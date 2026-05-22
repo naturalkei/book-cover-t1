@@ -14,7 +14,8 @@
     "lint:fix": "eslint . --fix",
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "serve": "vite preview"
+    "serve": "vite preview",
+    "screenshots": "tsx scripts/screenshots.ts"
   },
   "keywords": [],
   "author": "",
@@ -42,6 +43,7 @@
     "globals": "^17.6.0",
     "jsdom": "^29.1.1",
     "tailwindcss": "^4.3.0",
+    "tsx": "^4.22.3",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.59.4",
     "vite": "^7.3.3",
