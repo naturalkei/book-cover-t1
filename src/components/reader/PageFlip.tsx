@@ -74,7 +74,7 @@ export default function PageFlip({
       tabIndex={0}
       onClick={handleClick}
       onKeyDown={handleKeyDown}
-      className="relative mx-auto aspect-[3/4] w-full max-w-2xl select-none rounded-2xl bg-slate-900 shadow-[0_40px_80px_-30px_rgba(0,0,0,0.6)] ring-1 ring-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
+      className="relative mx-auto aspect-[3/4] w-full max-w-2xl select-none rounded-2xl bg-slate-200 shadow-[0_40px_80px_-30px_rgba(0,0,0,0.4)] ring-1 ring-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-50 dark:bg-slate-900 dark:shadow-[0_40px_80px_-30px_rgba(0,0,0,0.6)] dark:ring-white/5 dark:focus-visible:ring-sky-400 dark:focus-visible:ring-offset-slate-950"
       style={{ perspective: '2400px' }}
     >
       <img

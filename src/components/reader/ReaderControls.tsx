@@ -6,7 +6,7 @@ interface ReaderControlsProps {
   onPageChange: (next: number) => void
 }
 
-const baseButton = 'inline-flex items-center gap-1.5 rounded-full bg-white/5 px-4 py-2 text-sm font-medium text-slate-200 transition hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-white/5'
+const baseButton = 'inline-flex items-center gap-1.5 rounded-full bg-slate-200 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-50 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-slate-200 dark:bg-white/5 dark:text-slate-200 dark:hover:bg-white/10 dark:focus-visible:ring-sky-400 dark:focus-visible:ring-offset-slate-950 dark:disabled:hover:bg-white/5'
 
 export default function ReaderControls({ pageIndex, totalPages, onPageChange }: ReaderControlsProps) {
   const canPrev = pageIndex > 0
@@ -30,10 +30,10 @@ export default function ReaderControls({ pageIndex, totalPages, onPageChange }: 
 
       <span
         aria-live="polite"
-        className="min-w-[6ch] text-center text-sm tabular-nums text-slate-400"
+        className="min-w-[6ch] text-center text-sm tabular-nums text-slate-500 dark:text-slate-400"
       >
         <span data-testid="reader-current-page">{pageIndex + 1}</span>
-        <span aria-hidden="true" className="px-1 text-slate-600">/</span>
+        <span aria-hidden="true" className="px-1 text-slate-400 dark:text-slate-600">/</span>
         <span data-testid="reader-total-pages">{totalPages}</span>
       </span>
 

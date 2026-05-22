@@ -48,11 +48,11 @@ export default function PageJumpInput({
       noValidate
       onSubmit={handleSubmit}
       className={[
-        'inline-flex items-center gap-2 rounded-full bg-white/5 px-3 py-1.5 text-sm text-slate-200 ring-1 ring-white/5',
+        'inline-flex items-center gap-2 rounded-full bg-slate-200 px-3 py-1.5 text-sm text-slate-700 ring-1 ring-slate-300 dark:bg-white/5 dark:text-slate-200 dark:ring-white/5',
         className,
       ].filter(Boolean).join(' ')}
     >
-      <label htmlFor={inputId} className="text-xs uppercase tracking-[0.2em] text-slate-500">
+      <label htmlFor={inputId} className="text-xs uppercase tracking-[0.2em] text-slate-500 dark:text-slate-500">
         go to
       </label>
       <input
@@ -65,9 +65,9 @@ export default function PageJumpInput({
         onChange={handleChange}
         onBlur={() => commit(draft)}
         aria-label={`Page number, between 1 and ${totalPages}`}
-        className="w-14 appearance-none bg-transparent text-center tabular-nums text-slate-100 focus-visible:outline-none"
+        className="w-14 appearance-none bg-transparent text-center tabular-nums text-slate-900 focus-visible:outline-none dark:text-slate-100"
       />
-      <span aria-hidden="true" className="text-slate-500">/ {totalPages}</span>
+      <span aria-hidden="true" className="text-slate-500 dark:text-slate-500">/ {totalPages}</span>
       <button type="submit" className="sr-only">go</button>
     </form>
   )
