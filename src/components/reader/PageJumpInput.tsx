@@ -6,6 +6,7 @@ interface PageJumpInputProps {
   onPageChange: (next: number) => void
   className?: string
   step?: number
+  snap?: (index: number) => number
 }
 
 export default function PageJumpInput({
@@ -14,6 +15,7 @@ export default function PageJumpInput({
   onPageChange,
   className,
   step = 1,
+  snap,
 }: PageJumpInputProps) {
   const inputId = useId()
   const [draft, setDraft] = useState<string>(String(pageIndex + 1))
@@ -31,7 +33,10 @@ export default function PageJumpInput({
     }
     const clamped = Math.min(Math.max(1, parsed), totalPages)
     const safeStep = Math.max(1, Math.floor(step))
-    const targetIndex = (clamped - 1) - ((clamped - 1) % safeStep)
+    const rawTarget = clamped - 1
+    const targetIndex = snap
+      ? snap(rawTarget)
+      : rawTarget - (rawTarget % safeStep)
     setDraft(String(targetIndex + 1))
     if (targetIndex !== pageIndex) onPageChange(targetIndex)
   }
