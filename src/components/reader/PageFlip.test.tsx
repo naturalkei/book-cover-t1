@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import PageFlip from './PageFlip'
 
-const PAGES = ['/p/a.svg', '/p/b.svg', '/p/c.svg', '/p/d.svg']
+const PAGES = ['/p/a.svg', '/p/b.svg', '/p/c.svg', '/p/d.svg', '/p/e.svg']
 
 const setRectFor = (el: HTMLElement, width = 600) => {
   vi.spyOn(el, 'getBoundingClientRect').mockReturnValue({
@@ -110,7 +110,7 @@ describe('PageFlip', () => {
     expect(onPageChange).toHaveBeenCalledWith(1)
   })
 
-  it('preloads adjacent pages via the Image constructor', () => {
+  it('preloads pages within a ±2 window via the Image constructor', () => {
     const created: string[] = []
     const RealImage = window.Image
     window.Image = vi.fn().mockImplementation(function FakeImage(this: HTMLImageElement) {
@@ -121,12 +121,22 @@ describe('PageFlip', () => {
       })
     }) as unknown as typeof Image
     try {
-      render(<PageFlip pages={PAGES} pageIndex={1} />)
-      expect(created).toContain('/p/a.svg')
-      expect(created).toContain('/p/c.svg')
+      render(<PageFlip pages={PAGES} pageIndex={2} />)
+      expect(created).toEqual(
+        expect.arrayContaining(['/p/a.svg', '/p/b.svg', '/p/d.svg', '/p/e.svg']),
+      )
+      expect(created).not.toContain('/p/c.svg')
     }
     finally {
       window.Image = RealImage
     }
+  })
+
+  it('flags the current page image as high priority and eager', () => {
+    render(<PageFlip pages={PAGES} pageIndex={0} />)
+    const current = screen.getByTestId('page-flip-current')
+    expect(current).toHaveAttribute('loading', 'eager')
+    expect(current).toHaveAttribute('decoding', 'async')
+    expect(current).toHaveAttribute('fetchpriority', 'high')
   })
 })
