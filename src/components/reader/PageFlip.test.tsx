@@ -279,6 +279,114 @@ describe('PageFlip', () => {
       expect(screen.getByTestId('page-flip')).toHaveAttribute('data-cover-alone', 'false')
       expect(screen.getByTestId('page-flip-current-right')).toHaveAttribute('src', '/p/c.svg')
     })
+
+    it('clicking the left half of the first spread snaps back to the cover (#53)', () => {
+      const onPageChange = vi.fn()
+      render(
+        <PageFlip
+          pages={PAGES}
+          pageIndex={1}
+          mode="spread"
+          coverMode="single"
+          step={2}
+          onPageChange={onPageChange}
+        />,
+      )
+      const board = screen.getByTestId('page-flip')
+      setRectFor(board)
+      fireEvent.click(board, { clientX: 100 })
+      expect(onPageChange).toHaveBeenCalledWith(0)
+    })
+
+    it('still does not navigate past the start when clicking the left half at the cover itself', () => {
+      const onPageChange = vi.fn()
+      render(
+        <PageFlip
+          pages={PAGES}
+          pageIndex={0}
+          mode="spread"
+          coverMode="single"
+          step={1}
+          onPageChange={onPageChange}
+        />,
+      )
+      const board = screen.getByTestId('page-flip')
+      setRectFor(board)
+      fireEvent.click(board, { clientX: 100 })
+      expect(onPageChange).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('cover-boundary leaf (#52)', () => {
+    it('forward 0 → 1 mounts a half-width cover leaf on the right with the cover on the front and pages[1] on the back', () => {
+      const { rerender } = render(
+        <PageFlip pages={PAGES} pageIndex={0} mode="spread" coverMode="single" />,
+      )
+      rerender(<PageFlip pages={PAGES} pageIndex={1} mode="spread" coverMode="single" />)
+      const leaf = screen.getByTestId('page-flip-outgoing')
+      expect(leaf).toHaveAttribute('data-cover-leaf', 'true')
+      expect(leaf.className).toMatch(/\bw-1\/2\b/)
+      expect(leaf.className).toMatch(/\bright-0\b/)
+      expect(screen.getByTestId('page-flip-outgoing-front')).toHaveAttribute('src', '/p/a.svg')
+      expect(screen.getByTestId('page-flip-outgoing-back')).toHaveAttribute('src', '/p/b.svg')
+      const phantom = screen.getByTestId('page-flip-phantom')
+      expect(phantom).toHaveAttribute('data-cover-phantom', 'blank')
+      expect(phantom.className).toMatch(/\bleft-0\b/)
+      expect(phantom.querySelector('img')).toBeNull()
+    })
+
+    it('backward 1 → 0 keeps the leaf on the right half (cover lands back on the right) and the phantom holds pages[2] on the right', () => {
+      const { rerender } = render(
+        <PageFlip pages={PAGES} pageIndex={1} mode="spread" coverMode="single" />,
+      )
+      rerender(<PageFlip pages={PAGES} pageIndex={0} mode="spread" coverMode="single" />)
+      const leaf = screen.getByTestId('page-flip-outgoing')
+      expect(leaf).toHaveAttribute('data-cover-leaf', 'true')
+      expect(leaf.className).toMatch(/\bright-0\b/)
+      expect(screen.getByTestId('page-flip-outgoing-front')).toHaveAttribute('src', '/p/a.svg')
+      expect(screen.getByTestId('page-flip-outgoing-back')).toHaveAttribute('src', '/p/b.svg')
+      const phantom = screen.getByTestId('page-flip-phantom')
+      expect(phantom).toHaveAttribute('data-cover-phantom', 'page')
+      expect(phantom.className).toMatch(/\bright-0\b/)
+      expect(phantom.querySelector('img')).toHaveAttribute('src', '/p/c.svg')
+    })
+
+    it('cover leaf preserves 3D rendering so the back face can paint (#49 regression)', async () => {
+      vi.useRealTimers()
+      const { rerender } = render(
+        <PageFlip pages={PAGES} pageIndex={0} mode="spread" coverMode="single" presetId="classic" />,
+      )
+      rerender(
+        <PageFlip pages={PAGES} pageIndex={1} mode="spread" coverMode="single" presetId="classic" />,
+      )
+      const leaf = screen.getByTestId('page-flip-outgoing')
+      expect(leaf.className).not.toMatch(/\boverflow-hidden\b/)
+      expect(leaf).toHaveStyle({ transformStyle: 'preserve-3d' })
+    })
+
+    it('backward cover leaf reverses the rotation — initial transform is the spread final, final is the resting frame', async () => {
+      vi.useRealTimers()
+      const { rerender } = render(
+        <PageFlip pages={PAGES} pageIndex={1} mode="spread" coverMode="single" presetId="classic" />,
+      )
+      rerender(
+        <PageFlip pages={PAGES} pageIndex={0} mode="spread" coverMode="single" presetId="classic" />,
+      )
+      const leaf = screen.getByTestId('page-flip-outgoing')
+      expect(leaf.getAttribute('style') ?? '').toMatch(/rotateY\(-180deg\)/)
+      await waitFor(() => expect(leaf).toHaveAttribute('data-flip-phase', 'final'))
+      const finalStyle = leaf.getAttribute('style') ?? ''
+      expect(finalStyle).toContain('transform: none')
+    })
+
+    it('deeper navigation (spread → spread, no cover involved) still uses the regular spread leaf, not the cover leaf', () => {
+      const { rerender } = render(
+        <PageFlip pages={PAGES} pageIndex={1} mode="spread" coverMode="single" />,
+      )
+      rerender(<PageFlip pages={PAGES} pageIndex={3} mode="spread" coverMode="single" />)
+      const leaf = screen.getByTestId('page-flip-outgoing')
+      expect(leaf).not.toHaveAttribute('data-cover-leaf')
+    })
   })
 
   describe('flip presets', () => {

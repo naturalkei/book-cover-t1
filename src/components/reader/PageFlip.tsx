@@ -75,8 +75,17 @@ export default function PageFlip({
     if (outgoing) return
     const rect = event.currentTarget.getBoundingClientRect()
     const offset = event.clientX - rect.left
-    const next = offset > rect.width / 2 ? safeIndex + step : safeIndex - step
-    if (next < 0 || next >= pages.length) return
+    const rawNext = offset > rect.width / 2 ? safeIndex + step : safeIndex - step
+    // Underflow: if a step backward would land before 0, fall back to the
+    // cover (0) so the user can tap the left half of the first spread to
+    // close the book in coverMode='single'. Only bail when we're already
+    // at the start — there's nowhere further to go.
+    let next = rawNext
+    if (next < 0) {
+      if (safeIndex === 0) return
+      next = 0
+    }
+    if (next >= pages.length) return
     onPageChange?.(next)
   }
 
@@ -87,9 +96,6 @@ export default function PageFlip({
     const next = safeIndex + step
     if (next < pages.length) onPageChange?.(next)
   }
-
-  const isLeftEdge = safeIndex === 0
-  const isRightEdge = safeIndex + step >= pages.length
 
   return (
     <div
@@ -126,32 +132,43 @@ export default function PageFlip({
 
       {outgoing
         ? (
-          shouldUseSpreadLeaf(mode, outgoing.index, safeIndex, isCoverPage)
+          shouldUseCoverLeaf(mode, coverMode, outgoing.index, safeIndex)
             ? (
-              <OutgoingSpreadLeaf
-                key={`spread-${outgoing.index}-${safeIndex}-${outgoing.direction}`}
+              <OutgoingCoverLeaf
+                key={`cover-${outgoing.index}-${safeIndex}-${outgoing.direction}`}
                 pages={pages}
-                fromIndex={outgoing.index}
-                toIndex={safeIndex}
                 direction={outgoing.direction as FlipDirection}
                 duration={duration}
                 presetId={presetId}
                 roundClass={innerRoundClass}
               />
             )
-            : (
-              <OutgoingLayer
-                key={`outgoing-${outgoing.index}-${outgoing.direction}`}
-                pages={pages}
-                index={outgoing.index}
-                mode={mode}
-                coverAlone={isCoverPage(outgoing.index)}
-                direction={outgoing.direction as FlipDirection}
-                duration={duration}
-                presetId={presetId}
-                roundClass={innerRoundClass}
-              />
-            )
+            : shouldUseSpreadLeaf(mode, outgoing.index, safeIndex, isCoverPage)
+              ? (
+                <OutgoingSpreadLeaf
+                  key={`spread-${outgoing.index}-${safeIndex}-${outgoing.direction}`}
+                  pages={pages}
+                  fromIndex={outgoing.index}
+                  toIndex={safeIndex}
+                  direction={outgoing.direction as FlipDirection}
+                  duration={duration}
+                  presetId={presetId}
+                  roundClass={innerRoundClass}
+                />
+              )
+              : (
+                <OutgoingLayer
+                  key={`outgoing-${outgoing.index}-${outgoing.direction}`}
+                  pages={pages}
+                  index={outgoing.index}
+                  mode={mode}
+                  coverAlone={isCoverPage(outgoing.index)}
+                  direction={outgoing.direction as FlipDirection}
+                  duration={duration}
+                  presetId={presetId}
+                  roundClass={innerRoundClass}
+                />
+              )
         )
         : null}
 
@@ -495,6 +512,163 @@ function OutgoingSpreadLeaf({
           'absolute inset-y-0 w-1/2 will-change-transform',
           leafSidePosition,
         ].filter(Boolean).join(' ')}
+        style={{ ...leafStyle, transformStyle: 'preserve-3d' }}
+      >
+        {frontSrc
+          ? (
+            <img
+              src={frontSrc}
+              alt=""
+              aria-hidden="true"
+              decoding="async"
+              data-testid="page-flip-outgoing-front"
+              className={[
+                'absolute inset-0 h-full w-full object-cover',
+                roundClass,
+              ].filter(Boolean).join(' ')}
+              style={{ backfaceVisibility: 'hidden' }}
+            />
+          )
+          : null}
+        {backSrc
+          ? (
+            <img
+              src={backSrc}
+              alt=""
+              aria-hidden="true"
+              decoding="async"
+              data-testid="page-flip-outgoing-back"
+              className={[
+                'absolute inset-0 h-full w-full object-cover',
+                roundClass,
+              ].filter(Boolean).join(' ')}
+              style={{
+                backfaceVisibility: 'hidden',
+                transform: 'rotateY(180deg)',
+              }}
+            />
+          )
+          : null}
+      </div>
+    </>
+  )
+}
+
+/**
+ * Cover-boundary transitions in spread + coverMode='single':
+ *   forward  0 → 1: leaf carries the cover (peels off the right half)
+ *   backward 1 → 0: leaf carries the cover (settles back onto the right half)
+ *
+ * Any other transition (deeper into the book, single mode, coverMode='spread')
+ * is handled by the existing leaf paths.
+ */
+const shouldUseCoverLeaf = (
+  mode: ViewMode,
+  coverMode: CoverMode,
+  outgoingIndex: number,
+  currentIndex: number,
+): boolean => {
+  if (mode !== 'spread') return false
+  if (coverMode !== 'single') return false
+  const isForward = outgoingIndex === 0 && currentIndex === 1
+  const isBackward = outgoingIndex === 1 && currentIndex === 0
+  return isForward || isBackward
+}
+
+interface OutgoingCoverLeafProps {
+  pages: string[]
+  direction: FlipDirection
+  duration: number
+  presetId: FlipPresetId
+  roundClass: string
+}
+
+/**
+ * Half-width leaf used only at the cover boundary in spread + coverMode='single'.
+ * Forward: leaf rotates 0° → -180°, peeling the cover off the right half.
+ * Backward: same leaf, but the rotation is reversed (-180° → 0°) so the cover
+ * "closes" back onto the right half. A phantom on the opposite half masks the
+ * static layer underneath until the leaf's matching face arrives.
+ */
+function OutgoingCoverLeaf({
+  pages,
+  direction,
+  duration,
+  presetId,
+  roundClass,
+}: OutgoingCoverLeafProps) {
+  // We always build the forward (right-pivot, 0° → -180°) spread frames and
+  // swap initial/final for backward, so the leaf's DOM position and pivot stay
+  // identical between directions — the cover never DOM-jumps between sides.
+  const baseFrames: FlipFrames = getFlipPreset(presetId)
+    .build('forward', duration, 'spread')
+  const frames: FlipFrames = direction === 'forward'
+    ? baseFrames
+    : { initial: baseFrames.final, final: baseFrames.initial }
+
+  const [phase, setPhase] = useState<'initial' | 'final'>('initial')
+
+  useEffect(() => {
+    let cancelled = false
+    let inner = 0
+    const outer = requestAnimationFrame(() => {
+      inner = requestAnimationFrame(() => {
+        if (!cancelled) setPhase('final')
+      })
+    })
+    return () => {
+      cancelled = true
+      cancelAnimationFrame(outer)
+      cancelAnimationFrame(inner)
+    }
+  }, [])
+
+  const leafStyle: React.CSSProperties = phase === 'initial' ? frames.initial : frames.final
+  const isForward = direction === 'forward'
+
+  const frontSrc = pages[0]
+  const backSrc = pages[1]
+  // Forward: at frame 0 we still see State A (blank left + cover right), so a
+  //          blank phantom on the LEFT holds the resting cover-alone look
+  //          until the leaf back face arrives.
+  // Backward: at frame 0 we still see State B (pages[1] | pages[2]), so a
+  //           pages[2] phantom on the RIGHT masks the static cover underneath
+  //           until the leaf front face lands.
+  const phantomSrc = isForward ? undefined : pages[2]
+  const phantomSidePosition = isForward ? 'left-0' : 'right-0'
+
+  return (
+    <>
+      <div
+        aria-hidden="true"
+        data-testid="page-flip-phantom"
+        data-cover-phantom={isForward ? 'blank' : 'page'}
+        className={[
+          'absolute inset-y-0 w-1/2 overflow-hidden',
+          phantomSidePosition,
+          roundClass,
+          isForward ? 'bg-slate-100 dark:bg-slate-950/40' : '',
+        ].filter(Boolean).join(' ')}
+      >
+        {phantomSrc
+          ? (
+            <img
+              src={phantomSrc}
+              alt=""
+              aria-hidden="true"
+              decoding="async"
+              className="h-full w-full object-cover"
+            />
+          )
+          : null}
+      </div>
+
+      <div
+        aria-hidden="true"
+        data-testid="page-flip-outgoing"
+        data-flip-phase={phase}
+        data-cover-leaf="true"
+        className="absolute inset-y-0 right-0 w-1/2 will-change-transform"
         style={{ ...leafStyle, transformStyle: 'preserve-3d' }}
       >
         {frontSrc
