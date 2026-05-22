@@ -2,6 +2,9 @@ import { act, renderHook } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import {
+  effectiveStep,
+  isCoverAlone,
+  snapPage,
   snapToStep,
   stepForMode,
   useViewMode,
@@ -97,5 +100,62 @@ describe('snapToStep', () => {
   })
   it('clamps negatives to zero', () => {
     expect(snapToStep(-3, 2)).toBe(0)
+  })
+})
+
+describe('snapPage (cover-aware)', () => {
+  it('is identity for single mode at any index', () => {
+    expect(snapPage(0, 'single')).toBe(0)
+    expect(snapPage(3, 'single')).toBe(3)
+    expect(snapPage(7, 'single')).toBe(7)
+  })
+
+  it('snaps to even starts in spread mode with coverMode=spread', () => {
+    expect(snapPage(0, 'spread', 'spread')).toBe(0)
+    expect(snapPage(1, 'spread', 'spread')).toBe(0)
+    expect(snapPage(2, 'spread', 'spread')).toBe(2)
+    expect(snapPage(5, 'spread', 'spread')).toBe(4)
+  })
+
+  it('snaps cover (0) alone, then odd starts in spread + coverMode=single', () => {
+    expect(snapPage(0, 'spread', 'single')).toBe(0)
+    expect(snapPage(1, 'spread', 'single')).toBe(1)
+    expect(snapPage(2, 'spread', 'single')).toBe(1)
+    expect(snapPage(3, 'spread', 'single')).toBe(3)
+    expect(snapPage(4, 'spread', 'single')).toBe(3)
+    expect(snapPage(5, 'spread', 'single')).toBe(5)
+  })
+
+  it('clamps negative indices to zero across modes', () => {
+    expect(snapPage(-1, 'single')).toBe(0)
+    expect(snapPage(-3, 'spread', 'spread')).toBe(0)
+    expect(snapPage(-3, 'spread', 'single')).toBe(0)
+  })
+})
+
+describe('effectiveStep (cover-aware)', () => {
+  it('is 1 for single mode regardless of index', () => {
+    expect(effectiveStep(0, 'single')).toBe(1)
+    expect(effectiveStep(5, 'single', 'single')).toBe(1)
+  })
+
+  it('is 2 across the whole spread in coverMode=spread', () => {
+    expect(effectiveStep(0, 'spread', 'spread')).toBe(2)
+    expect(effectiveStep(4, 'spread', 'spread')).toBe(2)
+  })
+
+  it('is 1 only at the cover (index 0) and 2 elsewhere in coverMode=single', () => {
+    expect(effectiveStep(0, 'spread', 'single')).toBe(1)
+    expect(effectiveStep(1, 'spread', 'single')).toBe(2)
+    expect(effectiveStep(3, 'spread', 'single')).toBe(2)
+  })
+})
+
+describe('isCoverAlone', () => {
+  it('is true only for index 0 in spread + coverMode=single', () => {
+    expect(isCoverAlone(0, 'spread', 'single')).toBe(true)
+    expect(isCoverAlone(1, 'spread', 'single')).toBe(false)
+    expect(isCoverAlone(0, 'spread', 'spread')).toBe(false)
+    expect(isCoverAlone(0, 'single', 'single')).toBe(false)
   })
 })

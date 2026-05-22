@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 
+import type { CoverMode } from './useCoverMode'
+
 export type ViewMode = 'single' | 'spread'
 
 export const VIEW_MODE_STORAGE_KEY = 'book-flip-showcase:view-mode'
@@ -47,3 +49,42 @@ export const snapToStep = (pageIndex: number, step: number): number => {
   if (step <= 1) return Math.max(0, pageIndex)
   return Math.max(0, pageIndex - (pageIndex % step))
 }
+
+/**
+ * Returns the snapped page index that respects spread alignment and the
+ * cover-alone option. Valid "spread starts" are:
+ *  - single mode:                          every index
+ *  - spread, coverMode='spread':           even indices (0, 2, 4, ...)
+ *  - spread, coverMode='single':           0, 1, 3, 5, 7, ... (cover alone, then odd-start spreads)
+ */
+export const snapPage = (
+  pageIndex: number,
+  mode: ViewMode,
+  coverMode: CoverMode = 'spread',
+): number => {
+  if (pageIndex <= 0) return 0
+  if (mode === 'single') return pageIndex
+  if (coverMode === 'spread') return pageIndex - (pageIndex % 2)
+  if (pageIndex === 1) return 1
+  return pageIndex % 2 === 1 ? pageIndex : pageIndex - 1
+}
+
+/**
+ * Effective step from a given page index. The cover is a one-page step;
+ * everything else follows the view mode.
+ */
+export const effectiveStep = (
+  pageIndex: number,
+  mode: ViewMode,
+  coverMode: CoverMode = 'spread',
+): 1 | 2 => {
+  if (mode === 'single') return 1
+  if (coverMode === 'spread') return 2
+  return pageIndex === 0 ? 1 : 2
+}
+
+export const isCoverAlone = (
+  pageIndex: number,
+  mode: ViewMode,
+  coverMode: CoverMode = 'spread',
+): boolean => mode === 'spread' && coverMode === 'single' && pageIndex === 0

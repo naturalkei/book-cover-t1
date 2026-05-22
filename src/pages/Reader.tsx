@@ -2,6 +2,7 @@ import { ArrowLeft } from 'lucide-react'
 import { useCallback, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 
+import CoverModeToggle from '@/components/reader/CoverModeToggle'
 import FlipPresetPicker from '@/components/reader/FlipPresetPicker'
 import NotFound from '@/components/NotFound'
 import PageFlip from '@/components/reader/PageFlip'
@@ -10,9 +11,16 @@ import ReaderControls from '@/components/reader/ReaderControls'
 import ThumbnailScrubber from '@/components/reader/ThumbnailScrubber'
 import ViewModeToggle from '@/components/reader/ViewModeToggle'
 import { getBookById } from '@/data/books'
+import { useCoverMode, type CoverMode } from '@/hooks/useCoverMode'
 import { useFlipPreset } from '@/hooks/useFlipPreset'
 import { useReaderKeyboard } from '@/hooks/useReaderKeyboard'
-import { snapToStep, stepForMode, useViewMode, type ViewMode } from '@/hooks/useViewMode'
+import {
+  effectiveStep,
+  isCoverAlone as computeIsCoverAlone,
+  snapPage,
+  useViewMode,
+  type ViewMode,
+} from '@/hooks/useViewMode'
 
 export default function Reader() {
   const { id } = useParams<{ id: string }>()
@@ -20,29 +28,42 @@ export default function Reader() {
   const book = id ? getBookById(id) : undefined
 
   const { viewMode, setViewMode } = useViewMode()
+  const { coverMode, setCoverMode } = useCoverMode()
   const { preset, effectivePreset, setPreset, reducedMotionOverride } = useFlipPreset()
-  const step = stepForMode(viewMode)
+
+  const snap = useCallback(
+    (index: number) => snapPage(index, viewMode, coverMode),
+    [viewMode, coverMode],
+  )
 
   const [pageIndex, setPageIndex] = useState(0)
-  const [lastStep, setLastStep] = useState(step)
-  if (lastStep !== step) {
-    setLastStep(step)
-    setPageIndex((current) => snapToStep(current, step))
+  const [lastSnapKey, setLastSnapKey] = useState(`${viewMode}:${coverMode}`)
+  const currentSnapKey = `${viewMode}:${coverMode}`
+  if (lastSnapKey !== currentSnapKey) {
+    setLastSnapKey(currentSnapKey)
+    setPageIndex((current) => snap(current))
   }
+
+  const isCoverAlone = computeIsCoverAlone(pageIndex, viewMode, coverMode)
+  const step = effectiveStep(pageIndex, viewMode, coverMode)
 
   const commitPage = useCallback(
     (next: number) => {
       const total = book?.pages.length ?? 0
       if (total === 0) return
       const clamped = Math.min(Math.max(0, next), total - 1)
-      setPageIndex(snapToStep(clamped, step))
+      setPageIndex(snap(clamped))
     },
-    [book?.pages.length, step],
+    [book?.pages.length, snap],
   )
 
   const handleViewModeChange = useCallback((next: ViewMode) => {
     setViewMode(next)
   }, [setViewMode])
+
+  const handleCoverModeChange = useCallback((next: CoverMode) => {
+    setCoverMode(next)
+  }, [setCoverMode])
 
   const exitToGallery = useCallback(() => navigate('/'), [navigate])
 
@@ -52,6 +73,7 @@ export default function Reader() {
     onPageChange: commitPage,
     onExit: exitToGallery,
     step,
+    snap,
   })
 
   if (!book) {
@@ -81,6 +103,11 @@ export default function Reader() {
 
         <div className="flex flex-wrap items-center gap-4">
           <ViewModeToggle mode={viewMode} onChange={handleViewModeChange} />
+          <CoverModeToggle
+            coverMode={coverMode}
+            onChange={handleCoverModeChange}
+            disabled={viewMode !== 'spread'}
+          />
           <div className="text-right">
             <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">{book.title}</h1>
             <p className="text-sm text-slate-600 dark:text-slate-300">by {book.author}</p>
@@ -94,7 +121,9 @@ export default function Reader() {
         onPageChange={commitPage}
         ariaLabel={`${book.title} spread`}
         mode={viewMode}
+        coverMode={coverMode}
         presetId={effectivePreset}
+        step={step}
       />
 
       <ReaderControls
@@ -102,6 +131,7 @@ export default function Reader() {
         totalPages={totalPages}
         onPageChange={commitPage}
         step={step}
+        isCoverAlone={isCoverAlone}
       />
 
       <div className="mt-4 flex justify-center">
@@ -110,6 +140,7 @@ export default function Reader() {
           totalPages={totalPages}
           onPageChange={commitPage}
           step={step}
+          snap={snap}
         />
       </div>
 

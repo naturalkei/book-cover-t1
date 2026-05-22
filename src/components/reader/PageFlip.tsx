@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 
+import type { CoverMode } from '@/hooks/useCoverMode'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import type { ViewMode } from '@/hooks/useViewMode'
 
@@ -18,7 +19,9 @@ interface PageFlipProps {
   ariaLabel?: string
   flipDurationMs?: number
   mode?: ViewMode
+  coverMode?: CoverMode
   presetId?: FlipPresetId
+  step?: 1 | 2
 }
 
 export default function PageFlip({
@@ -28,10 +31,16 @@ export default function PageFlip({
   ariaLabel = 'Book spread',
   flipDurationMs = 700,
   mode = 'single',
+  coverMode = 'spread',
   presetId = DEFAULT_FLIP_PRESET,
+  step: stepProp,
 }: PageFlipProps) {
-  const step = mode === 'spread' ? 2 : 1
+  const isCoverPage = (index: number): boolean =>
+    mode === 'spread' && coverMode === 'single' && index === 0
   const safeIndex = clamp(pageIndex, 0, pages.length - 1)
+  const defaultStep: 1 | 2 = mode === 'spread' ? (isCoverPage(safeIndex) ? 1 : 2) : 1
+  const step: 1 | 2 = stepProp ?? defaultStep
+  const coverAlone = isCoverPage(safeIndex)
   const [outgoing, setOutgoing] = useState<{ index: number; direction: FlipDirection } | null>(null)
   const lastIndexRef = useRef(safeIndex)
   const reducedMotion = useReducedMotion()
@@ -85,6 +94,7 @@ export default function PageFlip({
       data-testid="page-flip"
       data-flip-state={outgoing?.direction ?? 'idle'}
       data-view-mode={mode}
+      data-cover-alone={coverAlone ? 'true' : 'false'}
       data-flip-preset={presetId}
       tabIndex={0}
       onClick={handleClick}
@@ -99,6 +109,7 @@ export default function PageFlip({
         pages={pages}
         index={safeIndex}
         mode={mode}
+        coverAlone={coverAlone}
         outgoingExists={!!outgoing}
         staticStyle={staticStyle(reducedMotion, !!outgoing, duration)}
         testIdPrefix="page-flip-current"
@@ -113,6 +124,7 @@ export default function PageFlip({
             pages={pages}
             index={outgoing.index}
             mode={mode}
+            coverAlone={isCoverPage(outgoing.index)}
             direction={outgoing.direction as FlipDirection}
             duration={duration}
             presetId={presetId}
@@ -160,6 +172,7 @@ interface PageSurfaceProps {
   pages: string[]
   index: number
   mode: ViewMode
+  coverAlone: boolean
   outgoingExists: boolean
   staticStyle: React.CSSProperties
   testIdPrefix: string
@@ -171,6 +184,7 @@ function PageSurface({
   pages,
   index,
   mode,
+  coverAlone,
   staticStyle,
   testIdPrefix,
   loading = 'lazy',
@@ -190,6 +204,32 @@ function PageSurface({
         className="absolute inset-0 h-full w-full rounded-2xl object-cover"
         style={staticStyle}
       />
+    )
+  }
+
+  if (coverAlone) {
+    const coverSrc = pages[index]
+    return (
+      <div
+        data-testid={`${testIdPrefix}-spread`}
+        className="absolute inset-0 flex overflow-hidden rounded-2xl"
+        style={staticStyle}
+      >
+        <div
+          aria-hidden="true"
+          data-testid={`${testIdPrefix}-cover-blank`}
+          className="h-full w-1/2 bg-slate-100 dark:bg-slate-950/40"
+        />
+        <img
+          src={coverSrc}
+          alt={`Page ${index + 1}`}
+          loading={loading}
+          decoding="async"
+          fetchPriority={fetchPriority}
+          data-testid={testIdPrefix}
+          className="h-full w-1/2 object-cover"
+        />
+      </div>
     )
   }
 
@@ -237,6 +277,7 @@ interface OutgoingLayerProps {
   pages: string[]
   index: number
   mode: ViewMode
+  coverAlone: boolean
   direction: FlipDirection
   duration: number
   presetId: FlipPresetId
@@ -246,6 +287,7 @@ function OutgoingLayer({
   pages,
   index,
   mode,
+  coverAlone,
   direction,
   duration,
   presetId,
@@ -283,6 +325,28 @@ function OutgoingLayer({
         className="absolute inset-0 h-full w-full rounded-2xl object-cover will-change-transform"
         style={style}
       />
+    )
+  }
+
+  if (coverAlone) {
+    const coverSrc = pages[index]
+    return (
+      <div
+        aria-hidden="true"
+        data-testid="page-flip-outgoing"
+        data-flip-phase={phase}
+        className="absolute inset-0 flex overflow-hidden rounded-2xl will-change-transform"
+        style={style}
+      >
+        <div aria-hidden="true" className="h-full w-1/2 bg-slate-100 dark:bg-slate-950/40" />
+        <img
+          src={coverSrc}
+          alt=""
+          aria-hidden="true"
+          decoding="async"
+          className="h-full w-1/2 object-cover"
+        />
+      </div>
     )
   }
 

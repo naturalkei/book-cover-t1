@@ -1,29 +1,19 @@
-import { expect, test, type Page } from '@playwright/test'
+import { expect, test } from '@playwright/test'
 
-const STORAGE_KEY = 'book-flip-showcase:view-mode'
-
-const seedMode = async (page: Page, mode: 'single' | 'spread') => {
-  await page.addInitScript(([key, value]) => {
-    window.localStorage.setItem(key, value)
-  }, [STORAGE_KEY, mode] as const)
-}
-
-const openFirstBook = async (page: Page) => {
-  await page.goto('/')
-  await page.getByRole('list', { name: /book gallery/i }).getByRole('link').first().click()
-  await expect(page.getByTestId('page-flip')).toBeVisible()
-}
+import { openFirstBook, seedCoverMode, seedViewMode } from './helpers'
 
 test.describe('reader view modes', () => {
   test('starts in single mode by default on narrow viewports', async ({ page }) => {
     await page.setViewportSize({ width: 800, height: 900 })
     await openFirstBook(page)
+    await expect(page.getByTestId('page-flip')).toBeVisible()
     await expect(page.getByTestId('page-flip')).toHaveAttribute('data-view-mode', 'single')
     await expect(page.getByTestId('view-mode-single')).toHaveAttribute('aria-checked', 'true')
   })
 
-  test('switching to spread renders two pages side by side and steps by 2', async ({ page }) => {
-    await seedMode(page, 'single')
+  test('switching to spread (cover paired) renders two pages side by side and steps by 2', async ({ page }) => {
+    await seedViewMode(page, 'single')
+    await seedCoverMode(page, 'spread')
     await page.setViewportSize({ width: 1440, height: 900 })
     await openFirstBook(page)
 
@@ -53,8 +43,9 @@ test.describe('reader view modes', () => {
     await expect(page.getByTestId('page-flip')).toHaveAttribute('data-view-mode', 'spread')
   })
 
-  test('keyboard ArrowRight in spread mode advances by 2', async ({ page }) => {
-    await seedMode(page, 'spread')
+  test('keyboard ArrowRight in spread mode (cover paired) advances by 2', async ({ page }) => {
+    await seedViewMode(page, 'spread')
+    await seedCoverMode(page, 'spread')
     await page.setViewportSize({ width: 1440, height: 900 })
     await openFirstBook(page)
 

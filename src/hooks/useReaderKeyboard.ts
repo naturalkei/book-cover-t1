@@ -6,6 +6,13 @@ interface UseReaderKeyboardOptions {
   onPageChange: (next: number) => void
   onExit?: () => void
   step?: number
+  /**
+   * Optional snap-to-valid-page function. If provided it is used to align
+   * Arrow / Home / End targets to the closest valid page start (cover-aware
+   * spread starts, for example). When omitted, navigation falls back to the
+   * regular step-aligned behavior.
+   */
+  snap?: (index: number) => number
 }
 
 const isTypingInForm = (target: EventTarget | null): boolean => {
@@ -24,29 +31,38 @@ export function useReaderKeyboard({
   onPageChange,
   onExit,
   step = 1,
+  snap,
 }: UseReaderKeyboardOptions): void {
   useEffect(() => {
     const safeStep = Math.max(1, Math.floor(step))
     const lastIndex = Math.max(0, totalPages - 1)
-    const lastStart = lastIndex - (lastIndex % safeStep)
+    const snapFn = snap ?? ((i: number) => Math.max(0, i - (i % safeStep)))
+    const lastStart = snapFn(lastIndex)
 
     const handler = (event: KeyboardEvent) => {
       if (isTypingInForm(event.target)) return
       if (event.metaKey || event.ctrlKey || event.altKey) return
 
       switch (event.key) {
-        case 'ArrowLeft':
-          if (pageIndex >= safeStep) {
+        case 'ArrowLeft': {
+          if (pageIndex <= 0) return
+          const target = snapFn(Math.max(0, pageIndex - safeStep))
+          if (target !== pageIndex) {
             event.preventDefault()
-            onPageChange(pageIndex - safeStep)
+            onPageChange(target)
           }
           break
-        case 'ArrowRight':
-          if (pageIndex + safeStep < totalPages) {
+        }
+        case 'ArrowRight': {
+          if (pageIndex >= lastIndex) return
+          const candidate = Math.min(pageIndex + safeStep, lastIndex)
+          const target = snapFn(candidate)
+          if (target !== pageIndex) {
             event.preventDefault()
-            onPageChange(pageIndex + safeStep)
+            onPageChange(target)
           }
           break
+        }
         case 'Home':
           if (pageIndex !== 0) {
             event.preventDefault()
@@ -71,5 +87,5 @@ export function useReaderKeyboard({
     }
     document.addEventListener('keydown', handler)
     return () => document.removeEventListener('keydown', handler)
-  }, [pageIndex, totalPages, onPageChange, onExit, step])
+  }, [pageIndex, totalPages, onPageChange, onExit, step, snap])
 }

@@ -174,6 +174,44 @@ describe('PageFlip', () => {
     })
   })
 
+  describe('cover-alone (coverMode=single in spread mode)', () => {
+    it('renders only the cover on the right half with a blank left half', () => {
+      render(<PageFlip pages={PAGES} pageIndex={0} mode="spread" coverMode="single" />)
+      expect(screen.getByTestId('page-flip')).toHaveAttribute('data-cover-alone', 'true')
+      expect(screen.getByTestId('page-flip-current-cover-blank')).toBeInTheDocument()
+      expect(screen.getByTestId('page-flip-current')).toHaveAttribute('src', '/p/a.svg')
+      expect(screen.queryByTestId('page-flip-current-right')).toBeNull()
+    })
+
+    it('clicking the right half advances by 1 step (cover → first spread)', () => {
+      const onPageChange = vi.fn()
+      render(
+        <PageFlip
+          pages={PAGES}
+          pageIndex={0}
+          mode="spread"
+          coverMode="single"
+          step={1}
+          onPageChange={onPageChange}
+        />,
+      )
+      const board = screen.getByTestId('page-flip')
+      setRectFor(board)
+      fireEvent.click(board, { clientX: 500 })
+      expect(onPageChange).toHaveBeenCalledWith(1)
+    })
+
+    it('cover-alone flag turns off once we navigate to a real spread', () => {
+      const { rerender } = render(
+        <PageFlip pages={PAGES} pageIndex={0} mode="spread" coverMode="single" />,
+      )
+      expect(screen.getByTestId('page-flip')).toHaveAttribute('data-cover-alone', 'true')
+      rerender(<PageFlip pages={PAGES} pageIndex={1} mode="spread" coverMode="single" />)
+      expect(screen.getByTestId('page-flip')).toHaveAttribute('data-cover-alone', 'false')
+      expect(screen.getByTestId('page-flip-current-right')).toHaveAttribute('src', '/p/c.svg')
+    })
+  })
+
   describe('flip presets', () => {
     it('reflects the active preset on the surface via data-flip-preset', () => {
       render(<PageFlip pages={PAGES} pageIndex={0} presetId="tilt" />)
