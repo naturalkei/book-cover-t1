@@ -4,6 +4,7 @@ import { Link, useParams } from 'react-router-dom'
 
 import NotFound from '@/components/NotFound'
 import PageFlip from '@/components/reader/PageFlip'
+import ReaderControls from '@/components/reader/ReaderControls'
 import { getBookById } from '@/data/books'
 
 export default function Reader() {
@@ -50,15 +51,14 @@ export default function Reader() {
         ariaLabel={`${book.title} spread`}
       />
 
-      <footer className="mt-8 flex items-center justify-between text-sm text-slate-400">
-        <p>
-          Page <span className="text-white">{pageIndex + 1}</span>
-          <span className="px-1 text-slate-600">/</span>
-          <span>{totalPages}</span>
-        </p>
-        <p className="text-xs uppercase tracking-[0.2em] text-slate-500">
-          tap the page sides to flip · prev/next controls land in #9
-        </p>
+      <ReaderControls
+        pageIndex={pageIndex}
+        totalPages={totalPages}
+        onPageChange={setPageIndex}
+      />
+
+      <footer className="mt-6 text-center text-xs uppercase tracking-[0.2em] text-slate-500">
+        tap a page side, or use the controls above
       </footer>
     </section>
   )
