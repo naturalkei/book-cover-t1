@@ -12,17 +12,24 @@ describe('books data module', () => {
     expect(new Set(ids).size).toBe(ids.length)
   })
 
-  it('requires every book to have at least one page', () => {
+  it('requires every book to have at least 20 pages', () => {
     for (const book of books) {
-      expect(book.pages.length).toBeGreaterThan(0)
+      expect(book.pages.length).toBeGreaterThanOrEqual(20)
     }
   })
 
-  it('references cover and page assets under the books directory', () => {
+  it('exposes a unique page source for every page within a book', () => {
+    for (const book of books) {
+      const unique = new Set(book.pages)
+      expect(unique.size).toBe(book.pages.length)
+    }
+  })
+
+  it('references the cover under /books/ and serves pages as inline SVG data URIs', () => {
     for (const book of books) {
       expect(book.coverSrc).toMatch(/\/books\/[^/]+\.svg$/)
       for (const page of book.pages) {
-        expect(page).toMatch(/\/books\/[^/]+\.svg$/)
+        expect(page).toMatch(/^data:image\/svg\+xml/)
       }
     }
   })

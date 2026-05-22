@@ -24,7 +24,7 @@ describe('Reader', () => {
   it('shows page 1 of total pages by default', () => {
     renderAt('/book/atlas-of-cities')
     const nav = screen.getByRole('navigation', { name: /reader pagination/i })
-    expect(nav.textContent?.replace(/\s+/g, '')).toContain('1/8')
+    expect(nav.textContent?.replace(/\s+/g, '')).toMatch(/1\/\d{2,}/)
   })
 
   it('renders the first page image with descriptive alt text', () => {
