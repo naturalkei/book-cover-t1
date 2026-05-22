@@ -24,7 +24,9 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'pnpm dev --port=5173 --strictPort',
+    // Bind explicitly to 127.0.0.1 — on GitHub Actions, Vite's default
+    // `localhost` often resolves to IPv6 (::1) while Playwright probes IPv4.
+    command: 'pnpm dev --port=5173 --strictPort --host 127.0.0.1',
     url: BASE_URL,
     reuseExistingServer: !process.env.CI,
     stdout: 'pipe',
