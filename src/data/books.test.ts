@@ -18,11 +18,11 @@ describe('books data module', () => {
     }
   })
 
-  it('references cover and page assets under /books/', () => {
+  it('references cover and page assets under the books directory', () => {
     for (const book of books) {
-      expect(book.coverSrc.startsWith('/books/')).toBe(true)
+      expect(book.coverSrc).toMatch(/\/books\/[^/]+\.svg$/)
       for (const page of book.pages) {
-        expect(page.startsWith('/books/')).toBe(true)
+        expect(page).toMatch(/\/books\/[^/]+\.svg$/)
       }
     }
   })
