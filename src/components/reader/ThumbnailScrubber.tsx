@@ -60,18 +60,18 @@ export default function ThumbnailScrubber({
   return (
     <section
       aria-label="Page scrubber"
-      className="mt-8 rounded-2xl bg-slate-900/50 p-4 ring-1 ring-white/5"
+      className="mt-8 rounded-2xl bg-white p-4 ring-1 ring-slate-200 dark:bg-slate-900/50 dark:ring-white/5"
     >
-      <div className="flex items-center justify-between text-xs uppercase tracking-[0.2em] text-slate-500">
+      <div className="flex items-center justify-between text-xs uppercase tracking-[0.2em] text-slate-500 dark:text-slate-500">
         <span>scrub</span>
         {showPreview
           ? (
-            <span aria-live="polite" data-testid="scrubber-preview" className="text-sky-300">
+            <span aria-live="polite" data-testid="scrubber-preview" className="text-sky-600 dark:text-sky-300">
               preview · page {previewIndex + 1}
             </span>
           )
           : (
-            <span className="text-slate-500">page {pageIndex + 1} of {pages.length}</span>
+            <span className="text-slate-500 dark:text-slate-500">page {pageIndex + 1} of {pages.length}</span>
           )}
       </div>
 
@@ -91,7 +91,7 @@ export default function ThumbnailScrubber({
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerUp}
         onBlur={handleBlur}
-        className="mt-3 w-full accent-sky-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
+        className="mt-3 w-full accent-sky-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:accent-sky-400 dark:focus-visible:ring-sky-400 dark:focus-visible:ring-offset-slate-950"
       />
 
       <ul
@@ -107,10 +107,10 @@ export default function ThumbnailScrubber({
               data-testid={`scrubber-thumb-${index}`}
               onClick={() => onPageChange(index)}
               className={[
-                'block h-16 w-12 overflow-hidden rounded-md ring-1 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950',
+                'block h-16 w-12 overflow-hidden rounded-md ring-1 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-sky-400 dark:focus-visible:ring-offset-slate-950',
                 index === pageIndex
-                  ? 'ring-sky-400 shadow-[0_0_0_2px_rgba(56,189,248,0.4)]'
-                  : 'ring-white/10 hover:ring-white/30',
+                  ? 'ring-sky-500 shadow-[0_0_0_2px_rgba(56,189,248,0.4)] dark:ring-sky-400'
+                  : 'ring-slate-200 hover:ring-slate-300 dark:ring-white/10 dark:hover:ring-white/30',
               ].join(' ')}
             >
               <img

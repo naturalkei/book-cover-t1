@@ -44,15 +44,15 @@ export default function Reader() {
       <header className="mb-10 flex flex-wrap items-center justify-between gap-4">
         <Link
           to="/"
-          className="inline-flex items-center gap-2 text-sm font-medium text-slate-300 transition hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
+          className="inline-flex items-center gap-2 text-sm font-medium text-slate-600 transition hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:text-slate-300 dark:hover:text-white dark:focus-visible:ring-sky-400 dark:focus-visible:ring-offset-slate-950"
         >
           <ArrowLeft className="h-4 w-4" aria-hidden="true" />
           Back to gallery
         </Link>
 
         <div className="text-right">
-          <h1 className="text-2xl font-semibold text-white">{book.title}</h1>
-          <p className="text-sm text-slate-400">by {book.author}</p>
+          <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">{book.title}</h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400">by {book.author}</p>
         </div>
       </header>
 
@@ -83,7 +83,7 @@ export default function Reader() {
         onPageChange={setPageIndex}
       />
 
-      <footer className="mt-6 text-center text-xs uppercase tracking-[0.2em] text-slate-500">
+      <footer className="mt-6 text-center text-xs uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
         tap a page side, use the controls, scrub, or jump to any page
       </footer>
     </section>
