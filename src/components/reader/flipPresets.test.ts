@@ -94,6 +94,31 @@ describe('flipPresets registry', () => {
     expect(String(backward.final.transform)).toContain('rotateY(180deg)')
   })
 
+  it('spread-mode tilt does not scale the leaf — the static layer stays at scale 1, so any scale change would read as shrink-then-grow at cleanup (#50)', () => {
+    const tilt = FLIP_PRESET_LIST.find(p => p.id === 'tilt')!
+    const forward = tilt.build('forward', 700, 'spread')
+    const backward = tilt.build('backward', 700, 'spread')
+    expect(String(forward.final.transform)).not.toMatch(/scale\(/)
+    expect(String(backward.final.transform)).not.toMatch(/scale\(/)
+    expect(String(forward.final.transform)).toContain('rotateX(-6deg)')
+  })
+
+  it('single-mode tilt keeps its scale(0.92) lift-off effect (only spread-mode is desaturated)', () => {
+    const tilt = FLIP_PRESET_LIST.find(p => p.id === 'tilt')!
+    const single = tilt.build('forward', 700)
+    expect(String(single.final.transform)).toContain('scale(0.92)')
+  })
+
+  it('spread-mode classic and curl also keep scale unchanged so the leaf does not pulse', () => {
+    for (const id of ['classic', 'curl'] as const) {
+      const preset = FLIP_PRESET_LIST.find(p => p.id === id)!
+      const forward = preset.build('forward', 700, 'spread')
+      const backward = preset.build('backward', 700, 'spread')
+      expect(String(forward.final.transform)).not.toMatch(/scale\(/)
+      expect(String(backward.final.transform)).not.toMatch(/scale\(/)
+    }
+  })
+
   it('spread-mode slide preset slides the leaf off the flipping side (not toward the spine)', () => {
     const slide = FLIP_PRESET_LIST.find(p => p.id === 'slide')!
     const forward = slide.build('forward', 700, 'spread')

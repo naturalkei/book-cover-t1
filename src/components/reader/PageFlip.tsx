@@ -509,9 +509,8 @@ function OutgoingSpreadLeaf({
         data-testid="page-flip-outgoing"
         data-flip-phase={phase}
         className={[
-          'absolute inset-y-0 w-1/2 overflow-hidden will-change-transform',
+          'absolute inset-y-0 w-1/2 will-change-transform',
           leafSidePosition,
-          roundClass,
         ].filter(Boolean).join(' ')}
         style={{ ...leafStyle, transformStyle: 'preserve-3d' }}
       >
@@ -523,7 +522,10 @@ function OutgoingSpreadLeaf({
               aria-hidden="true"
               decoding="async"
               data-testid="page-flip-outgoing-front"
-              className="absolute inset-0 h-full w-full object-cover"
+              className={[
+                'absolute inset-0 h-full w-full object-cover',
+                roundClass,
+              ].filter(Boolean).join(' ')}
               style={{ backfaceVisibility: 'hidden' }}
             />
           )
@@ -536,7 +538,10 @@ function OutgoingSpreadLeaf({
               aria-hidden="true"
               decoding="async"
               data-testid="page-flip-outgoing-back"
-              className="absolute inset-0 h-full w-full object-cover"
+              className={[
+                'absolute inset-0 h-full w-full object-cover',
+                roundClass,
+              ].filter(Boolean).join(' ')}
               style={{
                 backfaceVisibility: 'hidden',
                 transform: 'rotateY(180deg)',

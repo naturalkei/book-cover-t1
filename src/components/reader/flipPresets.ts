@@ -151,10 +151,14 @@ const FLIP_PRESETS: FlipPreset[] = [
     build: (direction, duration, mode = 'single') => {
       const transformOrigin = spineOrigin(direction)
       const transition = `transform ${duration}ms ${easeTilt}, opacity ${duration}ms ease-in-out`
+      // Spread-mode tilt deliberately omits scale: the leaf does not fade out
+      // (opacity stays at 1 so the back face can paint), so any scale change
+      // would read as a shrink-then-grow glitch when the static layer takes
+      // over at cleanup.
       const finalTransform = mode === 'spread'
         ? (direction === 'forward'
-          ? 'perspective(1800px) rotateX(-6deg) rotateY(-178deg) scale(0.96)'
-          : 'perspective(1800px) rotateX(-6deg) rotateY(178deg) scale(0.96)')
+          ? 'perspective(1800px) rotateX(-6deg) rotateY(-178deg)'
+          : 'perspective(1800px) rotateX(-6deg) rotateY(178deg)')
         : (direction === 'forward'
           ? 'perspective(1800px) rotateX(-10deg) rotateY(-150deg) scale(0.92)'
           : 'perspective(1800px) rotateX(-10deg) rotateY(150deg) scale(0.92)')

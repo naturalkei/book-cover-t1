@@ -204,6 +204,23 @@ describe('PageFlip', () => {
       expect(screen.getByTestId('page-flip-phantom').className).toMatch(/\bright-0\b/)
       expect(outgoing).toHaveStyle({ transformOrigin: 'right center' })
     })
+
+    it('leaf wrapper keeps preserve-3d and never sets overflow-hidden so the back face can paint past 90° (#49)', () => {
+      const { rerender } = render(<PageFlip pages={PAGES} pageIndex={0} mode="spread" />)
+      rerender(<PageFlip pages={PAGES} pageIndex={2} mode="spread" />)
+      const outgoing = screen.getByTestId('page-flip-outgoing')
+      expect(outgoing.className).not.toMatch(/\boverflow-hidden\b/)
+      expect(outgoing).toHaveStyle({ transformStyle: 'preserve-3d' })
+    })
+
+    it('rounded class is applied to the leaf faces (not the wrapper) so 3D rendering survives clipping (#49)', () => {
+      const { rerender } = render(<PageFlip pages={PAGES} pageIndex={0} mode="spread" rounded />)
+      rerender(<PageFlip pages={PAGES} pageIndex={2} mode="spread" rounded />)
+      const outgoing = screen.getByTestId('page-flip-outgoing')
+      expect(outgoing.className).not.toMatch(/\brounded-2xl\b/)
+      expect(screen.getByTestId('page-flip-outgoing-front').className).toMatch(/\brounded-2xl\b/)
+      expect(screen.getByTestId('page-flip-outgoing-back').className).toMatch(/\brounded-2xl\b/)
+    })
   })
 
   describe('rounded-corners toggle', () => {
