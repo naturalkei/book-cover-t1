@@ -6,6 +6,7 @@ import NotFound from '@/components/NotFound'
 import PageFlip from '@/components/reader/PageFlip'
 import PageJumpInput from '@/components/reader/PageJumpInput'
 import ReaderControls from '@/components/reader/ReaderControls'
+import ThumbnailScrubber from '@/components/reader/ThumbnailScrubber'
 import { getBookById } from '@/data/books'
 import { useReaderKeyboard } from '@/hooks/useReaderKeyboard'
 
@@ -76,8 +77,14 @@ export default function Reader() {
         />
       </div>
 
+      <ThumbnailScrubber
+        pages={book.pages}
+        pageIndex={pageIndex}
+        onPageChange={setPageIndex}
+      />
+
       <footer className="mt-6 text-center text-xs uppercase tracking-[0.2em] text-slate-500">
-        tap a page side, use the controls, or jump to any page
+        tap a page side, use the controls, scrub, or jump to any page
       </footer>
     </section>
   )
