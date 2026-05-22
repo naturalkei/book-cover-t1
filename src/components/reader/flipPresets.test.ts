@@ -35,31 +35,50 @@ describe('flipPresets registry', () => {
     }
   })
 
-  it('every preset.build() returns a CSS object with transition and transform-origin', () => {
+  it('every preset.build() returns initial + final frames with matching transition strings', () => {
     for (const preset of FLIP_PRESET_LIST) {
-      const styleF = preset.build('forward', 700)
-      const styleB = preset.build('backward', 700)
-      expect(styleF.transition).toBeTypeOf('string')
-      expect(styleB.transition).toBeTypeOf('string')
-      expect(styleF.transformOrigin).toBeTypeOf('string')
-      expect(styleB.transformOrigin).toBeTypeOf('string')
+      for (const direction of ['forward', 'backward'] as const) {
+        const { initial, final } = preset.build(direction, 700)
+        expect(initial.transition).toBeTypeOf('string')
+        expect(initial.transition).toEqual(final.transition)
+        expect(initial.transformOrigin).toEqual(final.transformOrigin)
+      }
     }
   })
 
-  it('fade preset declares transition opacity only (no transform)', () => {
-    const fade = FLIP_PRESET_LIST.find(p => p.id === 'fade')
-    const style = fade!.build('forward', 700)
-    expect(style.transition).toContain('opacity')
-    expect(style.transition).not.toContain('transform')
-    expect(style.transform).toBe('none')
+  it('every preset.initial has opacity 1 and final has opacity 0 (so a real from-to transition exists)', () => {
+    for (const preset of FLIP_PRESET_LIST) {
+      const { initial, final } = preset.build('forward', 700)
+      expect(initial.opacity).toBe(1)
+      expect(final.opacity).toBe(0)
+    }
   })
 
-  it('classic preset uses rotateY transforms with mirrored origins', () => {
-    const classic = FLIP_PRESET_LIST.find(p => p.id === 'classic')
-    expect(String(classic!.build('forward', 700).transform)).toContain('rotateY(-180deg)')
-    expect(String(classic!.build('backward', 700).transform)).toContain('rotateY(180deg)')
-    expect(classic!.build('forward', 700).transformOrigin).toBe('left center')
-    expect(classic!.build('backward', 700).transformOrigin).toBe('right center')
+  it('fade preset declares opacity-only transition with identity transforms in both frames', () => {
+    const fade = FLIP_PRESET_LIST.find(p => p.id === 'fade')!
+    const { initial, final } = fade.build('forward', 700)
+    expect(initial.transition).toContain('opacity')
+    expect(initial.transition).not.toContain('transform')
+    expect(initial.transform).toBe('none')
+    expect(final.transform).toBe('none')
+  })
+
+  it('classic preset rests at no transform and resolves to rotateY in the final frame', () => {
+    const classic = FLIP_PRESET_LIST.find(p => p.id === 'classic')!
+    const forward = classic.build('forward', 700)
+    const backward = classic.build('backward', 700)
+    expect(forward.initial.transform).toBe('none')
+    expect(String(forward.final.transform)).toContain('rotateY(-180deg)')
+    expect(String(backward.final.transform)).toContain('rotateY(180deg)')
+    expect(forward.final.transformOrigin).toBe('left center')
+    expect(backward.final.transformOrigin).toBe('right center')
+  })
+
+  it('slide preset rests at translateX 0 and slides off-screen in the final frame', () => {
+    const slide = FLIP_PRESET_LIST.find(p => p.id === 'slide')!
+    const { initial, final } = slide.build('forward', 700)
+    expect(initial.transform).toBe('translateX(0%)')
+    expect(final.transform).toBe('translateX(-100%)')
   })
 
   it('getFlipPreset returns the requested entry and falls back to default for unknown ids', () => {

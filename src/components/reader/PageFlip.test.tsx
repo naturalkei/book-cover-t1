@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from '@testing-library/react'
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -180,17 +180,36 @@ describe('PageFlip', () => {
       expect(screen.getByTestId('page-flip')).toHaveAttribute('data-flip-preset', 'tilt')
     })
 
-    it('applies the slide preset transform to the outgoing leaf', () => {
+    it('mounts the outgoing leaf in the resting "initial" frame, then advances to "final" on the next RAF', async () => {
+      vi.useRealTimers()
       const { rerender } = render(<PageFlip pages={PAGES} pageIndex={0} presetId="slide" />)
       rerender(<PageFlip pages={PAGES} pageIndex={1} presetId="slide" />)
       const outgoing = screen.getByTestId('page-flip-outgoing')
-      expect(outgoing).toHaveStyle({ transform: 'translateX(-100%)' })
+      expect(outgoing).toHaveAttribute('data-flip-phase', 'initial')
+      expect(outgoing).toHaveStyle({ transform: 'translateX(0%)', opacity: '1' })
+
+      await waitFor(() => expect(outgoing).toHaveAttribute('data-flip-phase', 'final'))
+      expect(outgoing).toHaveStyle({ transform: 'translateX(-100%)', opacity: '0' })
     })
 
-    it('applies the fade preset opacity-only transition to the outgoing leaf', () => {
+    it('animates the classic preset from no transform to rotateY in the final frame', async () => {
+      vi.useRealTimers()
+      const { rerender } = render(<PageFlip pages={PAGES} pageIndex={0} presetId="classic" />)
+      rerender(<PageFlip pages={PAGES} pageIndex={1} presetId="classic" />)
+      const outgoing = screen.getByTestId('page-flip-outgoing')
+      expect(outgoing).toHaveStyle({ transform: 'none' })
+      await waitFor(() => expect(outgoing).toHaveAttribute('data-flip-phase', 'final'))
+      const styleAttr = outgoing.getAttribute('style') ?? ''
+      expect(styleAttr).toMatch(/rotateY\(-180deg\)/)
+    })
+
+    it('applies the fade preset opacity-only transition to the outgoing leaf', async () => {
+      vi.useRealTimers()
       const { rerender } = render(<PageFlip pages={PAGES} pageIndex={0} presetId="fade" />)
       rerender(<PageFlip pages={PAGES} pageIndex={1} presetId="fade" />)
       const outgoing = screen.getByTestId('page-flip-outgoing')
+      expect(outgoing).toHaveStyle({ opacity: '1' })
+      await waitFor(() => expect(outgoing).toHaveAttribute('data-flip-phase', 'final'))
       const style = outgoing.getAttribute('style') ?? ''
       expect(style).toContain('opacity')
       expect(style).not.toMatch(/transform:[^;]*rotate/)
