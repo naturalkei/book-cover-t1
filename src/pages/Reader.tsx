@@ -4,6 +4,7 @@ import { Link, useParams } from 'react-router-dom'
 
 import NotFound from '@/components/NotFound'
 import PageFlip from '@/components/reader/PageFlip'
+import PageJumpInput from '@/components/reader/PageJumpInput'
 import ReaderControls from '@/components/reader/ReaderControls'
 import { getBookById } from '@/data/books'
 
@@ -57,8 +58,16 @@ export default function Reader() {
         onPageChange={setPageIndex}
       />
 
+      <div className="mt-4 flex justify-center">
+        <PageJumpInput
+          pageIndex={pageIndex}
+          totalPages={totalPages}
+          onPageChange={setPageIndex}
+        />
+      </div>
+
       <footer className="mt-6 text-center text-xs uppercase tracking-[0.2em] text-slate-500">
-        tap a page side, or use the controls above
+        tap a page side, use the controls, or jump to any page
       </footer>
     </section>
   )
