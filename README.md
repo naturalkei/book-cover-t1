@@ -1,49 +1,54 @@
-# VRT Starter R1
+# book-flip-showcase
 
 ![React](https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react&logoColor=black)
 ![Vite](https://img.shields.io/badge/Vite-7-646CFF?style=flat-square&logo=vite&logoColor=white)
 ![TailwindCSS](https://img.shields.io/badge/Tailwind-4-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=flat-square&logo=typescript&logoColor=white)
 ![ESLint](https://img.shields.io/badge/ESLint-9-4B32C3?style=flat-square&logo=eslint&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
 
-> **2026 Modern Frontend Boilerplate**
-> <br> A highly opinionated starter template featuring **React 19**, **Vite 7**, and **Tailwind CSS 4**.
-> <br> Formatted exclusively with **ESLint 9** (No Prettier, No Semicolons).
+> A book preview showcase site featuring a realistic paper page-flip animation experience.
+> <br> Built on **React 19**, **Vite 7**, and **Tailwind CSS 4**, formatted by **ESLint 9** alone (no Prettier, no semicolons).
 
-![VRT](./public/vrt-260108-1.png)
+## Overview
 
-## 🚀 Features
+`book-flip-showcase` is a single-page application that mimics the tactile feel of flipping through a physical book in the browser. It serves as both a curated gallery for book covers and an interactive demo of advanced page-turn animations.
 
-* **⚡️ Blazing Fast:** Built with **Vite 7** for instant server start and HMR.
-* **⚛️ React 19:** Full support for the latest React features (Server Components, Actions).
-* **🎨 Tailwind CSS v4:** Configured with the new oxide engine using TypeScript.
-* **✨ Zero Prettier:** Styling and formatting are handled entirely by **ESLint 9** (`@stylistic/eslint-plugin`).
-    * *Single Quotes*
-    * *No Semicolons*
-* **🛡️ Type Safe:** Strict TypeScript 5 configuration with separated `app` and `node` environments.
-* **🛣️ Smart Routing:** **React Router v6** with auto-mapped path aliases (`@/` -> `src/`).
-* **🤖 CI/CD Ready:** Automated deployment to **GitHub Pages** via GitHub Actions.
-* **📱 PWA Ready:** Includes proper meta tags, favicons, and Open Graph setups.
+See [`docs/plan-1.md`](./docs/plan-1.md) for the full product plan, scope, and milestones.
 
-## 📦 Tech Stack
+## Features
+
+- **Page-flip reader** — realistic CSS 3D page-turn animation with proper shadows and backface culling.
+- **Curated gallery** — cover art grid with smooth transitions into the reader.
+- **Multiple navigation modes** — corner drag, prev/next buttons, page jump, and a draggable thumbnail scrubber.
+- **Keyboard friendly** — `ArrowLeft` / `ArrowRight`, `Home` / `End`, `Esc` shortcuts.
+- **Accessible & motion-aware** — ARIA labels on all controls, respects `prefers-reduced-motion`.
+- **Modern editorial UI** — generous whitespace, dark mode by default, optional light theme.
+- **Zero Prettier** — formatting handled entirely by ESLint 9 + `@stylistic/eslint-plugin`.
+- **Strict TypeScript** — separated `app` and `node` tsconfig environments with `@/` path alias.
+
+## Tech Stack
 
 | Category | Technology | Version |
 | :--- | :--- | :--- |
-| **Framework** | [React](https://react.dev) | v19 |
-| **Build Tool** | [Vite](https://vitejs.dev) | v7 |
-| **Styling** | [Tailwind CSS](https://tailwindcss.com) | v4 |
-| **Language** | [TypeScript](https://www.typescriptlang.org) | v5 |
-| **Linter** | [ESLint (Flat Config)](https://eslint.org) | v9 |
-| **Router** | [React Router](https://reactrouter.com) | v6 |
-| **Package Manager** | [pnpm](https://pnpm.io) | v9+ |
+| Framework | [React](https://react.dev) | v19 |
+| Build Tool | [Vite](https://vitejs.dev) | v7 |
+| Styling | [Tailwind CSS](https://tailwindcss.com) | v4 |
+| Language | [TypeScript](https://www.typescriptlang.org) | v5 |
+| Linter | [ESLint (Flat Config)](https://eslint.org) | v9 |
+| Router | [React Router](https://reactrouter.com) | v7 |
+| Icons | [lucide-react](https://lucide.dev) | latest |
+| Unit Tests | [Vitest](https://vitest.dev) | planned |
+| E2E Tests | [Playwright](https://playwright.dev) | planned |
+| Package Manager | [pnpm](https://pnpm.io) | v10+ |
 
-## 🛠 Getting Started
+## Getting Started
 
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/your-username/vrt-starter-r1.git
-cd vrt-starter-r1
+git clone https://github.com/<your-username>/book-flip-showcase.git
+cd book-flip-showcase
 ```
 
 ### 2. Install dependencies
@@ -52,9 +57,9 @@ cd vrt-starter-r1
 pnpm install
 ```
 
-### 3. Setup Environment Variables (Optional)
+### 3. Configure environment variables (optional)
 
-Create a `.env` file in the root directory if you need to customize local development variables.
+Copy `.env.example` to `.env` and adjust as needed.
 
 ```conf
 VITE_BASE_URL="/{reponame}"
@@ -62,71 +67,107 @@ VITE_GITHUB_URL="https://github.com/{username}/{reponame}"
 VITE_SITE_URL="https://{username}.github.io/{reponame}/"
 ```
 
-### 4. Run Development Server
+### 4. Run the development server
 
 ```bash
 pnpm dev
 ```
 
-## 📜 Scripts
+Open <http://localhost:5173> in your browser.
 
-| Script            | Description                                                                |
-|-------------------|----------------------------------------------------------------------------|
-| `pnpm dev`        | Starts the development server.                                              |
-| `pnpm build`      | Runs TypeScript type checking (`tsc -b`) and builds for production.         |
-| `pnpm serve`      | Previews the production build locally.                                      |
-| `pnpm lint`       | Runs ESLint styling issues.                                                 |
-| `pnpm lint:fix`   | Automatically fixes all ESLint auto-fixable style issues.                   |
+## Scripts
 
+| Script | Description |
+| --- | --- |
+| `pnpm dev` | Starts the Vite development server with HMR. |
+| `pnpm build` | Runs `tsc -b` type checking and builds the production bundle. |
+| `pnpm serve` | Previews the production build locally. |
+| `pnpm lint` | Runs ESLint across the project. |
+| `pnpm lint:fix` | Auto-fixes ESLint issues where possible. |
 
-## 🧩 Project Structure
+## Project Structure
 
 ```text
-vrt-starter-r1/
-├── .github/workflows/   # GitHub Actions (Deployment)
-├── public/              # Static assets (Favicon, etc.)
+book-flip-showcase/
+├── .cursor/rules/       # Cursor agent rules (project conventions)
+├── .github/workflows/   # GitHub Actions (deployment)
+├── docs/                # Plan, issue reports, design notes
+│   ├── plan-1.md        # Product plan & scope (source of truth)
+│   └── issues/          # Per-issue resolution reports
+├── public/              # Static assets (covers, page images, favicon)
 ├── src/
-│   ├── components/      # Shared components (Layout, UI)
-│   ├── pages/           # Page components (Home, etc.)
-│   ├── App.tsx          # App entry with Routes
-│   ├── main.tsx         # React DOM rendering
+│   ├── components/      # Shared UI (reader, gallery, layout)
+│   ├── pages/           # Route-level pages (Gallery, Reader, NotFound)
+│   ├── data/            # Static book metadata (planned)
+│   ├── App.tsx          # Routes
+│   ├── main.tsx         # React DOM entry
 │   └── index.css        # Tailwind imports & global styles
-├── .env                 # Environment variables
-├── eslint.config.ts     # ESLint 9 Flat Config
-├── tailwind.config.ts   # Tailwind CSS Config
-├── tsconfig.json        # TypeScript Root Config (References)
-├── vite.config.ts       # Vite Config
+├── eslint.config.ts     # ESLint 9 flat config
+├── tailwind.config.ts   # Tailwind config
+├── tsconfig.json        # Root TS config (project references)
+├── vite.config.ts       # Vite config
 └── package.json
 ```
 
-## 💅 Code Style
+## Code Style
 
-(ESLint Only)This project does not use Prettier. Instead, it uses ESLint 9 with `@stylistic/eslint-plugin` to enforce specific formatting rules:
+This project does **not** use Prettier. ESLint 9 with `@stylistic/eslint-plugin` enforces formatting:
 
-* Semi: Never (`const a = 1`)
-* Quotes: Single (`'hello'`)
-* JSX Quotes: Double (`<div className="box">`)
-* Indent: 2 spaces
-* Object Curly Spacing: Always (`{ key: value }`)
-* React Hooks: Strictly enforced (`react-hooks/recommended`)
+- No semicolons — `const a = 1`
+- Single quotes for TS/JS — `'hello'`
+- Double quotes for JSX attributes — `<div className="box">`
+- 2-space indentation
+- Object curly spacing always on — `{ key: value }`
+- Trailing commas on multi-line literals
+- React Hooks rules strictly enforced (`react-hooks/recommended`)
 
-To fix style issues, simply run:
+To fix style issues:
+
 ```bash
 pnpm lint:fix
 ```
 
-## 🚀 Deployment
-This template is configured to deploy to GitHub Pages automatically.
+See [`.cursor/rules/code-style.mdc`](./.cursor/rules/code-style.mdc) for the full style guide used by the AI agent.
 
-1. Push your code to the main branch.
-1. Go to your repository Settings > Pages.
-1. Ensure the source is set to GitHub Actions.
-1. The workflow defined in .github/workflows/deploy.yml will handle the rest.
+## Conventions
 
-## 📝 Naming Convention
-The suffix `-r1` stands for Revision 1. This is a personal sequence numbering system for skeleton projects.
-Future updates to the stack will be released as `-r2`, `-r3`, etc.
+- **Commits** follow [Conventional Commits](https://www.conventionalcommits.org/) — `feat:`, `fix:`, `docs:`, `refactor:`, `chore:`, `test:`.
+- **Branches** are named `<type>/<issue-id>-<short-slug>` (or `<type>/<short-slug>` when no issue exists).
+- **PRs** are squash-merged by default and must close their linked issue.
 
-## 📄 License
+Detailed conventions live in [`.cursor/rules/`](./.cursor/rules/):
 
-This project is licensed under the MIT License - see the [LICENSE](/LICENSE) file for details.
+| Rule | Scope |
+| --- | --- |
+| `project-overview.mdc` | Project context and scope (always applied). |
+| `code-style.mdc` | StandardJS formatting for `*.ts` / `*.tsx`. |
+| `commit-convention.mdc` | Conventional Commits and branch naming. |
+| `agent-workflow.mdc` | Mandatory loop for every requirement. |
+| `testing.mdc` | Vitest and Playwright conventions. |
+
+## Agent Workflow
+
+Every requirement runs through this loop end-to-end:
+
+1. File a GitHub issue (`gh issue create`).
+2. Branch off `main` as `<type>/<issue-id>-<slug>`.
+3. Write Vitest unit / component tests.
+4. Write Playwright E2E scenarios.
+5. Make `pnpm lint` pass.
+6. Write a resolution report at `docs/issues/{issue-id}.md`.
+7. Post the report to the issue (`gh issue comment`).
+8. Open and squash-merge the PR (`gh pr create` → `gh pr merge --squash --delete-branch`).
+
+See [`.cursor/rules/agent-workflow.mdc`](./.cursor/rules/agent-workflow.mdc) for the Definition of Done.
+
+## Deployment
+
+This project is configured to deploy to GitHub Pages automatically via [`.github/workflows/deploy.yml`](./.github/workflows/deploy.yml):
+
+1. Push to `main`.
+2. In repository **Settings → Pages**, set the source to **GitHub Actions**.
+3. The workflow handles the rest.
+
+## License
+
+This project is licensed under the MIT License — see the [LICENSE](./LICENSE) file for details.

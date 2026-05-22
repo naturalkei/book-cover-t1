@@ -1,0 +1,31 @@
+---
+description: book-flip-showcase project context and scope
+alwaysApply: true
+---
+
+# book-flip-showcase
+
+A single-page app that showcases book covers and provides a realistic page-flip reading experience.
+
+## Stack
+
+- Vite 7 + React 19 + TypeScript 5
+- Tailwind CSS 4 (oxide engine, `@tailwindcss/vite`)
+- react-router-dom 7
+- lucide-react for icons
+- pnpm 10 as the package manager
+
+## Scope
+
+- Static, client-only SPA. No backend, no auth, no CMS.
+- Book metadata is declared in a single typed module (e.g. `src/data/books.ts`).
+- Cover and page images live under `public/`. Placeholders are acceptable for missing pages.
+
+## Out of Scope
+
+- EPUB parsing, DRM, annotations, or user accounts.
+- Server-side rendering or API routes.
+
+## Source of Truth
+
+The full planning doc lives at `docs/plan-1.md`. When making product or architectural decisions, defer to that document and update it in the same PR if the decision changes.

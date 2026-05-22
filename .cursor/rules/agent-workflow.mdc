@@ -1,0 +1,31 @@
+---
+description: Mandatory loop the agent runs for every requirement
+alwaysApply: true
+---
+
+# Agent Workflow
+
+For every requirement, change request, or non-trivial task, run this loop end-to-end before considering the work done.
+
+## The Loop
+
+1. **File a GitHub issue** with `gh issue create` — include scope, acceptance criteria, and a test plan.
+2. **Create a branch** named `<type>/<issue-id>-<short-slug>` off `main`. Commit incrementally with Conventional Commits.
+3. **Write Vitest specs** for the new behavior (unit / component). Make them green locally with `pnpm test`.
+4. **Write Playwright scenarios** for the user-facing flow. Make them green locally.
+5. **Run lint**: `pnpm lint` must pass.
+6. **Write the report** at `docs/issues/{issue-id}.md` summarizing problem, approach, trade-offs, and verification.
+7. **Comment on the issue** with `gh issue comment {issue-id} --body-file docs/issues/{issue-id}.md`.
+8. **Open and merge the PR** with `gh pr create`, wait for CI green, then `gh pr merge --squash --delete-branch`.
+
+## Definition of Done
+
+- [ ] GitHub issue is closed.
+- [ ] All Vitest and Playwright suites pass in CI.
+- [ ] `pnpm lint` passes.
+- [ ] `docs/issues/{issue-id}.md` exists and is linked from the issue.
+- [ ] PR is squash-merged and the branch is deleted.
+
+## Skipping Steps
+
+You may skip steps 3–4 ONLY for pure docs changes, config-only edits, or chores that touch no runtime code. Skipping must be called out in the PR description.

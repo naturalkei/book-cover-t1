@@ -1,0 +1,42 @@
+---
+description: Vitest and Playwright conventions
+globs: src/**/*.{test,spec}.{ts,tsx},tests/**/*.{ts,tsx},e2e/**/*.{ts,tsx}
+alwaysApply: false
+---
+
+# Testing Conventions
+
+## Vitest (unit / component)
+
+- Colocate specs next to the source: `Foo.tsx` → `Foo.test.tsx`.
+- Use React Testing Library for component tests; avoid snapshot tests for dynamic UI.
+- Prefer user-event over fireEvent.
+
+```tsx
+// src/components/PageFlipButton.test.tsx
+import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import { PageFlipButton } from './PageFlipButton'
+
+test('emits direction on click', async () => {
+  const onFlip = vi.fn()
+  render(<PageFlipButton direction="next" onFlip={onFlip} />)
+  await userEvent.click(screen.getByRole('button', { name: /next page/i }))
+  expect(onFlip).toHaveBeenCalledWith('next')
+})
+```
+
+## Playwright (E2E)
+
+- Specs live in `e2e/` and are named after the user journey (`reader-navigation.spec.ts`).
+- Use `data-testid` only as a last resort; prefer role + accessible name selectors.
+- Each spec must be runnable in isolation against a fresh `pnpm dev` server.
+
+## Naming
+
+- Describe behavior, not implementation: `it('turns to the next page on swipe')`, not `it('calls handleSwipe')`.
+- One assertion focus per test; multiple `expect` calls are fine when they validate one behavior.
+
+## Accessibility
+
+E2E suites should include at least one assertion that interactive controls are reachable by keyboard.

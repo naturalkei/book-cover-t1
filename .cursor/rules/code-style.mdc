@@ -1,0 +1,43 @@
+---
+description: StandardJS code style for TypeScript and React sources
+globs: src/**/*.{ts,tsx},*.ts,*.tsx
+alwaysApply: false
+---
+
+# Code Style (StandardJS)
+
+Formatting is enforced by ESLint 9 + `@stylistic/eslint-plugin`. Do not add Prettier.
+
+## Rules
+
+- No semicolons (`const a = 1`)
+- Single quotes for TS/JS (`'hello'`)
+- Double quotes for JSX attributes (`<div className="box">`)
+- 2-space indentation
+- Object curly spacing always on (`{ key: value }`)
+- Trailing commas on multi-line literals
+- Max 1 consecutive empty line, no trailing newline at EOF beyond 1
+
+## Examples
+
+```ts
+// BAD
+import {useState} from "react";
+const greet = (name: string) => { return "hi, " + name; };
+
+// GOOD
+import { useState } from 'react'
+const greet = (name: string) => `hi, ${name}`
+```
+
+```tsx
+// BAD
+<button onClick={()=>setOpen(true)} className='btn'>Open</button>
+
+// GOOD
+<button onClick={() => setOpen(true)} className="btn">Open</button>
+```
+
+## Verification
+
+Run `pnpm lint` before committing. Use `pnpm lint:fix` to auto-fix style issues.
