@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 600" role="img" aria-label="Silent Frequencies cover">
+  <defs>
+    <linearGradient id="silent-bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fef3c7"/>
+      <stop offset="100%" stop-color="#fbbf24"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="600" fill="url(#silent-bg)"/>
+  <g stroke="#78350f" stroke-width="1.5" fill="none" opacity="0.5">
+    <path d="M 32 460 Q 100 420 168 460 T 304 460 T 372 460"/>
+    <path d="M 32 480 Q 100 440 168 480 T 304 480 T 372 480"/>
+    <path d="M 32 500 Q 100 460 168 500 T 304 500 T 372 500"/>
+  </g>
+  <g font-family="ui-serif, Georgia, serif" fill="#451a03">
+    <text x="200" y="200" text-anchor="middle" font-size="40" font-weight="700">Silent</text>
+    <text x="200" y="248" text-anchor="middle" font-size="40" font-weight="700">Frequencies</text>
+    <text x="200" y="290" text-anchor="middle" font-size="14" opacity="0.7">Essays on listening</text>
+    <text x="200" y="560" text-anchor="middle" font-size="13" letter-spacing="3">REED OKAFOR</text>
+  </g>
+</svg>

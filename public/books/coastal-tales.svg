@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 600" role="img" aria-label="Coastal Tales cover">
+  <defs>
+    <linearGradient id="coast-bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0f766e"/>
+      <stop offset="100%" stop-color="#042f2e"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="600" fill="url(#coast-bg)"/>
+  <g fill="#5eead4" opacity="0.55">
+    <circle cx="320" cy="120" r="38"/>
+    <circle cx="320" cy="120" r="56" fill="none" stroke="#5eead4" stroke-width="1"/>
+  </g>
+  <g fill="#99f6e4" opacity="0.7">
+    <path d="M 0 460 Q 100 420 200 450 T 400 440 L 400 600 L 0 600 Z"/>
+    <path d="M 0 500 Q 100 470 200 490 T 400 480 L 400 600 L 0 600 Z" fill="#2dd4bf" opacity="0.45"/>
+  </g>
+  <g font-family="ui-sans-serif, system-ui, sans-serif" fill="#ecfdf5">
+    <text x="40" y="280" font-size="44" font-weight="800">Coastal</text>
+    <text x="40" y="328" font-size="44" font-weight="800">Tales</text>
+    <text x="40" y="362" font-size="15" opacity="0.85">Stories from the tide line</text>
+    <text x="40" y="560" font-size="13" letter-spacing="3" opacity="0.7">YUKI TANAKA</text>
+  </g>
+</svg>

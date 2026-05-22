@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 600" role="img" aria-label="Atlas of Cities cover">
+  <defs>
+    <linearGradient id="atlas-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+    <linearGradient id="atlas-stripe" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#0ea5e9"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="600" fill="url(#atlas-bg)"/>
+  <rect x="32" y="32" width="6" height="536" fill="url(#atlas-stripe)"/>
+  <g font-family="ui-sans-serif, system-ui, sans-serif" fill="#e2e8f0">
+    <text x="56" y="120" font-size="14" letter-spacing="6" opacity="0.6">VOLUME 01</text>
+    <text x="56" y="220" font-size="44" font-weight="800">Atlas</text>
+    <text x="56" y="270" font-size="44" font-weight="800">of Cities</text>
+    <text x="56" y="320" font-size="16" opacity="0.7">A field guide to urban form</text>
+    <text x="56" y="540" font-size="14" letter-spacing="3" opacity="0.5">MARA LIN</text>
+  </g>
+</svg>
