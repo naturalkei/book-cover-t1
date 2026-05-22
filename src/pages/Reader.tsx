@@ -1,18 +1,28 @@
 import { ArrowLeft } from 'lucide-react'
-import { useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { useCallback, useState } from 'react'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 
 import NotFound from '@/components/NotFound'
 import PageFlip from '@/components/reader/PageFlip'
 import PageJumpInput from '@/components/reader/PageJumpInput'
 import ReaderControls from '@/components/reader/ReaderControls'
 import { getBookById } from '@/data/books'
+import { useReaderKeyboard } from '@/hooks/useReaderKeyboard'
 
 export default function Reader() {
   const { id } = useParams<{ id: string }>()
+  const navigate = useNavigate()
   const book = id ? getBookById(id) : undefined
 
   const [pageIndex, setPageIndex] = useState(0)
+  const exitToGallery = useCallback(() => navigate('/'), [navigate])
+
+  useReaderKeyboard({
+    pageIndex,
+    totalPages: book?.pages.length ?? 0,
+    onPageChange: setPageIndex,
+    onExit: exitToGallery,
+  })
 
   if (!book) {
     return (
