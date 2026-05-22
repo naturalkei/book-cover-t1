@@ -1,5 +1,8 @@
 # book-flip-showcase
 
+[![CI](https://github.com/naturalkei/book-cover-t1/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/naturalkei/book-cover-t1/actions/workflows/ci.yml)
+[![Deploy to GitHub Pages](https://github.com/naturalkei/book-cover-t1/actions/workflows/deploy.yml/badge.svg?branch=main)](https://github.com/naturalkei/book-cover-t1/actions/workflows/deploy.yml)
+
 ![React](https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react&logoColor=black)
 ![Vite](https://img.shields.io/badge/Vite-7-646CFF?style=flat-square&logo=vite&logoColor=white)
 ![TailwindCSS](https://img.shields.io/badge/Tailwind-4-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)
@@ -38,8 +41,8 @@ See [`docs/plan-1.md`](./docs/plan-1.md) for the full product plan, scope, and m
 | Linter | [ESLint (Flat Config)](https://eslint.org) | v9 |
 | Router | [React Router](https://reactrouter.com) | v7 |
 | Icons | [lucide-react](https://lucide.dev) | latest |
-| Unit Tests | [Vitest](https://vitest.dev) | planned |
-| E2E Tests | [Playwright](https://playwright.dev) | planned |
+| Unit Tests | [Vitest](https://vitest.dev) | v3 |
+| E2E Tests | [Playwright](https://playwright.dev) | v1 |
 | Package Manager | [pnpm](https://pnpm.io) | v10+ |
 
 ## Getting Started
@@ -84,6 +87,12 @@ Open <http://localhost:5173> in your browser.
 | `pnpm serve` | Previews the production build locally. |
 | `pnpm lint` | Runs ESLint across the project. |
 | `pnpm lint:fix` | Auto-fixes ESLint issues where possible. |
+| `pnpm test` | Runs the Vitest unit / component suite once. |
+| `pnpm test:watch` | Runs Vitest in watch mode. |
+| `pnpm test:coverage` | Runs Vitest with V8 coverage. |
+| `pnpm e2e` | Runs the Playwright end-to-end suite headlessly. |
+| `pnpm e2e:ui` | Opens the Playwright UI runner. |
+| `pnpm e2e:report` | Opens the most recent Playwright HTML report. |
 
 ## Project Structure
 
@@ -160,13 +169,18 @@ Every requirement runs through this loop end-to-end:
 
 See [`.cursor/rules/agent-workflow.mdc`](./.cursor/rules/agent-workflow.mdc) for the Definition of Done.
 
-## Deployment
+## Continuous Integration & Deployment
 
-This project is configured to deploy to GitHub Pages automatically via [`.github/workflows/deploy.yml`](./.github/workflows/deploy.yml):
+Two GitHub Actions workflows guard `main`:
+
+- [`.github/workflows/ci.yml`](./.github/workflows/ci.yml) — on every PR and push to `main`: `pnpm lint`, `pnpm test` (Vitest), `pnpm build`, then `pnpm e2e` (Playwright, headed Chromium with cached browsers). The Playwright HTML report is uploaded as an artifact when the suite finishes.
+- [`.github/workflows/deploy.yml`](./.github/workflows/deploy.yml) — on push to `main` (or manual dispatch): installs with `--frozen-lockfile`, builds with the production `VITE_BASE_URL`, and deploys the `dist/` folder to GitHub Pages via the official `actions/deploy-pages` action.
+
+To enable Pages:
 
 1. Push to `main`.
 2. In repository **Settings → Pages**, set the source to **GitHub Actions**.
-3. The workflow handles the rest.
+3. The workflow handles the rest; status is reflected by the badges at the top of this file.
 
 ## License
 
