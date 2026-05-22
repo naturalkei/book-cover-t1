@@ -9,7 +9,7 @@ export default function Gallery({ books = defaultBooks }: GalleryProps) {
   return (
     <section className="mx-auto w-full max-w-6xl px-6 py-16 sm:py-24">
       <header className="mb-12 max-w-3xl">
-        <p className="text-xs font-medium uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400">
+        <p className="text-xs font-medium uppercase tracking-[0.3em] text-slate-700 dark:text-slate-400">
           book flip showcase
         </p>
         <h1 className="mt-3 text-4xl font-bold tracking-tight text-slate-900 sm:text-6xl dark:text-white">

@@ -52,7 +52,7 @@ export default function PageJumpInput({
         className,
       ].filter(Boolean).join(' ')}
     >
-      <label htmlFor={inputId} className="text-xs uppercase tracking-[0.2em] text-slate-500 dark:text-slate-500">
+      <label htmlFor={inputId} className="text-xs uppercase tracking-[0.2em] text-slate-700 dark:text-slate-400">
         go to
       </label>
       <input
@@ -67,7 +67,7 @@ export default function PageJumpInput({
         aria-label={`Page number, between 1 and ${totalPages}`}
         className="w-14 appearance-none bg-transparent text-center tabular-nums text-slate-900 focus-visible:outline-none dark:text-slate-100"
       />
-      <span aria-hidden="true" className="text-slate-500 dark:text-slate-500">/ {totalPages}</span>
+      <span aria-hidden="true" className="text-slate-700 dark:text-slate-400">/ {totalPages}</span>
       <button type="submit" className="sr-only">go</button>
     </form>
   )

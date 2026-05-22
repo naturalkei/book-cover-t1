@@ -30,10 +30,10 @@ export default function ReaderControls({ pageIndex, totalPages, onPageChange }: 
 
       <span
         aria-live="polite"
-        className="min-w-[6ch] text-center text-sm tabular-nums text-slate-500 dark:text-slate-400"
+        className="min-w-[6ch] text-center text-sm tabular-nums text-slate-700 dark:text-slate-300"
       >
         <span data-testid="reader-current-page">{pageIndex + 1}</span>
-        <span aria-hidden="true" className="px-1 text-slate-400 dark:text-slate-600">/</span>
+        <span aria-hidden="true" className="px-1 text-slate-500 dark:text-slate-500">/</span>
         <span data-testid="reader-total-pages">{totalPages}</span>
       </span>
 

@@ -7,7 +7,16 @@ export default function Layout() {
   const githubUrl = import.meta.env.VITE_GITHUB_URL
   return (
     <div className="flex min-h-screen flex-col bg-slate-50 font-sans text-slate-900 dark:bg-slate-950 dark:text-slate-100">
-      <nav className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/70 backdrop-blur-md dark:border-white/5 dark:bg-slate-950/70">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[60] focus:rounded-full focus:bg-sky-500 focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white focus:outline-none focus:ring-2 focus:ring-sky-300 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-slate-950"
+      >
+        Skip to main content
+      </a>
+      <nav
+        aria-label="Primary"
+        className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/70 backdrop-blur-md dark:border-white/5 dark:bg-slate-950/70"
+      >
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
           <Link
             to="/"
@@ -39,11 +48,11 @@ export default function Layout() {
         </div>
       </nav>
 
-      <main className="flex-1">
+      <main id="main-content" className="flex-1" tabIndex={-1}>
         <Outlet />
       </main>
 
-      <footer className="border-t border-slate-200/80 py-8 text-center text-xs text-slate-500 dark:border-white/5 dark:text-slate-500">
+      <footer className="border-t border-slate-200/80 py-8 text-center text-xs text-slate-600 dark:border-white/5 dark:text-slate-400">
         <p>Built with React, Vite, and Tailwind. © {new Date().getFullYear()} book-flip-showcase.</p>
       </footer>
     </div>

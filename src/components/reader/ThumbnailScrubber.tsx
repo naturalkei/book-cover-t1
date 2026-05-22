@@ -62,16 +62,16 @@ export default function ThumbnailScrubber({
       aria-label="Page scrubber"
       className="mt-8 rounded-2xl bg-white p-4 ring-1 ring-slate-200 dark:bg-slate-900/50 dark:ring-white/5"
     >
-      <div className="flex items-center justify-between text-xs uppercase tracking-[0.2em] text-slate-500 dark:text-slate-500">
+      <div className="flex items-center justify-between text-xs uppercase tracking-[0.2em] text-slate-700 dark:text-slate-400">
         <span>scrub</span>
         {showPreview
           ? (
-            <span aria-live="polite" data-testid="scrubber-preview" className="text-sky-600 dark:text-sky-300">
+            <span aria-live="polite" data-testid="scrubber-preview" className="text-sky-700 dark:text-sky-300">
               preview · page {previewIndex + 1}
             </span>
           )
           : (
-            <span className="text-slate-500 dark:text-slate-500">page {pageIndex + 1} of {pages.length}</span>
+            <span className="text-slate-700 dark:text-slate-400">page {pageIndex + 1} of {pages.length}</span>
           )}
       </div>
 
