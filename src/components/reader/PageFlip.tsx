@@ -3,6 +3,8 @@ import { useEffect, useRef, useState } from 'react'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import type { ViewMode } from '@/hooks/useViewMode'
 
+import { DEFAULT_FLIP_PRESET, getFlipPreset, type FlipPresetId } from './flipPresets'
+
 interface PageFlipProps {
   pages: string[]
   pageIndex: number
@@ -10,6 +12,7 @@ interface PageFlipProps {
   ariaLabel?: string
   flipDurationMs?: number
   mode?: ViewMode
+  presetId?: FlipPresetId
 }
 
 type FlipDirection = 'forward' | 'backward' | null
@@ -21,6 +24,7 @@ export default function PageFlip({
   ariaLabel = 'Book spread',
   flipDurationMs = 700,
   mode = 'single',
+  presetId = DEFAULT_FLIP_PRESET,
 }: PageFlipProps) {
   const step = mode === 'spread' ? 2 : 1
   const safeIndex = clamp(pageIndex, 0, pages.length - 1)
@@ -77,6 +81,7 @@ export default function PageFlip({
       data-testid="page-flip"
       data-flip-state={outgoing?.direction ?? 'idle'}
       data-view-mode={mode}
+      data-flip-preset={presetId}
       tabIndex={0}
       onClick={handleClick}
       onKeyDown={handleKeyDown}
@@ -109,6 +114,7 @@ export default function PageFlip({
             duration={duration}
             outgoing
             outgoingDirection={outgoing.direction}
+            presetId={presetId}
             testIdPrefix="page-flip-outgoing"
           />
         )
@@ -147,6 +153,7 @@ interface PageSurfaceProps {
   duration: number
   outgoing: boolean
   outgoingDirection?: FlipDirection
+  presetId?: FlipPresetId
   testIdPrefix: string
   loading?: 'eager' | 'lazy'
   fetchPriority?: 'high' | 'low' | 'auto'
@@ -160,26 +167,14 @@ function PageSurface({
   duration,
   outgoing,
   outgoingDirection,
+  presetId,
   testIdPrefix,
   loading = 'lazy',
   fetchPriority,
 }: PageSurfaceProps) {
-  const isLayer = outgoing && outgoingDirection !== undefined
+  const isLayer = outgoing && outgoingDirection !== undefined && outgoingDirection !== null
   const baseStyle: React.CSSProperties = isLayer
-    ? {
-      transformOrigin: outgoingDirection === 'forward' ? 'left center' : 'right center',
-      transition: reducedMotion
-        ? `opacity ${duration}ms ease-in-out`
-        : `transform ${duration}ms cubic-bezier(0.2, 0.7, 0.2, 1), opacity ${duration}ms ease-in-out`,
-      transform: reducedMotion
-        ? 'none'
-        : outgoingDirection === 'forward'
-          ? 'rotateY(-180deg)'
-          : 'rotateY(180deg)',
-      opacity: 0,
-      boxShadow: '0 30px 60px -20px rgba(0, 0, 0, 0.45)',
-      backfaceVisibility: 'hidden',
-    }
+    ? getFlipPreset(presetId ?? DEFAULT_FLIP_PRESET).build(outgoingDirection as 'forward' | 'backward', duration)
     : reducedMotion
       ? { transition: `opacity ${duration}ms ease-in-out`, opacity: outgoing ? 0.4 : 1 }
       : { backfaceVisibility: 'hidden' }

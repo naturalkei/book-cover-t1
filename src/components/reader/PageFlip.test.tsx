@@ -173,4 +173,27 @@ describe('PageFlip', () => {
       expect(screen.getByTestId('page-flip-current-right-empty')).toBeInTheDocument()
     })
   })
+
+  describe('flip presets', () => {
+    it('reflects the active preset on the surface via data-flip-preset', () => {
+      render(<PageFlip pages={PAGES} pageIndex={0} presetId="tilt" />)
+      expect(screen.getByTestId('page-flip')).toHaveAttribute('data-flip-preset', 'tilt')
+    })
+
+    it('applies the slide preset transform to the outgoing leaf', () => {
+      const { rerender } = render(<PageFlip pages={PAGES} pageIndex={0} presetId="slide" />)
+      rerender(<PageFlip pages={PAGES} pageIndex={1} presetId="slide" />)
+      const outgoing = screen.getByTestId('page-flip-outgoing')
+      expect(outgoing).toHaveStyle({ transform: 'translateX(-100%)' })
+    })
+
+    it('applies the fade preset opacity-only transition to the outgoing leaf', () => {
+      const { rerender } = render(<PageFlip pages={PAGES} pageIndex={0} presetId="fade" />)
+      rerender(<PageFlip pages={PAGES} pageIndex={1} presetId="fade" />)
+      const outgoing = screen.getByTestId('page-flip-outgoing')
+      const style = outgoing.getAttribute('style') ?? ''
+      expect(style).toContain('opacity')
+      expect(style).not.toMatch(/transform:[^;]*rotate/)
+    })
+  })
 })
