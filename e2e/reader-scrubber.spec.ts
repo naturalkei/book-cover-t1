@@ -1,7 +1,10 @@
 import { expect, test } from '@playwright/test'
 
+import { seedViewMode } from './helpers'
+
 test.describe('reader thumbnail scrubber', () => {
   test('jumps to a thumbnail when clicked', async ({ page }) => {
+    await seedViewMode(page, 'single')
     await page.goto('/')
     await page.getByRole('list', { name: /book gallery/i }).getByRole('link').first().click()
 
@@ -14,6 +17,7 @@ test.describe('reader thumbnail scrubber', () => {
   })
 
   test('scrubbing the slider commits a new page', async ({ page }) => {
+    await seedViewMode(page, 'single')
     await page.goto('/')
     await page.getByRole('list', { name: /book gallery/i }).getByRole('link').first().click()
 

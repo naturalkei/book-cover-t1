@@ -4,13 +4,14 @@ import { describe, expect, it, vi } from 'vitest'
 
 import PageJumpInput from './PageJumpInput'
 
-const setup = (overrides: Partial<{ pageIndex: number; totalPages: number }> = {}) => {
+const setup = (overrides: Partial<{ pageIndex: number; totalPages: number; step: number }> = {}) => {
   const onPageChange = vi.fn()
   const utils = render(
     <PageJumpInput
       pageIndex={overrides.pageIndex ?? 0}
       totalPages={overrides.totalPages ?? 10}
       onPageChange={onPageChange}
+      step={overrides.step ?? 1}
     />,
   )
   const input = screen.getByRole('spinbutton', { name: /page number/i })
@@ -73,5 +74,24 @@ describe('PageJumpInput', () => {
       <PageJumpInput pageIndex={6} totalPages={10} onPageChange={() => {}} />,
     )
     expect(screen.getByRole('spinbutton', { name: /page number/i })).toHaveValue(7)
+  })
+
+  describe('with step=2 (spread)', () => {
+    it('snaps an odd target down to the nearest spread start', async () => {
+      const user = userEvent.setup()
+      const { input, onPageChange } = setup({ pageIndex: 0, totalPages: 10, step: 2 })
+      await user.clear(input)
+      await user.type(input, '6{Enter}')
+      expect(onPageChange).toHaveBeenCalledWith(4)
+      expect(input).toHaveValue(5)
+    })
+
+    it('does not call onPageChange when the snapped target equals the current spread start', async () => {
+      const user = userEvent.setup()
+      const { input, onPageChange } = setup({ pageIndex: 4, totalPages: 10, step: 2 })
+      await user.clear(input)
+      await user.type(input, '6{Enter}')
+      expect(onPageChange).not.toHaveBeenCalled()
+    })
   })
 })

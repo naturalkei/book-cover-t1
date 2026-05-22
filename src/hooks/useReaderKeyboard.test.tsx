@@ -8,10 +8,11 @@ interface HarnessProps {
   totalPages: number
   onPageChange: (next: number) => void
   onExit?: () => void
+  step?: number
 }
 
-function Harness({ pageIndex, totalPages, onPageChange, onExit }: HarnessProps) {
-  useReaderKeyboard({ pageIndex, totalPages, onPageChange, onExit })
+function Harness({ pageIndex, totalPages, onPageChange, onExit, step }: HarnessProps) {
+  useReaderKeyboard({ pageIndex, totalPages, onPageChange, onExit, step })
   return (
     <div>
       <input data-testid="text-input" />
@@ -112,5 +113,42 @@ describe('useReaderKeyboard', () => {
     fireEvent.keyDown(document, { key: 'ArrowRight', metaKey: true })
     fireEvent.keyDown(document, { key: 'ArrowRight', ctrlKey: true })
     expect(onPageChange).not.toHaveBeenCalled()
+  })
+
+  describe('with step=2 (spread)', () => {
+    it('advances by 2 on ArrowRight', () => {
+      const onPageChange = vi.fn()
+      render(<Harness pageIndex={2} totalPages={8} step={2} onPageChange={onPageChange} />)
+      fireEvent.keyDown(document, { key: 'ArrowRight' })
+      expect(onPageChange).toHaveBeenCalledWith(4)
+    })
+
+    it('retreats by 2 on ArrowLeft', () => {
+      const onPageChange = vi.fn()
+      render(<Harness pageIndex={4} totalPages={8} step={2} onPageChange={onPageChange} />)
+      fireEvent.keyDown(document, { key: 'ArrowLeft' })
+      expect(onPageChange).toHaveBeenCalledWith(2)
+    })
+
+    it('End lands on the last spread start (even index) for even totals', () => {
+      const onPageChange = vi.fn()
+      render(<Harness pageIndex={0} totalPages={8} step={2} onPageChange={onPageChange} />)
+      fireEvent.keyDown(document, { key: 'End' })
+      expect(onPageChange).toHaveBeenCalledWith(6)
+    })
+
+    it('End lands on the trailing solo page for odd totals', () => {
+      const onPageChange = vi.fn()
+      render(<Harness pageIndex={0} totalPages={7} step={2} onPageChange={onPageChange} />)
+      fireEvent.keyDown(document, { key: 'End' })
+      expect(onPageChange).toHaveBeenCalledWith(6)
+    })
+
+    it('refuses to advance past the last spread', () => {
+      const onPageChange = vi.fn()
+      render(<Harness pageIndex={6} totalPages={8} step={2} onPageChange={onPageChange} />)
+      fireEvent.keyDown(document, { key: 'ArrowRight' })
+      expect(onPageChange).not.toHaveBeenCalled()
+    })
   })
 })

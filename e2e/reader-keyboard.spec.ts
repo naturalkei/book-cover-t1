@@ -1,7 +1,10 @@
 import { expect, test } from '@playwright/test'
 
+import { seedViewMode } from './helpers'
+
 test.describe('reader keyboard shortcuts', () => {
   test('navigates with ArrowRight / ArrowLeft / Home / End / Escape', async ({ page }) => {
+    await seedViewMode(page, 'single')
     await page.goto('/')
 
     const firstCard = page.getByRole('list', { name: /book gallery/i }).getByRole('link').first()
@@ -35,6 +38,7 @@ test.describe('reader keyboard shortcuts', () => {
   })
 
   test('does not navigate while typing in the page-jump input', async ({ page }) => {
+    await seedViewMode(page, 'single')
     await page.goto('/')
     await page.getByRole('list', { name: /book gallery/i }).getByRole('link').first().click()
 

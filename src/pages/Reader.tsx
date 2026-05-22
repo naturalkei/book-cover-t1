@@ -7,22 +7,48 @@ import PageFlip from '@/components/reader/PageFlip'
 import PageJumpInput from '@/components/reader/PageJumpInput'
 import ReaderControls from '@/components/reader/ReaderControls'
 import ThumbnailScrubber from '@/components/reader/ThumbnailScrubber'
+import ViewModeToggle from '@/components/reader/ViewModeToggle'
 import { getBookById } from '@/data/books'
 import { useReaderKeyboard } from '@/hooks/useReaderKeyboard'
+import { snapToStep, stepForMode, useViewMode, type ViewMode } from '@/hooks/useViewMode'
 
 export default function Reader() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const book = id ? getBookById(id) : undefined
 
+  const { viewMode, setViewMode } = useViewMode()
+  const step = stepForMode(viewMode)
+
   const [pageIndex, setPageIndex] = useState(0)
+  const [lastStep, setLastStep] = useState(step)
+  if (lastStep !== step) {
+    setLastStep(step)
+    setPageIndex((current) => snapToStep(current, step))
+  }
+
+  const commitPage = useCallback(
+    (next: number) => {
+      const total = book?.pages.length ?? 0
+      if (total === 0) return
+      const clamped = Math.min(Math.max(0, next), total - 1)
+      setPageIndex(snapToStep(clamped, step))
+    },
+    [book?.pages.length, step],
+  )
+
+  const handleViewModeChange = useCallback((next: ViewMode) => {
+    setViewMode(next)
+  }, [setViewMode])
+
   const exitToGallery = useCallback(() => navigate('/'), [navigate])
 
   useReaderKeyboard({
     pageIndex,
     totalPages: book?.pages.length ?? 0,
-    onPageChange: setPageIndex,
+    onPageChange: commitPage,
     onExit: exitToGallery,
+    step,
   })
 
   if (!book) {
@@ -50,37 +76,43 @@ export default function Reader() {
           Back to gallery
         </Link>
 
-        <div className="text-right">
-          <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">{book.title}</h1>
-          <p className="text-sm text-slate-600 dark:text-slate-300">by {book.author}</p>
+        <div className="flex flex-wrap items-center gap-4">
+          <ViewModeToggle mode={viewMode} onChange={handleViewModeChange} />
+          <div className="text-right">
+            <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">{book.title}</h1>
+            <p className="text-sm text-slate-600 dark:text-slate-300">by {book.author}</p>
+          </div>
         </div>
       </header>
 
       <PageFlip
         pages={book.pages}
         pageIndex={pageIndex}
-        onPageChange={setPageIndex}
+        onPageChange={commitPage}
         ariaLabel={`${book.title} spread`}
+        mode={viewMode}
       />
 
       <ReaderControls
         pageIndex={pageIndex}
         totalPages={totalPages}
-        onPageChange={setPageIndex}
+        onPageChange={commitPage}
+        step={step}
       />
 
       <div className="mt-4 flex justify-center">
         <PageJumpInput
           pageIndex={pageIndex}
           totalPages={totalPages}
-          onPageChange={setPageIndex}
+          onPageChange={commitPage}
+          step={step}
         />
       </div>
 
       <ThumbnailScrubber
         pages={book.pages}
         pageIndex={pageIndex}
-        onPageChange={setPageIndex}
+        onPageChange={commitPage}
       />
 
       <footer className="mt-6 text-center text-xs uppercase tracking-[0.2em] text-slate-600 dark:text-slate-400">

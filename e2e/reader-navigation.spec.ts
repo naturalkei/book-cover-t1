@@ -1,7 +1,10 @@
 import { expect, test } from '@playwright/test'
 
+import { seedViewMode } from './helpers'
+
 test.describe('reader navigation', () => {
   test('clicks through every page of a book using the next button', async ({ page }) => {
+    await seedViewMode(page, 'single')
     await page.goto('/')
 
     const firstCard = page.getByRole('list', { name: /book gallery/i }).getByRole('link').first()

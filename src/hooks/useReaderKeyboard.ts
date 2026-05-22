@@ -5,6 +5,7 @@ interface UseReaderKeyboardOptions {
   totalPages: number
   onPageChange: (next: number) => void
   onExit?: () => void
+  step?: number
 }
 
 const isTypingInForm = (target: EventTarget | null): boolean => {
@@ -22,23 +23,28 @@ export function useReaderKeyboard({
   totalPages,
   onPageChange,
   onExit,
+  step = 1,
 }: UseReaderKeyboardOptions): void {
   useEffect(() => {
+    const safeStep = Math.max(1, Math.floor(step))
+    const lastIndex = Math.max(0, totalPages - 1)
+    const lastStart = lastIndex - (lastIndex % safeStep)
+
     const handler = (event: KeyboardEvent) => {
       if (isTypingInForm(event.target)) return
       if (event.metaKey || event.ctrlKey || event.altKey) return
 
       switch (event.key) {
         case 'ArrowLeft':
-          if (pageIndex > 0) {
+          if (pageIndex >= safeStep) {
             event.preventDefault()
-            onPageChange(pageIndex - 1)
+            onPageChange(pageIndex - safeStep)
           }
           break
         case 'ArrowRight':
-          if (pageIndex < totalPages - 1) {
+          if (pageIndex + safeStep < totalPages) {
             event.preventDefault()
-            onPageChange(pageIndex + 1)
+            onPageChange(pageIndex + safeStep)
           }
           break
         case 'Home':
@@ -48,9 +54,9 @@ export function useReaderKeyboard({
           }
           break
         case 'End':
-          if (pageIndex !== totalPages - 1) {
+          if (pageIndex !== lastStart) {
             event.preventDefault()
-            onPageChange(totalPages - 1)
+            onPageChange(lastStart)
           }
           break
         case 'Escape':
@@ -65,5 +71,5 @@ export function useReaderKeyboard({
     }
     document.addEventListener('keydown', handler)
     return () => document.removeEventListener('keydown', handler)
-  }, [pageIndex, totalPages, onPageChange, onExit])
+  }, [pageIndex, totalPages, onPageChange, onExit, step])
 }
