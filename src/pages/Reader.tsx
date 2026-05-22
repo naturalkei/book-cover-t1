@@ -2,6 +2,7 @@ import { ArrowLeft } from 'lucide-react'
 import { useCallback, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 
+import FlipPresetPicker from '@/components/reader/FlipPresetPicker'
 import NotFound from '@/components/NotFound'
 import PageFlip from '@/components/reader/PageFlip'
 import PageJumpInput from '@/components/reader/PageJumpInput'
@@ -9,6 +10,7 @@ import ReaderControls from '@/components/reader/ReaderControls'
 import ThumbnailScrubber from '@/components/reader/ThumbnailScrubber'
 import ViewModeToggle from '@/components/reader/ViewModeToggle'
 import { getBookById } from '@/data/books'
+import { useFlipPreset } from '@/hooks/useFlipPreset'
 import { useReaderKeyboard } from '@/hooks/useReaderKeyboard'
 import { snapToStep, stepForMode, useViewMode, type ViewMode } from '@/hooks/useViewMode'
 
@@ -18,6 +20,7 @@ export default function Reader() {
   const book = id ? getBookById(id) : undefined
 
   const { viewMode, setViewMode } = useViewMode()
+  const { preset, effectivePreset, setPreset, reducedMotionOverride } = useFlipPreset()
   const step = stepForMode(viewMode)
 
   const [pageIndex, setPageIndex] = useState(0)
@@ -91,6 +94,7 @@ export default function Reader() {
         onPageChange={commitPage}
         ariaLabel={`${book.title} spread`}
         mode={viewMode}
+        presetId={effectivePreset}
       />
 
       <ReaderControls
@@ -113,6 +117,13 @@ export default function Reader() {
         pages={book.pages}
         pageIndex={pageIndex}
         onPageChange={commitPage}
+      />
+
+      <FlipPresetPicker
+        value={preset}
+        effectiveValue={effectivePreset}
+        onChange={setPreset}
+        locked={reducedMotionOverride}
       />
 
       <footer className="mt-6 text-center text-xs uppercase tracking-[0.2em] text-slate-600 dark:text-slate-400">
