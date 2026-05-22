@@ -126,17 +126,32 @@ export default function PageFlip({
 
       {outgoing
         ? (
-          <OutgoingLayer
-            key={`outgoing-${outgoing.index}-${outgoing.direction}`}
-            pages={pages}
-            index={outgoing.index}
-            mode={mode}
-            coverAlone={isCoverPage(outgoing.index)}
-            direction={outgoing.direction as FlipDirection}
-            duration={duration}
-            presetId={presetId}
-            roundClass={innerRoundClass}
-          />
+          shouldUseSpreadLeaf(mode, outgoing.index, safeIndex, isCoverPage)
+            ? (
+              <OutgoingSpreadLeaf
+                key={`spread-${outgoing.index}-${safeIndex}-${outgoing.direction}`}
+                pages={pages}
+                fromIndex={outgoing.index}
+                toIndex={safeIndex}
+                direction={outgoing.direction as FlipDirection}
+                duration={duration}
+                presetId={presetId}
+                roundClass={innerRoundClass}
+              />
+            )
+            : (
+              <OutgoingLayer
+                key={`outgoing-${outgoing.index}-${outgoing.direction}`}
+                pages={pages}
+                index={outgoing.index}
+                mode={mode}
+                coverAlone={isCoverPage(outgoing.index)}
+                direction={outgoing.direction as FlipDirection}
+                duration={duration}
+                presetId={presetId}
+                roundClass={innerRoundClass}
+              />
+            )
         )
         : null}
 
@@ -403,6 +418,134 @@ function OutgoingLayer({
           <div aria-hidden="true" className="h-full w-1/2 bg-slate-100 dark:bg-slate-950/40" />
         )}
     </div>
+  )
+}
+
+const shouldUseSpreadLeaf = (
+  mode: ViewMode,
+  outgoingIndex: number,
+  currentIndex: number,
+  isCoverPage: (index: number) => boolean,
+): boolean => {
+  if (mode !== 'spread') return false
+  if (isCoverPage(outgoingIndex)) return false
+  if (isCoverPage(currentIndex)) return false
+  return true
+}
+
+interface OutgoingSpreadLeafProps {
+  pages: string[]
+  fromIndex: number
+  toIndex: number
+  direction: FlipDirection
+  duration: number
+  presetId: FlipPresetId
+  roundClass: string
+}
+
+function OutgoingSpreadLeaf({
+  pages,
+  fromIndex,
+  toIndex,
+  direction,
+  duration,
+  presetId,
+  roundClass,
+}: OutgoingSpreadLeafProps) {
+  const frames: FlipFrames = getFlipPreset(presetId).build(direction, duration, 'spread')
+  const [phase, setPhase] = useState<'initial' | 'final'>('initial')
+
+  useEffect(() => {
+    let cancelled = false
+    let inner = 0
+    const outer = requestAnimationFrame(() => {
+      inner = requestAnimationFrame(() => {
+        if (!cancelled) setPhase('final')
+      })
+    })
+    return () => {
+      cancelled = true
+      cancelAnimationFrame(outer)
+      cancelAnimationFrame(inner)
+    }
+  }, [])
+
+  const leafStyle: React.CSSProperties = phase === 'initial' ? frames.initial : frames.final
+  const isForward = direction === 'forward'
+
+  const frontSrc = isForward ? pages[fromIndex + 1] : pages[fromIndex]
+  const backSrc = isForward ? pages[toIndex] : pages[toIndex + 1]
+  const phantomSrc = isForward ? pages[fromIndex] : pages[fromIndex + 1]
+
+  const leafSidePosition = isForward ? 'right-0' : 'left-0'
+  const phantomSidePosition = isForward ? 'left-0' : 'right-0'
+
+  return (
+    <>
+      {phantomSrc
+        ? (
+          <div
+            aria-hidden="true"
+            data-testid="page-flip-phantom"
+            className={[
+              'absolute inset-y-0 w-1/2 overflow-hidden',
+              phantomSidePosition,
+              roundClass,
+            ].filter(Boolean).join(' ')}
+          >
+            <img
+              src={phantomSrc}
+              alt=""
+              aria-hidden="true"
+              decoding="async"
+              className="h-full w-full object-cover"
+            />
+          </div>
+        )
+        : null}
+
+      <div
+        aria-hidden="true"
+        data-testid="page-flip-outgoing"
+        data-flip-phase={phase}
+        className={[
+          'absolute inset-y-0 w-1/2 overflow-hidden will-change-transform',
+          leafSidePosition,
+          roundClass,
+        ].filter(Boolean).join(' ')}
+        style={{ ...leafStyle, transformStyle: 'preserve-3d' }}
+      >
+        {frontSrc
+          ? (
+            <img
+              src={frontSrc}
+              alt=""
+              aria-hidden="true"
+              decoding="async"
+              data-testid="page-flip-outgoing-front"
+              className="absolute inset-0 h-full w-full object-cover"
+              style={{ backfaceVisibility: 'hidden' }}
+            />
+          )
+          : null}
+        {backSrc
+          ? (
+            <img
+              src={backSrc}
+              alt=""
+              aria-hidden="true"
+              decoding="async"
+              data-testid="page-flip-outgoing-back"
+              className="absolute inset-0 h-full w-full object-cover"
+              style={{
+                backfaceVisibility: 'hidden',
+                transform: 'rotateY(180deg)',
+              }}
+            />
+          )
+          : null}
+      </div>
+    </>
   )
 }
 
