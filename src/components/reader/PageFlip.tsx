@@ -36,11 +36,12 @@ export default function PageFlip({
   }, [safeIndex, duration])
 
   useEffect(() => {
-    const neighbors = [safeIndex - 1, safeIndex + 1]
+    const neighbors = [safeIndex - 2, safeIndex - 1, safeIndex + 1, safeIndex + 2]
     for (const i of neighbors) {
       const src = pages[i]
       if (!src) continue
       const img = new window.Image()
+      img.decoding = 'async'
       img.src = src
     }
   }, [safeIndex, pages])
@@ -81,6 +82,10 @@ export default function PageFlip({
         key={`page-${safeIndex}`}
         src={pages[safeIndex]}
         alt={`Page ${safeIndex + 1}`}
+        loading="eager"
+        decoding="async"
+        fetchPriority="high"
+        data-testid="page-flip-current"
         className="absolute inset-0 h-full w-full rounded-2xl object-cover"
         style={reducedMotion
           ? { transition: `opacity ${duration}ms ease-in-out`, opacity: outgoing ? 0.4 : 1 }
@@ -94,6 +99,7 @@ export default function PageFlip({
             src={pages[outgoing.index]}
             alt=""
             aria-hidden="true"
+            decoding="async"
             data-testid="page-flip-outgoing"
             className="absolute inset-0 h-full w-full rounded-2xl object-cover will-change-transform"
             style={{
