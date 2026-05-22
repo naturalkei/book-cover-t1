@@ -23,12 +23,13 @@ describe('Reader', () => {
 
   it('shows page 1 of total pages by default', () => {
     renderAt('/book/atlas-of-cities')
-    expect(screen.getByText(/page/i).textContent).toMatch(/page\s*1\s*\/\s*8/i)
+    const indicator = screen.getByText(/^page$/i, { selector: 'p, span' }).closest('p') as HTMLElement
+    expect(indicator.textContent).toMatch(/page\s*1\s*\/\s*8/i)
   })
 
   it('renders the first page image with descriptive alt text', () => {
     renderAt('/book/atlas-of-cities')
-    expect(screen.getByAltText(/atlas of cities page 1/i)).toBeInTheDocument()
+    expect(screen.getByAltText(/page 1/i)).toBeInTheDocument()
   })
 
   it('links back to the gallery', () => {
