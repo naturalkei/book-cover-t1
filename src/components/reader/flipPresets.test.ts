@@ -81,6 +81,27 @@ describe('flipPresets registry', () => {
     expect(final.transform).toBe('translateX(-100%)')
   })
 
+  it('spread-mode rotational presets pivot at the spine and keep the leaf opaque (so the back face shows)', () => {
+    const classic = FLIP_PRESET_LIST.find(p => p.id === 'classic')!
+    const forward = classic.build('forward', 700, 'spread')
+    expect(forward.initial.transformOrigin).toBe('left center')
+    expect(forward.final.transformOrigin).toBe('left center')
+    expect(String(forward.final.transform)).toContain('rotateY(-180deg)')
+    expect(forward.final.opacity).toBe(1)
+
+    const backward = classic.build('backward', 700, 'spread')
+    expect(backward.initial.transformOrigin).toBe('right center')
+    expect(String(backward.final.transform)).toContain('rotateY(180deg)')
+  })
+
+  it('spread-mode slide preset slides the leaf off the flipping side (not toward the spine)', () => {
+    const slide = FLIP_PRESET_LIST.find(p => p.id === 'slide')!
+    const forward = slide.build('forward', 700, 'spread')
+    expect(forward.final.transform).toBe('translateX(110%)')
+    const backward = slide.build('backward', 700, 'spread')
+    expect(backward.final.transform).toBe('translateX(-110%)')
+  })
+
   it('getFlipPreset returns the requested entry and falls back to default for unknown ids', () => {
     expect(getFlipPreset('curl').id).toBe('curl')
     // @ts-expect-error — exercising the fallback for an unknown id

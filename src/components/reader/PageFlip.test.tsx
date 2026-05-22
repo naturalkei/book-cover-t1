@@ -172,6 +172,38 @@ describe('PageFlip', () => {
       expect(screen.queryByTestId('page-flip-current-right')).toBeNull()
       expect(screen.getByTestId('page-flip-current-right-empty')).toBeInTheDocument()
     })
+
+    it('spread-mode outgoing leaf is a single half-width two-faced leaf, not the whole spread', async () => {
+      const { rerender } = render(<PageFlip pages={PAGES} pageIndex={0} mode="spread" />)
+      rerender(<PageFlip pages={PAGES} pageIndex={2} mode="spread" />)
+      const outgoing = screen.getByTestId('page-flip-outgoing')
+      expect(outgoing.className).toMatch(/\bw-1\/2\b/)
+      // Front face shows the OLD right page (pages[1]); back face shows the NEW left page (pages[2]).
+      expect(screen.getByTestId('page-flip-outgoing-front')).toHaveAttribute('src', '/p/b.svg')
+      expect(screen.getByTestId('page-flip-outgoing-back')).toHaveAttribute('src', '/p/c.svg')
+      // A phantom half-width layer on the OPPOSITE side covers the old left page until the leaf back arrives.
+      const phantom = screen.getByTestId('page-flip-phantom')
+      expect(phantom.className).toMatch(/\bw-1\/2\b/)
+      expect(phantom.querySelector('img')).toHaveAttribute('src', '/p/a.svg')
+    })
+
+    it('spread-mode forward leaf sits on the right half and pivots at the left (spine)', () => {
+      const { rerender } = render(<PageFlip pages={PAGES} pageIndex={0} mode="spread" />)
+      rerender(<PageFlip pages={PAGES} pageIndex={2} mode="spread" />)
+      const outgoing = screen.getByTestId('page-flip-outgoing')
+      expect(outgoing.className).toMatch(/\bright-0\b/)
+      expect(screen.getByTestId('page-flip-phantom').className).toMatch(/\bleft-0\b/)
+      expect(outgoing).toHaveStyle({ transformOrigin: 'left center' })
+    })
+
+    it('spread-mode backward leaf sits on the left half and pivots at the right (spine)', () => {
+      const { rerender } = render(<PageFlip pages={PAGES} pageIndex={2} mode="spread" />)
+      rerender(<PageFlip pages={PAGES} pageIndex={0} mode="spread" />)
+      const outgoing = screen.getByTestId('page-flip-outgoing')
+      expect(outgoing.className).toMatch(/\bleft-0\b/)
+      expect(screen.getByTestId('page-flip-phantom').className).toMatch(/\bright-0\b/)
+      expect(outgoing).toHaveStyle({ transformOrigin: 'right center' })
+    })
   })
 
   describe('rounded-corners toggle', () => {
