@@ -1,12 +1,16 @@
 import { ArrowLeft } from 'lucide-react'
+import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 
 import NotFound from '@/components/NotFound'
+import PageFlip from '@/components/reader/PageFlip'
 import { getBookById } from '@/data/books'
 
 export default function Reader() {
   const { id } = useParams<{ id: string }>()
   const book = id ? getBookById(id) : undefined
+
+  const [pageIndex, setPageIndex] = useState(0)
 
   if (!book) {
     return (
@@ -18,8 +22,6 @@ export default function Reader() {
   }
 
   const totalPages = book.pages.length
-  const currentPage = 0
-  const currentSrc = book.pages[currentPage]
 
   return (
     <section
@@ -41,25 +43,21 @@ export default function Reader() {
         </div>
       </header>
 
-      <div
-        aria-label="Book spread"
-        className="relative mx-auto aspect-[3/4] w-full max-w-2xl overflow-hidden rounded-2xl bg-slate-900 shadow-[0_40px_80px_-30px_rgba(0,0,0,0.6)] ring-1 ring-white/5"
-      >
-        <img
-          src={currentSrc}
-          alt={`${book.title} page ${currentPage + 1}`}
-          className="h-full w-full object-cover"
-        />
-      </div>
+      <PageFlip
+        pages={book.pages}
+        pageIndex={pageIndex}
+        onPageChange={setPageIndex}
+        ariaLabel={`${book.title} spread`}
+      />
 
       <footer className="mt-8 flex items-center justify-between text-sm text-slate-400">
         <p>
-          Page <span className="text-white">{currentPage + 1}</span>
+          Page <span className="text-white">{pageIndex + 1}</span>
           <span className="px-1 text-slate-600">/</span>
           <span>{totalPages}</span>
         </p>
         <p className="text-xs uppercase tracking-[0.2em] text-slate-500">
-          flip controls land in M2 / M3
+          tap the page sides to flip · prev/next controls land in #9
         </p>
       </footer>
     </section>
