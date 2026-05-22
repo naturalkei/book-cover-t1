@@ -45,6 +45,9 @@ test.describe('accessibility audit', () => {
   })
 
   test('reader is fully keyboard navigable end-to-end', async ({ page }) => {
+    await page.addInitScript(([key, value]) => {
+      window.localStorage.setItem(key, value)
+    }, ['book-flip-showcase:view-mode', 'single'] as const)
     await page.goto('/')
     await page.getByRole('list', { name: /book gallery/i }).getByRole('link').first().click()
 
@@ -73,6 +76,9 @@ test.describe('reduced motion', () => {
   test('uses the reduced-motion fallback on PageFlip when the user prefers reduce', async ({ browser }) => {
     const context = await browser.newContext({ reducedMotion: 'reduce' })
     const page = await context.newPage()
+    await page.addInitScript(([key, value]) => {
+      window.localStorage.setItem(key, value)
+    }, ['book-flip-showcase:view-mode', 'single'] as const)
     await page.goto('/')
     await page.getByRole('list', { name: /book gallery/i }).getByRole('link').first().click()
 

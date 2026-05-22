@@ -139,4 +139,38 @@ describe('PageFlip', () => {
     expect(current).toHaveAttribute('decoding', 'async')
     expect(current).toHaveAttribute('fetchpriority', 'high')
   })
+
+  describe('spread mode', () => {
+    it('renders both left and right page images side by side', () => {
+      render(<PageFlip pages={PAGES} pageIndex={0} mode="spread" />)
+      expect(screen.getByTestId('page-flip')).toHaveAttribute('data-view-mode', 'spread')
+      expect(screen.getByTestId('page-flip-current')).toHaveAttribute('src', '/p/a.svg')
+      expect(screen.getByTestId('page-flip-current-right')).toHaveAttribute('src', '/p/b.svg')
+      expect(screen.getByTestId('page-flip-current-spread')).toBeInTheDocument()
+    })
+
+    it('clicking the right half advances by 2', () => {
+      const onPageChange = vi.fn()
+      render(<PageFlip pages={PAGES} pageIndex={0} mode="spread" onPageChange={onPageChange} />)
+      const board = screen.getByTestId('page-flip')
+      setRectFor(board)
+      fireEvent.click(board, { clientX: 500 })
+      expect(onPageChange).toHaveBeenCalledWith(2)
+    })
+
+    it('clicking the left half retreats by 2', () => {
+      const onPageChange = vi.fn()
+      render(<PageFlip pages={PAGES} pageIndex={2} mode="spread" onPageChange={onPageChange} />)
+      const board = screen.getByTestId('page-flip')
+      setRectFor(board)
+      fireEvent.click(board, { clientX: 100 })
+      expect(onPageChange).toHaveBeenCalledWith(0)
+    })
+
+    it('renders an empty right slot when there is no trailing page', () => {
+      render(<PageFlip pages={PAGES} pageIndex={4} mode="spread" />)
+      expect(screen.queryByTestId('page-flip-current-right')).toBeNull()
+      expect(screen.getByTestId('page-flip-current-right-empty')).toBeInTheDocument()
+    })
+  })
 })

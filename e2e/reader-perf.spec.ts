@@ -1,12 +1,10 @@
-import { expect, test, type Page } from '@playwright/test'
+import { expect, test } from '@playwright/test'
 
-const openFirstBook = async (page: Page) => {
-  await page.goto('/')
-  await page.getByRole('list', { name: /book gallery/i }).getByRole('link').first().click()
-}
+import { openFirstBook, seedViewMode } from './helpers'
 
 test.describe('reader perf', () => {
-  test('renders the current spread with high-priority loading hints', async ({ page }) => {
+  test('renders the current page with high-priority loading hints', async ({ page }) => {
+    await seedViewMode(page, 'single')
     await openFirstBook(page)
     const current = page.getByTestId('page-flip-current')
     await expect(current).toBeVisible()
@@ -16,6 +14,7 @@ test.describe('reader perf', () => {
   })
 
   test('reader page module is fetched lazily, not on gallery load', async ({ page }) => {
+    await seedViewMode(page, 'single')
     const readerRequests: string[] = []
     page.on('request', (request) => {
       const url = request.url()
@@ -34,6 +33,7 @@ test.describe('reader perf', () => {
   })
 
   test('only one DOM image is rendered for the page surface at rest', async ({ page }) => {
+    await seedViewMode(page, 'single')
     await openFirstBook(page)
     const flip = page.getByTestId('page-flip')
     await expect(flip).toBeVisible()
