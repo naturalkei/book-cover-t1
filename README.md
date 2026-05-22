@@ -179,6 +179,10 @@ Detailed conventions live in [`.cursor/rules/`](./.cursor/rules/):
 | `agent-workflow.mdc` | Mandatory loop for every requirement. |
 | `testing.mdc` | Vitest and Playwright conventions. |
 
+## Changelog
+
+Release history lives in [`CHANGELOG.md`](./CHANGELOG.md). v1.0.0 (2026-05-22) ships the full Foundation → Reader MVP → Advanced Navigation → Polish → Release scope: gallery, reader with 3D flip, page-jump, keyboard shortcuts, thumbnail scrubber, light/dark theme, reduced-motion + axe-clean a11y, lazy-loaded reader chunk, and a CI + Pages deploy pipeline.
+
 ## Agent Workflow
 
 Every requirement runs through this loop end-to-end:
