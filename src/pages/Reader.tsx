@@ -52,7 +52,7 @@ export default function Reader() {
 
         <div className="text-right">
           <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">{book.title}</h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400">by {book.author}</p>
+          <p className="text-sm text-slate-600 dark:text-slate-300">by {book.author}</p>
         </div>
       </header>
 
@@ -83,7 +83,7 @@ export default function Reader() {
         onPageChange={setPageIndex}
       />
 
-      <footer className="mt-6 text-center text-xs uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
+      <footer className="mt-6 text-center text-xs uppercase tracking-[0.2em] text-slate-600 dark:text-slate-400">
         tap a page side, use the controls, scrub, or jump to any page
       </footer>
     </section>

@@ -33,10 +33,7 @@ export default function BookCard({ book }: BookCardProps) {
           <h3 className="truncate text-lg font-semibold text-slate-900 dark:text-white">{book.title}</h3>
           <p className="truncate text-sm text-slate-500 dark:text-slate-400">{book.author}</p>
         </div>
-        <span
-          className="mt-1 inline-flex shrink-0 items-center rounded-full px-2 py-0.5 text-xs font-medium"
-          style={{ color: accent, backgroundColor: `${accent}1a` }}
-        >
+        <span className="mt-1 inline-flex shrink-0 items-center rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700 dark:bg-white/10 dark:text-slate-200">
           {book.pages.length} pages
         </span>
       </div>
