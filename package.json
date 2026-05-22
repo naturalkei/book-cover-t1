@@ -1,7 +1,7 @@
 {
-  "name": "vrt-starter-r1",
+  "name": "book-cover-t1",
   "version": "1.0.0",
-  "description": "Vite 7 + React 19 + Tailwind 4 Starter Template",
+  "description": "A book preview showcase site featuring a realistic paper page-flip animation experience",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
