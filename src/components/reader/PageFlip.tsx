@@ -3,7 +3,13 @@ import { useEffect, useRef, useState } from 'react'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import type { ViewMode } from '@/hooks/useViewMode'
 
-import { DEFAULT_FLIP_PRESET, getFlipPreset, type FlipPresetId } from './flipPresets'
+import {
+  DEFAULT_FLIP_PRESET,
+  getFlipPreset,
+  type FlipDirection,
+  type FlipFrames,
+  type FlipPresetId,
+} from './flipPresets'
 
 interface PageFlipProps {
   pages: string[]
@@ -14,8 +20,6 @@ interface PageFlipProps {
   mode?: ViewMode
   presetId?: FlipPresetId
 }
-
-type FlipDirection = 'forward' | 'backward' | null
 
 export default function PageFlip({
   pages,
@@ -95,9 +99,8 @@ export default function PageFlip({
         pages={pages}
         index={safeIndex}
         mode={mode}
-        reducedMotion={reducedMotion}
-        duration={duration}
-        outgoing={!!outgoing}
+        outgoingExists={!!outgoing}
+        staticStyle={staticStyle(reducedMotion, !!outgoing, duration)}
         testIdPrefix="page-flip-current"
         loading="eager"
         fetchPriority="high"
@@ -105,17 +108,14 @@ export default function PageFlip({
 
       {outgoing
         ? (
-          <PageSurface
+          <OutgoingLayer
             key={`outgoing-${outgoing.index}-${outgoing.direction}`}
             pages={pages}
             index={outgoing.index}
             mode={mode}
-            reducedMotion={reducedMotion}
+            direction={outgoing.direction as FlipDirection}
             duration={duration}
-            outgoing
-            outgoingDirection={outgoing.direction}
             presetId={presetId}
-            testIdPrefix="page-flip-outgoing"
           />
         )
         : null}
@@ -145,15 +145,23 @@ export default function PageFlip({
   )
 }
 
+const staticStyle = (
+  reducedMotion: boolean,
+  outgoingExists: boolean,
+  duration: number,
+): React.CSSProperties => {
+  if (reducedMotion) {
+    return { transition: `opacity ${duration}ms ease-in-out`, opacity: outgoingExists ? 0.4 : 1 }
+  }
+  return { backfaceVisibility: 'hidden' }
+}
+
 interface PageSurfaceProps {
   pages: string[]
   index: number
   mode: ViewMode
-  reducedMotion: boolean
-  duration: number
-  outgoing: boolean
-  outgoingDirection?: FlipDirection
-  presetId?: FlipPresetId
+  outgoingExists: boolean
+  staticStyle: React.CSSProperties
   testIdPrefix: string
   loading?: 'eager' | 'lazy'
   fetchPriority?: 'high' | 'low' | 'auto'
@@ -163,39 +171,24 @@ function PageSurface({
   pages,
   index,
   mode,
-  reducedMotion,
-  duration,
-  outgoing,
-  outgoingDirection,
-  presetId,
+  staticStyle,
   testIdPrefix,
   loading = 'lazy',
   fetchPriority,
 }: PageSurfaceProps) {
-  const isLayer = outgoing && outgoingDirection !== undefined && outgoingDirection !== null
-  const baseStyle: React.CSSProperties = isLayer
-    ? getFlipPreset(presetId ?? DEFAULT_FLIP_PRESET).build(outgoingDirection as 'forward' | 'backward', duration)
-    : reducedMotion
-      ? { transition: `opacity ${duration}ms ease-in-out`, opacity: outgoing ? 0.4 : 1 }
-      : { backfaceVisibility: 'hidden' }
-
   if (mode === 'single') {
     const src = pages[index]
     return (
       <img
         key={`page-${index}`}
         src={src}
-        alt={isLayer ? '' : `Page ${index + 1}`}
-        aria-hidden={isLayer ? true : undefined}
+        alt={`Page ${index + 1}`}
         loading={loading}
         decoding="async"
         fetchPriority={fetchPriority}
         data-testid={testIdPrefix}
-        className={[
-          'absolute inset-0 h-full w-full rounded-2xl object-cover',
-          isLayer ? 'will-change-transform' : '',
-        ].filter(Boolean).join(' ')}
-        style={baseStyle}
+        className="absolute inset-0 h-full w-full rounded-2xl object-cover"
+        style={staticStyle}
       />
     )
   }
@@ -205,42 +198,124 @@ function PageSurface({
 
   return (
     <div
-      data-testid={isLayer ? undefined : `${testIdPrefix}-spread`}
-      aria-hidden={isLayer ? true : undefined}
-      className={[
-        'absolute inset-0 flex overflow-hidden rounded-2xl',
-        isLayer ? 'will-change-transform' : '',
-      ].filter(Boolean).join(' ')}
-      style={baseStyle}
+      data-testid={`${testIdPrefix}-spread`}
+      className="absolute inset-0 flex overflow-hidden rounded-2xl"
+      style={staticStyle}
     >
       <img
         src={leftSrc}
-        alt={isLayer ? '' : `Page ${index + 1}`}
-        aria-hidden={isLayer ? true : undefined}
+        alt={`Page ${index + 1}`}
         loading={loading}
         decoding="async"
         fetchPriority={fetchPriority}
-        data-testid={isLayer ? undefined : testIdPrefix}
+        data-testid={testIdPrefix}
         className="h-full w-1/2 object-cover"
       />
       {rightSrc
         ? (
           <img
             src={rightSrc}
-            alt={isLayer ? '' : `Page ${index + 2}`}
-            aria-hidden={isLayer ? true : undefined}
+            alt={`Page ${index + 2}`}
             loading={loading}
             decoding="async"
-            data-testid={isLayer ? undefined : `${testIdPrefix}-right`}
+            data-testid={`${testIdPrefix}-right`}
             className="h-full w-1/2 object-cover"
           />
         )
         : (
           <div
             aria-hidden="true"
-            data-testid={isLayer ? undefined : `${testIdPrefix}-right-empty`}
+            data-testid={`${testIdPrefix}-right-empty`}
             className="h-full w-1/2 bg-slate-100 dark:bg-slate-950/40"
           />
+        )}
+    </div>
+  )
+}
+
+interface OutgoingLayerProps {
+  pages: string[]
+  index: number
+  mode: ViewMode
+  direction: FlipDirection
+  duration: number
+  presetId: FlipPresetId
+}
+
+function OutgoingLayer({
+  pages,
+  index,
+  mode,
+  direction,
+  duration,
+  presetId,
+}: OutgoingLayerProps) {
+  const frames: FlipFrames = getFlipPreset(presetId).build(direction, duration)
+  const [phase, setPhase] = useState<'initial' | 'final'>('initial')
+
+  useEffect(() => {
+    let cancelled = false
+    let inner = 0
+    const outer = requestAnimationFrame(() => {
+      inner = requestAnimationFrame(() => {
+        if (!cancelled) setPhase('final')
+      })
+    })
+    return () => {
+      cancelled = true
+      cancelAnimationFrame(outer)
+      cancelAnimationFrame(inner)
+    }
+  }, [])
+
+  const style = phase === 'initial' ? frames.initial : frames.final
+
+  if (mode === 'single') {
+    const src = pages[index]
+    return (
+      <img
+        src={src}
+        alt=""
+        aria-hidden="true"
+        decoding="async"
+        data-testid="page-flip-outgoing"
+        data-flip-phase={phase}
+        className="absolute inset-0 h-full w-full rounded-2xl object-cover will-change-transform"
+        style={style}
+      />
+    )
+  }
+
+  const leftSrc = pages[index]
+  const rightSrc = pages[index + 1]
+
+  return (
+    <div
+      aria-hidden="true"
+      data-testid="page-flip-outgoing"
+      data-flip-phase={phase}
+      className="absolute inset-0 flex overflow-hidden rounded-2xl will-change-transform"
+      style={style}
+    >
+      <img
+        src={leftSrc}
+        alt=""
+        aria-hidden="true"
+        decoding="async"
+        className="h-full w-1/2 object-cover"
+      />
+      {rightSrc
+        ? (
+          <img
+            src={rightSrc}
+            alt=""
+            aria-hidden="true"
+            decoding="async"
+            className="h-full w-1/2 object-cover"
+          />
+        )
+        : (
+          <div aria-hidden="true" className="h-full w-1/2 bg-slate-100 dark:bg-slate-950/40" />
         )}
     </div>
   )
