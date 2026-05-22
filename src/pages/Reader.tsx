@@ -8,12 +8,14 @@ import NotFound from '@/components/NotFound'
 import PageFlip from '@/components/reader/PageFlip'
 import PageJumpInput from '@/components/reader/PageJumpInput'
 import ReaderControls from '@/components/reader/ReaderControls'
+import RoundedToggle from '@/components/reader/RoundedToggle'
 import ThumbnailScrubber from '@/components/reader/ThumbnailScrubber'
 import ViewModeToggle from '@/components/reader/ViewModeToggle'
 import { getBookById } from '@/data/books'
 import { useCoverMode, type CoverMode } from '@/hooks/useCoverMode'
 import { useFlipPreset } from '@/hooks/useFlipPreset'
 import { useReaderKeyboard } from '@/hooks/useReaderKeyboard'
+import { useRoundedCorners } from '@/hooks/useRoundedCorners'
 import {
   effectiveStep,
   isCoverAlone as computeIsCoverAlone,
@@ -29,6 +31,7 @@ export default function Reader() {
 
   const { viewMode, setViewMode } = useViewMode()
   const { coverMode, setCoverMode } = useCoverMode()
+  const { rounded, setRounded } = useRoundedCorners()
   const { preset, effectivePreset, setPreset, reducedMotionOverride } = useFlipPreset()
 
   const snap = useCallback(
@@ -108,6 +111,7 @@ export default function Reader() {
             onChange={handleCoverModeChange}
             disabled={viewMode !== 'spread'}
           />
+          <RoundedToggle rounded={rounded} onChange={setRounded} />
           <div className="text-right">
             <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">{book.title}</h1>
             <p className="text-sm text-slate-600 dark:text-slate-300">by {book.author}</p>
@@ -124,6 +128,7 @@ export default function Reader() {
         coverMode={coverMode}
         presetId={effectivePreset}
         step={step}
+        rounded={rounded}
       />
 
       <ReaderControls

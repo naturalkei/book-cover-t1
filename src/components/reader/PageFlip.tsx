@@ -22,6 +22,7 @@ interface PageFlipProps {
   coverMode?: CoverMode
   presetId?: FlipPresetId
   step?: 1 | 2
+  rounded?: boolean
 }
 
 export default function PageFlip({
@@ -34,6 +35,7 @@ export default function PageFlip({
   coverMode = 'spread',
   presetId = DEFAULT_FLIP_PRESET,
   step: stepProp,
+  rounded = false,
 }: PageFlipProps) {
   const isCoverPage = (index: number): boolean =>
     mode === 'spread' && coverMode === 'single' && index === 0
@@ -41,6 +43,8 @@ export default function PageFlip({
   const defaultStep: 1 | 2 = mode === 'spread' ? (isCoverPage(safeIndex) ? 1 : 2) : 1
   const step: 1 | 2 = stepProp ?? defaultStep
   const coverAlone = isCoverPage(safeIndex)
+  const roundClass = rounded ? 'rounded-2xl' : ''
+  const innerRoundClass = rounded ? 'rounded-2xl' : ''
   const [outgoing, setOutgoing] = useState<{ index: number; direction: FlipDirection } | null>(null)
   const lastIndexRef = useRef(safeIndex)
   const reducedMotion = useReducedMotion()
@@ -99,10 +103,12 @@ export default function PageFlip({
       tabIndex={0}
       onClick={handleClick}
       onKeyDown={handleKeyDown}
+      data-rounded={rounded ? 'true' : 'false'}
       className={[
-        'relative mx-auto w-full select-none rounded-2xl bg-slate-200 shadow-[0_40px_80px_-30px_rgba(0,0,0,0.4)] ring-1 ring-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-50 dark:bg-slate-900 dark:shadow-[0_40px_80px_-30px_rgba(0,0,0,0.6)] dark:ring-white/5 dark:focus-visible:ring-sky-400 dark:focus-visible:ring-offset-slate-950',
+        'relative mx-auto w-full select-none bg-slate-200 shadow-[0_40px_80px_-30px_rgba(0,0,0,0.4)] ring-1 ring-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-50 dark:bg-slate-900 dark:shadow-[0_40px_80px_-30px_rgba(0,0,0,0.6)] dark:ring-white/5 dark:focus-visible:ring-sky-400 dark:focus-visible:ring-offset-slate-950',
+        roundClass,
         mode === 'spread' ? 'aspect-[3/2] max-w-4xl' : 'aspect-[3/4] max-w-2xl',
-      ].join(' ')}
+      ].filter(Boolean).join(' ')}
       style={{ perspective: '2400px' }}
     >
       <PageSurface
@@ -115,6 +121,7 @@ export default function PageFlip({
         testIdPrefix="page-flip-current"
         loading="eager"
         fetchPriority="high"
+        roundClass={innerRoundClass}
       />
 
       {outgoing
@@ -128,6 +135,7 @@ export default function PageFlip({
             direction={outgoing.direction as FlipDirection}
             duration={duration}
             presetId={presetId}
+            roundClass={innerRoundClass}
           />
         )
         : null}
@@ -178,6 +186,7 @@ interface PageSurfaceProps {
   testIdPrefix: string
   loading?: 'eager' | 'lazy'
   fetchPriority?: 'high' | 'low' | 'auto'
+  roundClass: string
 }
 
 function PageSurface({
@@ -189,6 +198,7 @@ function PageSurface({
   testIdPrefix,
   loading = 'lazy',
   fetchPriority,
+  roundClass,
 }: PageSurfaceProps) {
   if (mode === 'single') {
     const src = pages[index]
@@ -201,7 +211,7 @@ function PageSurface({
         decoding="async"
         fetchPriority={fetchPriority}
         data-testid={testIdPrefix}
-        className="absolute inset-0 h-full w-full rounded-2xl object-cover"
+        className={['absolute inset-0 h-full w-full object-cover', roundClass].filter(Boolean).join(' ')}
         style={staticStyle}
       />
     )
@@ -212,7 +222,7 @@ function PageSurface({
     return (
       <div
         data-testid={`${testIdPrefix}-spread`}
-        className="absolute inset-0 flex overflow-hidden rounded-2xl"
+        className={['absolute inset-0 flex overflow-hidden', roundClass].filter(Boolean).join(' ')}
         style={staticStyle}
       >
         <div
@@ -239,7 +249,7 @@ function PageSurface({
   return (
     <div
       data-testid={`${testIdPrefix}-spread`}
-      className="absolute inset-0 flex overflow-hidden rounded-2xl"
+      className={['absolute inset-0 flex overflow-hidden', roundClass].filter(Boolean).join(' ')}
       style={staticStyle}
     >
       <img
@@ -281,6 +291,7 @@ interface OutgoingLayerProps {
   direction: FlipDirection
   duration: number
   presetId: FlipPresetId
+  roundClass: string
 }
 
 function OutgoingLayer({
@@ -291,6 +302,7 @@ function OutgoingLayer({
   direction,
   duration,
   presetId,
+  roundClass,
 }: OutgoingLayerProps) {
   const frames: FlipFrames = getFlipPreset(presetId).build(direction, duration)
   const [phase, setPhase] = useState<'initial' | 'final'>('initial')
@@ -322,7 +334,10 @@ function OutgoingLayer({
         decoding="async"
         data-testid="page-flip-outgoing"
         data-flip-phase={phase}
-        className="absolute inset-0 h-full w-full rounded-2xl object-cover will-change-transform"
+        className={[
+          'absolute inset-0 h-full w-full object-cover will-change-transform',
+          roundClass,
+        ].filter(Boolean).join(' ')}
         style={style}
       />
     )
@@ -335,7 +350,10 @@ function OutgoingLayer({
         aria-hidden="true"
         data-testid="page-flip-outgoing"
         data-flip-phase={phase}
-        className="absolute inset-0 flex overflow-hidden rounded-2xl will-change-transform"
+        className={[
+          'absolute inset-0 flex overflow-hidden will-change-transform',
+          roundClass,
+        ].filter(Boolean).join(' ')}
         style={style}
       >
         <div aria-hidden="true" className="h-full w-1/2 bg-slate-100 dark:bg-slate-950/40" />
@@ -358,7 +376,10 @@ function OutgoingLayer({
       aria-hidden="true"
       data-testid="page-flip-outgoing"
       data-flip-phase={phase}
-      className="absolute inset-0 flex overflow-hidden rounded-2xl will-change-transform"
+      className={[
+        'absolute inset-0 flex overflow-hidden will-change-transform',
+        roundClass,
+      ].filter(Boolean).join(' ')}
       style={style}
     >
       <img

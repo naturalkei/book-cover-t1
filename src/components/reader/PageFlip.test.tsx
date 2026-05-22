@@ -174,6 +174,26 @@ describe('PageFlip', () => {
     })
   })
 
+  describe('rounded-corners toggle', () => {
+    it('defaults to sharp corners (no rounded-2xl class) for a real-book look', () => {
+      render(<PageFlip pages={PAGES} pageIndex={0} />)
+      const surface = screen.getByTestId('page-flip')
+      expect(surface).toHaveAttribute('data-rounded', 'false')
+      expect(surface.className).not.toMatch(/\brounded-2xl\b/)
+      const page = screen.getByTestId('page-flip-current')
+      expect(page.className).not.toMatch(/\brounded-2xl\b/)
+    })
+
+    it('paints rounded-2xl on the board and the page surface when rounded=true', () => {
+      render(<PageFlip pages={PAGES} pageIndex={0} rounded />)
+      const surface = screen.getByTestId('page-flip')
+      expect(surface).toHaveAttribute('data-rounded', 'true')
+      expect(surface.className).toMatch(/\brounded-2xl\b/)
+      const page = screen.getByTestId('page-flip-current')
+      expect(page.className).toMatch(/\brounded-2xl\b/)
+    })
+  })
+
   describe('cover-alone (coverMode=single in spread mode)', () => {
     it('renders only the cover on the right half with a blank left half', () => {
       render(<PageFlip pages={PAGES} pageIndex={0} mode="spread" coverMode="single" />)
