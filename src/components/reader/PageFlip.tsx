@@ -159,23 +159,6 @@ export default function PageFlip({
         aria-hidden="true"
         className="pointer-events-none absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-linear-to-b from-black/0 via-black/30 to-black/0"
       />
-
-      {isLeftEdge
-        ? null
-        : (
-          <span
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-y-0 left-0 w-12 bg-linear-to-r from-black/30 to-transparent"
-          />
-        )}
-      {isRightEdge
-        ? null
-        : (
-          <span
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-y-0 right-0 w-12 bg-linear-to-l from-black/30 to-transparent"
-          />
-        )}
     </div>
   )
 }
