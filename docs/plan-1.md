@@ -95,7 +95,7 @@ Keyboard map:
   - Literal constants → `UPPER_SNAKE_CASE` (e.g. `DEFAULT_FLIP_PRESET`)
   - Constant objects/arrays → `PascalCase` (e.g. `Books`, `FlipPresetList`)
   - Functions → camelCase with a verb prefix (e.g. `getBookById`, `snapPage`)
-- **Tailwind classes**: when a `className` string exceeds 80 characters, group with `clsx` across multiple lines (shared bundles live in `src/lib/class-names.ts`).
+- **Tailwind classes**: when a `className` string exceeds 60 characters, group with `clsx` across multiple lines (shared bundles live in `src/lib/class-names.ts`; see `CLASS_LINE_LIMIT`).
 - **Commit messages**: [Conventional Commits](https://www.conventionalcommits.org/) (`feat:`, `fix:`, `docs:`, `refactor:`, `chore:`, `test:`).
 - **Branching**: One branch per GitHub issue, named `<type>/<issue-id>-<short-slug>` (e.g. `feat/12-thumbnail-scrubber`).
 - **PRs**: Squash-merge by default. PR title mirrors the Conventional Commit summary and links the issue.

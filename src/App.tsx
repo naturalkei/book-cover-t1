@@ -1,3 +1,4 @@
+import clsx from 'clsx'
 import { lazy, Suspense } from 'react'
 import { Route, Routes } from 'react-router-dom'
 
@@ -32,7 +33,10 @@ function ReaderFallback() {
       role="status"
       aria-live="polite"
       data-testid="reader-loading"
-      className="mx-auto flex max-w-5xl items-center justify-center px-6 py-24 text-sm text-slate-700 dark:text-slate-300"
+      className={clsx(
+        'mx-auto flex max-w-5xl items-center justify-center',
+        'px-6 py-24 text-sm text-slate-700 dark:text-slate-300',
+      )}
     >
       Loading reader…
     </div>

@@ -1,4 +1,7 @@
+import clsx from 'clsx'
 import { useId, useState, type ChangeEvent, type FormEvent } from 'react'
+
+import { PageJumpForm } from '@/lib/class-names'
 
 interface IPageJumpInputProps {
   pageIndex: number
@@ -56,12 +59,15 @@ export default function PageJumpInput({
       aria-label="Jump to page"
       noValidate
       onSubmit={handleSubmit}
-      className={[
-        'inline-flex items-center gap-2 rounded-full bg-slate-200 px-3 py-1.5 text-sm text-slate-700 ring-1 ring-slate-300 dark:bg-white/5 dark:text-slate-200 dark:ring-white/5',
-        className,
-      ].filter(Boolean).join(' ')}
+      className={clsx(PageJumpForm, className)}
     >
-      <label htmlFor={inputId} className="text-xs uppercase tracking-[0.2em] text-slate-700 dark:text-slate-400">
+      <label
+        htmlFor={inputId}
+        className={clsx(
+          'text-xs uppercase tracking-[0.2em]',
+          'text-slate-700 dark:text-slate-400',
+        )}
+      >
         go to
       </label>
       <input
@@ -74,7 +80,11 @@ export default function PageJumpInput({
         onChange={handleChange}
         onBlur={() => commit(draft)}
         aria-label={`Page number, between 1 and ${totalPages}`}
-        className="w-14 appearance-none bg-transparent text-center tabular-nums text-slate-900 focus-visible:outline-none dark:text-slate-100"
+        className={clsx(
+          'w-14 appearance-none bg-transparent text-center',
+          'tabular-nums text-slate-900 focus-visible:outline-none',
+          'dark:text-slate-100',
+        )}
       />
       <span aria-hidden="true" className="text-slate-700 dark:text-slate-400">/ {totalPages}</span>
       <button type="submit" className="sr-only">go</button>

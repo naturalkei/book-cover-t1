@@ -1,3 +1,4 @@
+import clsx from 'clsx'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 import { BasePaginationButton } from '@/lib/class-names'
@@ -39,7 +40,10 @@ export default function ReaderControls({
 
       <span
         aria-live="polite"
-        className="min-w-[7ch] text-center text-sm tabular-nums text-slate-700 dark:text-slate-300"
+        className={clsx(
+          'min-w-[7ch] text-center text-sm tabular-nums',
+          'text-slate-700 dark:text-slate-300',
+        )}
       >
         <span data-testid="reader-current-page">{pageIndex + 1}</span>
         {showsRange

@@ -58,4 +58,4 @@ Run `pnpm lint` before committing. Use `pnpm lint:fix` to auto-fix style issues.
 
 ## Tailwind className
 
-When a class string exceeds **80 characters**, split with `clsx(...)` across multiple lines. Reusable bundles belong in `src/lib/class-names.ts`.
+When a class string exceeds **60 characters**, split with `clsx(...)` across multiple lines. Reusable bundles belong in `src/lib/class-names.ts` (`CLASS_LINE_LIMIT` constant).

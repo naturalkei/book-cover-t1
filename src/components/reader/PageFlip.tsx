@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { TCoverMode } from '@/hooks/cover-mode'
 import { useReducedMotion } from '@/hooks/reduced-motion'
 import type { TViewMode } from '@/hooks/view-mode'
-import { FocusRingOnSlate50 } from '@/lib/class-names'
+import { PageFlipSurface } from '@/lib/class-names'
 
 import {
   DEFAULT_FLIP_PRESET,
@@ -113,10 +113,7 @@ export default function PageFlip({
       onKeyDown={handleKeyDown}
       data-rounded={rounded ? 'true' : 'false'}
       className={clsx(
-        'relative mx-auto w-full select-none bg-slate-200',
-        'shadow-[0_40px_80px_-30px_rgba(0,0,0,0.4)] ring-1 ring-slate-200',
-        'dark:bg-slate-900 dark:shadow-[0_40px_80px_-30px_rgba(0,0,0,0.6)] dark:ring-white/5',
-        FocusRingOnSlate50,
+        PageFlipSurface,
         roundClass,
         mode === 'spread' ? 'aspect-[3/2] max-w-4xl' : 'aspect-[3/4] max-w-2xl',
       )}
@@ -179,7 +176,11 @@ export default function PageFlip({
 
       <span
         aria-hidden="true"
-        className="pointer-events-none absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-linear-to-b from-black/0 via-black/30 to-black/0"
+        className={clsx(
+          'pointer-events-none absolute inset-y-0 left-1/2 w-px',
+          '-translate-x-1/2',
+          'bg-linear-to-b from-black/0 via-black/30 to-black/0',
+        )}
       />
     </div>
   )
@@ -231,7 +232,7 @@ function PageSurface({
         decoding="async"
         fetchPriority={fetchPriority}
         data-testid={testIdPrefix}
-        className={['absolute inset-0 h-full w-full object-cover', roundClass].filter(Boolean).join(' ')}
+        className={clsx('absolute inset-0 h-full w-full object-cover', roundClass)}
         style={staticStyle}
       />
     )
@@ -242,7 +243,7 @@ function PageSurface({
     return (
       <div
         data-testid={`${testIdPrefix}-spread`}
-        className={['absolute inset-0 flex overflow-hidden', roundClass].filter(Boolean).join(' ')}
+        className={clsx('absolute inset-0 flex overflow-hidden', roundClass)}
         style={staticStyle}
       >
         <div
@@ -269,7 +270,7 @@ function PageSurface({
   return (
     <div
       data-testid={`${testIdPrefix}-spread`}
-      className={['absolute inset-0 flex overflow-hidden', roundClass].filter(Boolean).join(' ')}
+      className={clsx('absolute inset-0 flex overflow-hidden', roundClass)}
       style={staticStyle}
     >
       <img
@@ -354,10 +355,11 @@ function OutgoingLayer({
         decoding="async"
         data-testid="page-flip-outgoing"
         data-flip-phase={phase}
-        className={[
-          'absolute inset-0 h-full w-full object-cover will-change-transform',
+        className={clsx(
+          'absolute inset-0 h-full w-full object-cover',
+          'will-change-transform',
           roundClass,
-        ].filter(Boolean).join(' ')}
+        )}
         style={style}
       />
     )
@@ -370,10 +372,10 @@ function OutgoingLayer({
         aria-hidden="true"
         data-testid="page-flip-outgoing"
         data-flip-phase={phase}
-        className={[
+        className={clsx(
           'absolute inset-0 flex overflow-hidden will-change-transform',
           roundClass,
-        ].filter(Boolean).join(' ')}
+        )}
         style={style}
       >
         <div aria-hidden="true" className="h-full w-1/2 bg-slate-100 dark:bg-slate-950/40" />
@@ -396,10 +398,10 @@ function OutgoingLayer({
       aria-hidden="true"
       data-testid="page-flip-outgoing"
       data-flip-phase={phase}
-      className={[
+      className={clsx(
         'absolute inset-0 flex overflow-hidden will-change-transform',
         roundClass,
-      ].filter(Boolean).join(' ')}
+      )}
       style={style}
     >
       <img
@@ -492,11 +494,11 @@ function OutgoingSpreadLeaf({
           <div
             aria-hidden="true"
             data-testid="page-flip-phantom"
-            className={[
+            className={clsx(
               'absolute inset-y-0 w-1/2 overflow-hidden',
               phantomSidePosition,
               roundClass,
-            ].filter(Boolean).join(' ')}
+            )}
           >
             <img
               src={phantomSrc}
@@ -513,10 +515,10 @@ function OutgoingSpreadLeaf({
         aria-hidden="true"
         data-testid="page-flip-outgoing"
         data-flip-phase={phase}
-        className={[
+        className={clsx(
           'absolute inset-y-0 w-1/2 will-change-transform',
           leafSidePosition,
-        ].filter(Boolean).join(' ')}
+        )}
         style={{ ...leafStyle, transformStyle: 'preserve-3d' }}
       >
         {frontSrc
@@ -527,10 +529,10 @@ function OutgoingSpreadLeaf({
               aria-hidden="true"
               decoding="async"
               data-testid="page-flip-outgoing-front"
-              className={[
+              className={clsx(
                 'absolute inset-0 h-full w-full object-cover',
                 roundClass,
-              ].filter(Boolean).join(' ')}
+              )}
               style={{ backfaceVisibility: 'hidden' }}
             />
           )
@@ -543,10 +545,10 @@ function OutgoingSpreadLeaf({
               aria-hidden="true"
               decoding="async"
               data-testid="page-flip-outgoing-back"
-              className={[
+              className={clsx(
                 'absolute inset-0 h-full w-full object-cover',
                 roundClass,
-              ].filter(Boolean).join(' ')}
+              )}
               style={{
                 backfaceVisibility: 'hidden',
                 transform: 'rotateY(180deg)',
@@ -648,12 +650,12 @@ function OutgoingCoverLeaf({
         aria-hidden="true"
         data-testid="page-flip-phantom"
         data-cover-phantom={isForward ? 'blank' : 'page'}
-        className={[
+        className={clsx(
           'absolute inset-y-0 w-1/2 overflow-hidden',
           phantomSidePosition,
           roundClass,
-          isForward ? 'bg-slate-100 dark:bg-slate-950/40' : '',
-        ].filter(Boolean).join(' ')}
+          isForward && 'bg-slate-100 dark:bg-slate-950/40',
+        )}
       >
         {phantomSrc
           ? (
@@ -684,10 +686,10 @@ function OutgoingCoverLeaf({
               aria-hidden="true"
               decoding="async"
               data-testid="page-flip-outgoing-front"
-              className={[
+              className={clsx(
                 'absolute inset-0 h-full w-full object-cover',
                 roundClass,
-              ].filter(Boolean).join(' ')}
+              )}
               style={{ backfaceVisibility: 'hidden' }}
             />
           )
@@ -700,10 +702,10 @@ function OutgoingCoverLeaf({
               aria-hidden="true"
               decoding="async"
               data-testid="page-flip-outgoing-back"
-              className={[
+              className={clsx(
                 'absolute inset-0 h-full w-full object-cover',
                 roundClass,
-              ].filter(Boolean).join(' ')}
+              )}
               style={{
                 backfaceVisibility: 'hidden',
                 transform: 'rotateY(180deg)',
