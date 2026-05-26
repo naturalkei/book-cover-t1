@@ -1,6 +1,6 @@
 import { useId, useState, type ChangeEvent, type FormEvent } from 'react'
 
-interface PageJumpInputProps {
+interface IPageJumpInputProps {
   pageIndex: number
   totalPages: number
   onPageChange: (next: number) => void
@@ -16,7 +16,7 @@ export default function PageJumpInput({
   className,
   step = 1,
   snap,
-}: PageJumpInputProps) {
+}: IPageJumpInputProps) {
   const inputId = useId()
   const [draft, setDraft] = useState<string>(String(pageIndex + 1))
   const [lastPageIndex, setLastPageIndex] = useState<number>(pageIndex)

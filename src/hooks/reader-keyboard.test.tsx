@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from 'vitest'
 
 import { useReaderKeyboard } from './reader-keyboard'
 
-interface HarnessProps {
+interface IHarnessProps {
   pageIndex: number
   totalPages: number
   onPageChange: (next: number) => void
@@ -11,7 +11,7 @@ interface HarnessProps {
   step?: number
 }
 
-function Harness({ pageIndex, totalPages, onPageChange, onExit, step }: HarnessProps) {
+function Harness({ pageIndex, totalPages, onPageChange, onExit, step }: IHarnessProps) {
   useReaderKeyboard({ pageIndex, totalPages, onPageChange, onExit, step })
   return (
     <div>

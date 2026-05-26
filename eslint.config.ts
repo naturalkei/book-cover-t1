@@ -8,11 +8,10 @@ import tseslint from 'typescript-eslint'
 
 export default defineConfig([
   { ignores: ['dist', 'playwright-report', 'test-results', 'coverage'] },
-  
-  // Base Configs (Spread Syntax)
+
   js.configs.recommended,
   ...tseslint.configs.recommended,
-  
+
   {
     files: ['**/*.{ts,tsx}'],
     languageOptions: {
@@ -22,25 +21,59 @@ export default defineConfig([
     plugins: {
       '@stylistic': stylistic,
     },
-    // Note: ensure plugins support flat config 'extends' or use tseslint.config if needed
     extends: [
       reactHooks.configs.flat.recommended,
       reactRefresh.configs.vite,
     ],
     rules: {
-      // General Linting
       '@typescript-eslint/no-unused-vars': 'warn',
 
-      // Stylistic Rules (No Prettier Needed)
       '@stylistic/semi': ['error', 'never'],
       '@stylistic/quotes': ['error', 'single'],
       '@stylistic/jsx-quotes': ['error', 'prefer-double'],
       '@stylistic/indent': ['error', 2],
-      
-      // Spacing & Formatting Details
       '@stylistic/object-curly-spacing': ['error', 'always'],
       '@stylistic/no-multiple-empty-lines': ['error', { max: 1, maxEOF: 0 }],
       '@stylistic/comma-dangle': ['error', 'always-multiline'],
+    },
+  },
+
+  {
+    files: ['src/**/*.{ts,tsx}'],
+    languageOptions: {
+      parserOptions: {
+        projectService: true,
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
+    rules: {
+      '@typescript-eslint/naming-convention': [
+        'error',
+        { selector: 'interface', format: ['PascalCase'], prefix: ['I'] },
+        { selector: 'typeAlias', format: ['PascalCase'], prefix: ['T'] },
+        {
+          selector: 'function',
+          format: ['camelCase', 'PascalCase'],
+          leadingUnderscore: 'allow',
+        },
+        {
+          selector: 'variable',
+          format: ['camelCase', 'PascalCase', 'UPPER_CASE'],
+          leadingUnderscore: 'allow',
+        },
+        {
+          selector: 'parameter',
+          format: ['camelCase', 'PascalCase'],
+          leadingUnderscore: 'allow',
+        },
+      ],
+    },
+  },
+
+  {
+    files: ['src/vite-env.d.ts'],
+    rules: {
+      '@typescript-eslint/naming-convention': 'off',
     },
   },
 ])

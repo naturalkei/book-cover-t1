@@ -2,11 +2,11 @@ import { render, screen, within } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, expect, it } from 'vitest'
 
-import type { Book } from '@/data/books'
+import type { IBook } from '@/data/books'
 
 import Gallery from './Gallery'
 
-const sampleBooks: Book[] = [
+const sampleBooks: IBook[] = [
   {
     id: 'a',
     title: 'Alpha',
@@ -23,7 +23,7 @@ const sampleBooks: Book[] = [
   },
 ]
 
-const renderGallery = (props?: { books?: Book[] }) =>
+const renderGallery = (props?: { books?: IBook[] }) =>
   render(
     <MemoryRouter>
       <Gallery {...props} />

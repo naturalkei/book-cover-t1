@@ -4,14 +4,14 @@ import {
   DEFAULT_FLIP_PRESET,
   isFlipPresetId,
   REDUCED_MOTION_PRESET,
-  type FlipPresetId,
+  type TFlipPresetId,
 } from '@/components/reader/flip-presets'
 
 import { useReducedMotion } from './reduced-motion'
 
 export const FLIP_PRESET_STORAGE_KEY = 'book-flip-showcase:flip-preset'
 
-const detectInitialPreset = (): FlipPresetId => {
+const detectInitialPreset = (): TFlipPresetId => {
   if (typeof window === 'undefined') return DEFAULT_FLIP_PRESET
   try {
     const stored = window.localStorage.getItem(FLIP_PRESET_STORAGE_KEY)
@@ -24,9 +24,9 @@ const detectInitialPreset = (): FlipPresetId => {
 }
 
 export function useFlipPreset() {
-  const [preset, setPresetState] = useState<FlipPresetId>(() => detectInitialPreset())
+  const [preset, setPresetState] = useState<TFlipPresetId>(() => detectInitialPreset())
   const reducedMotion = useReducedMotion()
-  const effectivePreset: FlipPresetId = reducedMotion ? REDUCED_MOTION_PRESET : preset
+  const effectivePreset: TFlipPresetId = reducedMotion ? REDUCED_MOTION_PRESET : preset
 
   useEffect(() => {
     try {
@@ -37,7 +37,7 @@ export function useFlipPreset() {
     }
   }, [preset])
 
-  const setPreset = useCallback((next: FlipPresetId) => setPresetState(next), [])
+  const setPreset = useCallback((next: TFlipPresetId) => setPresetState(next), [])
 
   return { preset, effectivePreset, setPreset, reducedMotionOverride: reducedMotion }
 }

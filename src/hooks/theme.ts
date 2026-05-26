@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState } from 'react'
 
-export type Theme = 'light' | 'dark'
+export type TTheme = 'light' | 'dark'
 
 const STORAGE_KEY = 'book-flip-showcase:theme'
 
-const detectInitialTheme = (): Theme => {
+const detectInitialTheme = (): TTheme => {
   if (typeof window === 'undefined') return 'dark'
   try {
     const stored = window.localStorage.getItem(STORAGE_KEY)
@@ -17,7 +17,7 @@ const detectInitialTheme = (): Theme => {
   return 'dark'
 }
 
-const applyTheme = (theme: Theme): void => {
+const applyTheme = (theme: TTheme): void => {
   if (typeof document === 'undefined') return
   const root = document.documentElement
   root.classList.toggle('dark', theme === 'dark')
@@ -29,7 +29,7 @@ export function applyInitialTheme(): void {
 }
 
 export function useTheme() {
-  const [theme, setThemeState] = useState<Theme>(() => detectInitialTheme())
+  const [theme, setThemeState] = useState<TTheme>(() => detectInitialTheme())
 
   useEffect(() => {
     applyTheme(theme)
@@ -41,7 +41,7 @@ export function useTheme() {
     }
   }, [theme])
 
-  const setTheme = useCallback((next: Theme) => setThemeState(next), [])
+  const setTheme = useCallback((next: TTheme) => setThemeState(next), [])
   const toggleTheme = useCallback(() => {
     setThemeState((prev) => (prev === 'dark' ? 'light' : 'dark'))
   }, [])

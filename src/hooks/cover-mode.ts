@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useState } from 'react'
 
-export type CoverMode = 'single' | 'spread'
+export type TCoverMode = 'single' | 'spread'
 
 export const COVER_MODE_STORAGE_KEY = 'book-flip-showcase:cover-mode'
 
-const isCoverMode = (value: unknown): value is CoverMode =>
+const isCoverMode = (value: unknown): value is TCoverMode =>
   value === 'single' || value === 'spread'
 
-const detectInitialCoverMode = (): CoverMode => {
+const detectInitialCoverMode = (): TCoverMode => {
   if (typeof window === 'undefined') return 'single'
   try {
     const stored = window.localStorage.getItem(COVER_MODE_STORAGE_KEY)
@@ -20,7 +20,7 @@ const detectInitialCoverMode = (): CoverMode => {
 }
 
 export function useCoverMode() {
-  const [coverMode, setCoverModeState] = useState<CoverMode>(() => detectInitialCoverMode())
+  const [coverMode, setCoverModeState] = useState<TCoverMode>(() => detectInitialCoverMode())
 
   useEffect(() => {
     try {
@@ -31,7 +31,7 @@ export function useCoverMode() {
     }
   }, [coverMode])
 
-  const setCoverMode = useCallback((next: CoverMode) => setCoverModeState(next), [])
+  const setCoverMode = useCallback((next: TCoverMode) => setCoverModeState(next), [])
   const toggleCoverMode = useCallback(() => {
     setCoverModeState((prev) => (prev === 'single' ? 'spread' : 'single'))
   }, [])

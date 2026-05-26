@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import {
   DEFAULT_FLIP_PRESET,
-  FLIP_PRESET_LIST,
+  FlipPresetList,
   getFlipPreset,
   isFlipPresetId,
   REDUCED_MOTION_PRESET,
@@ -10,11 +10,11 @@ import {
 
 describe('flipPresets registry', () => {
   it('exposes exactly five presets', () => {
-    expect(FLIP_PRESET_LIST).toHaveLength(5)
+    expect(FlipPresetList).toHaveLength(5)
   })
 
   it('has the expected canonical ids', () => {
-    expect(FLIP_PRESET_LIST.map(p => p.id)).toEqual([
+    expect(FlipPresetList.map(p => p.id)).toEqual([
       'classic',
       'curl',
       'slide',
@@ -29,14 +29,14 @@ describe('flipPresets registry', () => {
   })
 
   it('every preset declares a label and a description', () => {
-    for (const preset of FLIP_PRESET_LIST) {
+    for (const preset of FlipPresetList) {
       expect(preset.label.length).toBeGreaterThan(0)
       expect(preset.description.length).toBeGreaterThan(0)
     }
   })
 
   it('every preset.build() returns initial + final frames with matching transition strings', () => {
-    for (const preset of FLIP_PRESET_LIST) {
+    for (const preset of FlipPresetList) {
       for (const direction of ['forward', 'backward'] as const) {
         const { initial, final } = preset.build(direction, 700)
         expect(initial.transition).toBeTypeOf('string')
@@ -47,7 +47,7 @@ describe('flipPresets registry', () => {
   })
 
   it('every preset.initial has opacity 1 and final has opacity 0 (so a real from-to transition exists)', () => {
-    for (const preset of FLIP_PRESET_LIST) {
+    for (const preset of FlipPresetList) {
       const { initial, final } = preset.build('forward', 700)
       expect(initial.opacity).toBe(1)
       expect(final.opacity).toBe(0)
@@ -55,7 +55,7 @@ describe('flipPresets registry', () => {
   })
 
   it('fade preset declares opacity-only transition with identity transforms in both frames', () => {
-    const fade = FLIP_PRESET_LIST.find(p => p.id === 'fade')!
+    const fade = FlipPresetList.find(p => p.id === 'fade')!
     const { initial, final } = fade.build('forward', 700)
     expect(initial.transition).toContain('opacity')
     expect(initial.transition).not.toContain('transform')
@@ -64,7 +64,7 @@ describe('flipPresets registry', () => {
   })
 
   it('classic preset rests at no transform and resolves to rotateY in the final frame', () => {
-    const classic = FLIP_PRESET_LIST.find(p => p.id === 'classic')!
+    const classic = FlipPresetList.find(p => p.id === 'classic')!
     const forward = classic.build('forward', 700)
     const backward = classic.build('backward', 700)
     expect(forward.initial.transform).toBe('none')
@@ -75,14 +75,14 @@ describe('flipPresets registry', () => {
   })
 
   it('slide preset rests at translateX 0 and slides off-screen in the final frame', () => {
-    const slide = FLIP_PRESET_LIST.find(p => p.id === 'slide')!
+    const slide = FlipPresetList.find(p => p.id === 'slide')!
     const { initial, final } = slide.build('forward', 700)
     expect(initial.transform).toBe('translateX(0%)')
     expect(final.transform).toBe('translateX(-100%)')
   })
 
   it('spread-mode rotational presets pivot at the spine and keep the leaf opaque (so the back face shows)', () => {
-    const classic = FLIP_PRESET_LIST.find(p => p.id === 'classic')!
+    const classic = FlipPresetList.find(p => p.id === 'classic')!
     const forward = classic.build('forward', 700, 'spread')
     expect(forward.initial.transformOrigin).toBe('left center')
     expect(forward.final.transformOrigin).toBe('left center')
@@ -95,7 +95,7 @@ describe('flipPresets registry', () => {
   })
 
   it('spread-mode tilt does not scale the leaf — the static layer stays at scale 1, so any scale change would read as shrink-then-grow at cleanup (#50)', () => {
-    const tilt = FLIP_PRESET_LIST.find(p => p.id === 'tilt')!
+    const tilt = FlipPresetList.find(p => p.id === 'tilt')!
     const forward = tilt.build('forward', 700, 'spread')
     const backward = tilt.build('backward', 700, 'spread')
     expect(String(forward.final.transform)).not.toMatch(/scale\(/)
@@ -104,14 +104,14 @@ describe('flipPresets registry', () => {
   })
 
   it('single-mode tilt keeps its scale(0.92) lift-off effect (only spread-mode is desaturated)', () => {
-    const tilt = FLIP_PRESET_LIST.find(p => p.id === 'tilt')!
+    const tilt = FlipPresetList.find(p => p.id === 'tilt')!
     const single = tilt.build('forward', 700)
     expect(String(single.final.transform)).toContain('scale(0.92)')
   })
 
   it('spread-mode classic and curl also keep scale unchanged so the leaf does not pulse', () => {
     for (const id of ['classic', 'curl'] as const) {
-      const preset = FLIP_PRESET_LIST.find(p => p.id === id)!
+      const preset = FlipPresetList.find(p => p.id === id)!
       const forward = preset.build('forward', 700, 'spread')
       const backward = preset.build('backward', 700, 'spread')
       expect(String(forward.final.transform)).not.toMatch(/scale\(/)
@@ -120,7 +120,7 @@ describe('flipPresets registry', () => {
   })
 
   it('spread-mode slide preset slides the leaf off the flipping side (not toward the spine)', () => {
-    const slide = FLIP_PRESET_LIST.find(p => p.id === 'slide')!
+    const slide = FlipPresetList.find(p => p.id === 'slide')!
     const forward = slide.build('forward', 700, 'spread')
     expect(forward.final.transform).toBe('translateX(110%)')
     const backward = slide.build('backward', 700, 'spread')

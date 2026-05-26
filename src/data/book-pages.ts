@@ -1,4 +1,4 @@
-export interface PageGenInput {
+export interface IPageGenInput {
   bookId: string
   title: string
   author: string
@@ -6,18 +6,18 @@ export interface PageGenInput {
   count: number
 }
 
-export type PageLayout = 'cover' | 'text' | 'figure' | 'colophon'
+export type TPageLayout = 'cover' | 'text' | 'figure' | 'colophon'
 
-interface PageMeta {
+interface IPageMeta {
   index: number
-  layout: PageLayout
+  layout: TPageLayout
   block?: string[]
-  figure?: FigureKind
+  figure?: TFigureKind
 }
 
-type FigureKind = 'concentric' | 'columns' | 'horizon' | 'arc' | 'grid'
+type TFigureKind = 'concentric' | 'columns' | 'horizon' | 'arc' | 'grid'
 
-const LOREM_BLOCKS: string[][] = [
+const LoremBlocks: string[][] = [
   [
     'The city had been quiet for hours, lit by lampposts',
     'that blinked like distant fireflies in a slow rain.',
@@ -127,7 +127,7 @@ const LOREM_BLOCKS: string[][] = [
   ],
 ]
 
-const FIGURES: FigureKind[] = ['concentric', 'columns', 'horizon', 'arc', 'grid']
+const FigureKinds: TFigureKind[] = ['concentric', 'columns', 'horizon', 'arc', 'grid']
 
 const PAPER_BG = '<rect width="600" height="800" fill="#faf6ee"/><g opacity="0.5"><circle cx="120" cy="120" r="0.6" fill="#e7dccb"/><circle cx="280" cy="60" r="0.6" fill="#e7dccb"/><circle cx="440" cy="180" r="0.6" fill="#e7dccb"/><circle cx="80" cy="320" r="0.6" fill="#e7dccb"/><circle cx="520" cy="380" r="0.6" fill="#e7dccb"/><circle cx="200" cy="500" r="0.6" fill="#e7dccb"/><circle cx="400" cy="600" r="0.6" fill="#e7dccb"/><circle cx="160" cy="700" r="0.6" fill="#e7dccb"/><circle cx="500" cy="740" r="0.6" fill="#e7dccb"/></g>'
 
@@ -138,7 +138,7 @@ const escapeText = (value: string): string =>
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
 
-const buildFigure = (kind: FigureKind, accent: string, soft: string): string => {
+const buildFigure = (kind: TFigureKind, accent: string, soft: string): string => {
   switch (kind) {
     case 'concentric':
       return `<g opacity="0.85"><circle cx="300" cy="430" r="170" fill="none" stroke="${accent}" stroke-width="3"/><circle cx="300" cy="430" r="120" fill="none" stroke="${accent}" stroke-width="2" opacity="0.7"/><circle cx="300" cy="430" r="70" fill="${soft}" opacity="0.5"/><circle cx="300" cy="430" r="22" fill="${accent}"/></g>`
@@ -174,8 +174,8 @@ const gridCells = (accent: string, soft: string): string => {
   return out
 }
 
-const planPages = (count: number): PageMeta[] => {
-  const result: PageMeta[] = []
+const planPages = (count: number): IPageMeta[] => {
+  const result: IPageMeta[] = []
   for (let i = 0; i < count; i++) {
     if (i === 0) {
       result.push({ index: i, layout: 'cover' })
@@ -189,14 +189,14 @@ const planPages = (count: number): PageMeta[] => {
       result.push({
         index: i,
         layout: 'figure',
-        figure: FIGURES[Math.floor(i / 5) % FIGURES.length],
+        figure: FigureKinds[Math.floor(i / 5) % FigureKinds.length],
       })
       continue
     }
     result.push({
       index: i,
       layout: 'text',
-      block: LOREM_BLOCKS[(i - 1) % LOREM_BLOCKS.length],
+      block: LoremBlocks[(i - 1) % LoremBlocks.length],
     })
   }
   return result
@@ -221,7 +221,7 @@ const softenAccent = (hex: string): string => {
 }
 
 const buildSvg = (
-  meta: PageMeta,
+  meta: IPageMeta,
   total: number,
   ctx: { title: string; author: string; accent: string; soft: string },
 ): string => {
@@ -258,7 +258,7 @@ const buildSvg = (
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 800" role="img" aria-label="${titleSafe} page ${number}">${PAPER_BG}${header}${body}${footer}</svg>`
 }
 
-const describeFigure = (kind: FigureKind): string => {
+const describeFigure = (kind: TFigureKind): string => {
   switch (kind) {
     case 'concentric': return 'orbits and centres'
     case 'columns': return 'thresholds and weights'
@@ -271,7 +271,7 @@ const describeFigure = (kind: FigureKind): string => {
 const toDataUri = (svg: string): string =>
   `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`
 
-export const createBookPages = (input: PageGenInput): string[] => {
+export const createBookPages = (input: IPageGenInput): string[] => {
   const { title, author, accentColor, count } = input
   const soft = softenAccent(accentColor)
   const metas = planPages(count)

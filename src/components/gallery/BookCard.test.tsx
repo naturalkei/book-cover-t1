@@ -2,13 +2,13 @@ import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, expect, it } from 'vitest'
 
-import type { Book } from '@/data/books'
+import type { IBook } from '@/data/books'
 
 import BookCard from './BookCard'
 
 const COVER_SRC = '/books/atlas-of-cities.svg'
 
-const book: Book = {
+const book: IBook = {
   id: 'atlas-of-cities',
   title: 'Atlas of Cities',
   author: 'Mara Lin',

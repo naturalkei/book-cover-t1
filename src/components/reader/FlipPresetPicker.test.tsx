@@ -3,12 +3,12 @@ import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 
 import FlipPresetPicker from './FlipPresetPicker'
-import { FLIP_PRESET_LIST } from './flip-presets'
+import { FlipPresetList } from './flip-presets'
 
 describe('FlipPresetPicker', () => {
   it('renders one chip per registered preset', () => {
     render(<FlipPresetPicker value="classic" onChange={vi.fn()} />)
-    for (const preset of FLIP_PRESET_LIST) {
+    for (const preset of FlipPresetList) {
       expect(screen.getByTestId(`flip-preset-${preset.id}`)).toBeInTheDocument()
     }
   })

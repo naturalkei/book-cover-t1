@@ -47,3 +47,15 @@ Run `pnpm lint` before committing. Use `pnpm lint:fix` to auto-fix style issues.
 - React component files (`.tsx`): **PascalCase** — `CoverModeToggle.tsx`, `Reader.tsx`.
 - All other source files and folder names: **kebab-case** — `book-pages.ts`, `flip-presets.ts`.
 - Hook modules under `src/hooks/`: kebab-case **without** the `use` prefix in the filename; exported functions keep `use` — `cover-mode.ts` → `useCoverMode`.
+
+## Variable Naming
+
+- `interface` → **IPascalCase** — `IBook`, `IPageFlipProps`
+- `type` → **TPascalCase** — `TViewMode`, `TFlipPresetId`
+- Literal constants → **UPPER_SNAKE_CASE** — `DEFAULT_FLIP_PRESET`, `COVER_MODE_STORAGE_KEY`
+- Constant objects/arrays → **PascalCase** — `Books`, `FlipPresetList`, `ViewModeOptions`
+- Functions → **camelCase** with verb prefix — `getBookById`, `snapPage`, `detectInitialTheme`
+
+## Tailwind className
+
+When a class string exceeds **80 characters**, split with `clsx(...)` across multiple lines. Reusable bundles belong in `src/lib/class-names.ts`.
