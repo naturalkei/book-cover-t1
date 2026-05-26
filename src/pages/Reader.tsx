@@ -1,3 +1,4 @@
+import clsx from 'clsx'
 import { ArrowLeft } from 'lucide-react'
 import { useCallback, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
@@ -160,7 +161,11 @@ export default function Reader() {
         locked={reducedMotionOverride}
       />
 
-      <footer className="mt-6 text-center text-xs uppercase tracking-[0.2em] text-slate-600 dark:text-slate-400">
+      <footer className={clsx(
+        'mt-6 text-center text-xs uppercase tracking-[0.2em]',
+        'text-slate-600 dark:text-slate-400',
+      )}
+      >
         tap a page side, use the controls, scrub, or jump to any page
       </footer>
     </section>

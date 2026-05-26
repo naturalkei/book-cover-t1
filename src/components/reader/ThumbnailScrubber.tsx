@@ -1,7 +1,12 @@
 import clsx from 'clsx'
 import { useState, type ChangeEvent } from 'react'
 
-import { RangeInput, ThumbnailButton } from '@/lib/class-names'
+import {
+  RangeInput,
+  ThumbnailButton,
+  ThumbnailButtonActive,
+  ThumbnailButtonIdle,
+} from '@/lib/class-names'
 
 interface IThumbnailScrubberProps {
   pages: string[]
@@ -63,9 +68,17 @@ export default function ThumbnailScrubber({
   return (
     <section
       aria-label="Page scrubber"
-      className="mt-8 rounded-2xl bg-white p-4 ring-1 ring-slate-200 dark:bg-slate-900/50 dark:ring-white/5"
+      className={clsx(
+        'mt-8 rounded-2xl bg-white p-4 ring-1 ring-slate-200',
+        'dark:bg-slate-900/50 dark:ring-white/5',
+      )}
     >
-      <div className="flex items-center justify-between text-xs uppercase tracking-[0.2em] text-slate-700 dark:text-slate-400">
+      <div className={clsx(
+        'flex items-center justify-between',
+        'text-xs uppercase tracking-[0.2em]',
+        'text-slate-700 dark:text-slate-400',
+      )}
+      >
         <span>scrub</span>
         {showPreview
           ? (
@@ -111,9 +124,7 @@ export default function ThumbnailScrubber({
               onClick={() => onPageChange(index)}
               className={clsx(
                 ThumbnailButton,
-                index === pageIndex
-                  ? 'ring-sky-500 shadow-[0_0_0_2px_rgba(56,189,248,0.4)] dark:ring-sky-400'
-                  : 'ring-slate-200 hover:ring-slate-300 dark:ring-white/10 dark:hover:ring-white/30',
+                index === pageIndex ? ThumbnailButtonActive : ThumbnailButtonIdle,
               )}
             >
               <img

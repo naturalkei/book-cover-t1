@@ -1,6 +1,7 @@
 import clsx from 'clsx'
 
 import type { TCoverMode } from '@/hooks/cover-mode'
+import { ToggleChipLabel } from '@/lib/class-names'
 
 interface ICoverModeToggleProps {
   coverMode: TCoverMode
@@ -13,9 +14,7 @@ export default function CoverModeToggle({ coverMode, onChange, disabled = false 
   return (
     <label
       className={clsx(
-        'inline-flex select-none items-center gap-2 rounded-full bg-slate-200 px-3 py-1.5',
-        'text-xs font-medium uppercase tracking-[0.15em] text-slate-700 ring-1 ring-slate-300',
-        'dark:bg-white/5 dark:text-slate-200 dark:ring-white/5',
+        ToggleChipLabel,
         disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer',
       )}
       data-testid="cover-mode-toggle"
@@ -27,7 +26,10 @@ export default function CoverModeToggle({ coverMode, onChange, disabled = false 
         checked={checked}
         disabled={disabled}
         onChange={(event) => onChange(event.target.checked ? 'single' : 'spread')}
-        className="h-3.5 w-3.5 cursor-pointer accent-sky-500 disabled:cursor-not-allowed dark:accent-sky-400"
+        className={clsx(
+          'h-3.5 w-3.5 cursor-pointer accent-sky-500',
+          'disabled:cursor-not-allowed dark:accent-sky-400',
+        )}
       />
       <span>Cover alone</span>
     </label>

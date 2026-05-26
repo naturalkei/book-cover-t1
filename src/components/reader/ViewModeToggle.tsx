@@ -2,7 +2,11 @@ import clsx from 'clsx'
 import { BookOpen, FileText } from 'lucide-react'
 
 import type { TViewMode } from '@/hooks/view-mode'
-import { ViewModeOption } from '@/lib/class-names'
+import {
+  ViewModeOption,
+  ViewModeOptionActive,
+  ViewModeOptionIdle,
+} from '@/lib/class-names'
 
 interface IViewModeToggleProps {
   mode: TViewMode
@@ -29,8 +33,9 @@ export default function ViewModeToggle({ mode, onChange, className }: IViewModeT
       aria-label="View mode"
       data-testid="view-mode-toggle"
       className={clsx(
-        'inline-flex items-center gap-1 rounded-full bg-slate-200 p-1 text-xs',
-        'ring-1 ring-slate-300 dark:bg-white/5 dark:ring-white/10',
+        'inline-flex items-center gap-1 rounded-full bg-slate-200 p-1',
+        'text-xs ring-1 ring-slate-300',
+        'dark:bg-white/5 dark:ring-white/10',
         className,
       )}
     >
@@ -47,9 +52,7 @@ export default function ViewModeToggle({ mode, onChange, className }: IViewModeT
             onClick={() => onChange(id)}
             className={clsx(
               ViewModeOption,
-              active
-                ? 'bg-white text-slate-900 shadow-sm ring-1 ring-slate-300 dark:bg-slate-900 dark:text-white dark:ring-white/10'
-                : 'text-slate-700 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white',
+              active ? ViewModeOptionActive : ViewModeOptionIdle,
             )}
           >
             <Icon className="h-3.5 w-3.5" aria-hidden="true" />

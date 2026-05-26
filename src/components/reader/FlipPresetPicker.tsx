@@ -1,7 +1,11 @@
 import clsx from 'clsx'
 import { Sparkles } from 'lucide-react'
 
-import { FlipPresetOption } from '@/lib/class-names'
+import {
+  FlipPresetOption,
+  FlipPresetOptionActive,
+  FlipPresetOptionIdle,
+} from '@/lib/class-names'
 
 import { FlipPresetList, type TFlipPresetId } from './flip-presets'
 
@@ -31,7 +35,12 @@ export default function FlipPresetPicker({
         className,
       )}
     >
-      <header className="flex items-center justify-between gap-3 text-xs uppercase tracking-[0.2em] text-slate-700 dark:text-slate-300">
+      <header className={clsx(
+        'flex items-center justify-between gap-3',
+        'text-xs uppercase tracking-[0.2em]',
+        'text-slate-700 dark:text-slate-300',
+      )}
+      >
         <span className="inline-flex items-center gap-1.5">
           <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
           flip style
@@ -65,9 +74,7 @@ export default function FlipPresetPicker({
               onClick={() => onChange(preset.id)}
               className={clsx(
                 FlipPresetOption,
-                isActive
-                  ? 'border-sky-500 bg-sky-50 text-slate-900 shadow-sm dark:border-sky-400 dark:bg-sky-400/10 dark:text-white'
-                  : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 dark:border-white/10 dark:bg-slate-900/40 dark:text-slate-200 dark:hover:border-white/20',
+                isActive ? FlipPresetOptionActive : FlipPresetOptionIdle,
               )}
             >
               <span className="text-sm font-semibold">{preset.label}</span>
