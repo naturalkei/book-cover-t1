@@ -22,9 +22,11 @@ v1 delivers a static SPA: gallery → reader with CSS 3D flip, five presets, spr
 
 ### 1.2 v2 goals
 
-- **Preserve v1** as a stable, linkable demo (`v1.0.x` hotfixes only).
-- **Develop v2 on `main`** with freedom to refactor reader core, add features (WebGL renderer, richer gallery, i18n, etc.), and break internal APIs.
-- **Coexist in one deploy** (recommended) so stakeholders can compare v1 vs v2 at stable URLs.
+- **Preserve v1** as a stable, linkable demo (`v1.0.x` hotfixes on `maint/v1`).
+- **Develop v2 on `maint/v2`** with freedom to refactor reader core, add features (WebGL renderer, richer gallery, i18n, etc.), and break internal APIs.
+- **Integrate on `main`** — both maintenance lines land on `main` via PR before anything ships.
+- **Deploy from `release` only** — `main` → `release` → GitHub Pages (unchanged infra).
+- **Coexist in one deploy** so stakeholders can compare v1 vs v2 at stable URLs.
 - **Keep CI green** for both trees during the transition window.
 
 ### 1.3 Non-goals (v2 plan phase)
@@ -36,62 +38,99 @@ v1 delivers a static SPA: gallery → reader with CSS 3D flip, five presets, spr
 
 ## 2. Version & Git Strategy
 
-### 2.1 Freeze v1
+### 2.1 Branch model (maint → main → release)
+
+All version work flows through **`main`** before it reaches **`release`**. There is no direct path from `maint/*` to `release` and no deploy from `main`.
+
+```
+                    ┌─────────────┐
+                    │  maint/v1   │  v1 hotfixes · src/v1/** only
+                    └──────┬──────┘
+                           │ PR (squash) + CI green
+┌─────────────┐            ▼            ┌─────────────┐
+│  maint/v2   │ ──PR + CI──▶   main   ◀──│  feat/* PRs │  optional short-lived
+└─────────────┘            │            └─────────────┘  branches off maint/v2
+                           │ merge (when shippable)
+                           ▼
+                    ┌─────────────┐
+                    │   release   │  GitHub Pages + release-please ONLY
+                    └──────┬──────┘
+                           ▼
+                    GitHub Pages live
+```
+
+| Branch | Lifetime | Scope | Merges into |
+| --- | --- | --- | --- |
+| **`maint/v1`** | Long-lived | `src/v1/**`, v1 e2e, v1-only docs; shared fixes if v1 needs them | **`main`** (PR) |
+| **`maint/v2`** | Long-lived | `src/v2/**`, `src/app/**` shell, v2 e2e; shared types/utils | **`main`** (PR) |
+| **`main`** | Permanent | Integration — must always build v1 + v2 together | **`release`** (merge) |
+| **`release`** | Permanent | Deploy + semver tags only; no feature commits | — (Pages artifact) |
+
+**Rules**
+
+1. **`maint/v1` and `maint/v2` never merge into each other** — only into `main`.
+2. **`release` never receives commits except merges from `main`** (plus release-please version-bump commits on `release`).
+3. **Never deploy `main` directly** — always `main` → `release` → Pages.
+4. Short-lived branches (`fix/67-v1-cover-snap`, `feat/80-v2-webgl`) branch off the relevant **`maint/*`**, not off `main`, unless it is repo-wide tooling/docs.
+
+### 2.2 Freeze v1 & bootstrap maintenance branches
 
 1. Ensure `main` is release-quality (CI green, `package.json` at `1.0.0`).
-2. Merge `main` → `release` and confirm GitHub Pages deploy is green (see §2.3).
-3. Create an annotated tag on the deployed commit (if not already present):
+2. Merge `main` → `release`; confirm GitHub Pages deploy is green.
+3. Tag the deployed commit (if not already present — see #18):
    ```bash
-   git checkout release
-   git pull
+   git checkout release && git pull
    git tag -a v1.0.0 -m "v1.0.0 — gallery + reader MVP frozen"
    git push origin v1.0.0
    ```
-4. **Policy**
-   - **`main`** — day-to-day development (v2 features land here after Phase 1).
-   - **`release`** — **production deploy branch only** (GitHub Pages + release-please). Never use it for feature work.
-   - **Tags** — `v1.0.x` marks v1 baseline/hotfix releases cut from `release`; `v2.0.0-alpha.x` / `v2.0.0` when v2 ships.
+4. Create long-lived maintenance branches from `main` after Phase 1 directory split:
+   ```bash
+   git checkout main && git pull
+   git branch maint/v1 main   # tracks v1 line; cut from post-migration main
+   git branch maint/v2 main   # v2 work starts here
+   git push -u origin maint/v1 maint/v2
+   ```
+5. **Policy**
+   - **`maint/v1`** — v1 hotfixes and docs (`fix(v1):`, `docs(v1):`); patch releases `1.0.x`.
+   - **`maint/v2`** — v2 features and refactors (`feat(v2):`, `refactor(v2):`); eventually `2.0.0`.
+   - **`main`** — always integration-ready; absorbs merged work from both `maint/*` lines.
+   - **`release`** — production; merge from `main` when shipping to Pages.
+   - **Tags** — `v1.0.x` / `v2.0.x` cut on `release` by release-please.
 
-### 2.2 Release Please / CHANGELOG
+### 2.3 Release Please / CHANGELOG
 
-- [release-please](https://github.com/googleapis/release-please) runs on push to **`release`** (`.github/workflows/release-please.yml`), same as deploy.
-- Flow today: squash-merge PRs on `main` → periodic **`main` → `release` merge** → release-please bumps version / tag → deploy workflow publishes Pages.
-- After v2 starts: keep **one** `CHANGELOG.md` with `## v1` / `## v2` sections, or split files if noise grows. release-please manifest may need a major bump path for `2.0.0`.
+- [release-please](https://github.com/googleapis/release-please) runs on push to **`release`** (`.github/workflows/release-please.yml`), same trigger family as deploy.
+- Ship loop:
+  1. PR `maint/v1` or `maint/v2` → **`main`** (CI must pass).
+  2. When ready for production: merge **`main` → `release`**.
+  3. Push to `release` runs release-please (tag + changelog) and **deploy.yml** (Pages).
+  4. Optionally merge `release` → `main` to sync version-bump commits back.
 
-### 2.3 Branch roles & deploy (`release` = GitHub Pages)
+### 2.4 Deploy (`release` = GitHub Pages)
 
-> **`release` is the GitHub Pages deployment branch.** Do not rename it or add a competing deploy branch. All public URLs are whatever was last built from `release`.
+> **`release` is the GitHub Pages deployment branch.** Do not rename it or add a competing deploy branch.
 
-| Branch | Triggers | Role |
+| Workflow | Trigger | Effect |
 | --- | --- | --- |
-| `main` | CI on push / PR (`.github/workflows/ci.yml`) | Integration branch — features, refactors, v2 work |
-| `release` | **Deploy** (`.github/workflows/deploy.yml`) + **release-please** on push | Builds `dist/` → GitHub Pages at `https://<owner>.github.io/book-cover-t1/` |
-| Tag `v1.0.x` | — | Immutable marker for the frozen v1 line |
-
-**Standard ship loop**
-
-```
-feature PR ──squash──▶ main ──CI green──▶ merge ──▶ release ──▶ Pages live
-                              ▲                      │
-                              └──── (optional) ──────┘
-                              sync version-bump commit
-                              from release-please back to main
-```
+| `ci.yml` | PR / push to **`main`** | lint · test · e2e · build gate |
+| `deploy.yml` | push to **`release`** | build `dist/` → GitHub Pages |
+| `release-please.yml` | push to **`release`** | semver tag + `CHANGELOG.md` |
 
 **What gets deployed**
 
-- A **single artifact** from `release` containing both route trees once Phase 1–2 land (`/`, `/v1/*`, `/v2/*` — see §3).
-- `VITE_BASE_URL=/book-cover-t1/` is set in the deploy workflow; no per-version deploy branches.
+- One artifact from **`release`**, built from whatever was last merged from **`main`**, containing both route trees (`/`, `/v1/*`, `/v2/*` — see §3).
+- `VITE_BASE_URL=/book-cover-t1/` in `deploy.yml`; unchanged.
 
-**v1 hotfixes while v2 is in progress**
+**Typical workflows**
 
-| Scenario | Approach |
+| Task | Flow |
 | --- | --- |
-| Bug affects **v1 only** (under `src/v1/`) | Branch off `main` → fix → PR to `main` → merge `main` → `release` when ready to ship |
-| Urgent v1 patch, **main has unreleasable v2 WIP** | Branch `maint/v1` from tag `v1.0.x` → fix → cherry-pick to `release` (or temporary `maint/v1` → `release` merge without merging all of `main`) |
-| v2 preview needed on Pages before v2 is default | Merge `main` → `release` as today; v2 lives at `/v2/` while v1 stays at `/v1/` |
+| v1 hotfix | branch off `maint/v1` → PR → **`main`** → when shippable: **`main` → `release`** |
+| v2 feature | branch off `maint/v2` → PR → **`main`** → when shippable: **`main` → `release`** |
+| Ship both v1 fix + v2 WIP on main | Only merge to `release` when **`main` is releasable**; otherwise keep v2 on `maint/v2` until v1 fix lands on `main` alone |
+| Emergency v1-only on busy `main` | Finish v1 fix on `maint/v1` → PR to **`main`** with minimal diff; do **not** bypass `main` to reach `release` |
 
-**Do not** create `release/v1` or repurpose `release` — it is already the Pages + semver release line (#55, `deploy.yml`).
+**Do not** create `release/v1`, deploy from `maint/*`, or commit features directly on `release`.
 
 ---
 
@@ -346,13 +385,13 @@ Initially, run **full suite** on every PR; split when v2 tests multiply.
 
 ## 7. Migration Plan (phased)
 
-### Phase 0 — Tag & document (no code move)
+### Phase 0 — Tag & bootstrap branches
 
-- [ ] Confirm `v1.0.0` tag on current `release` HEAD (already cut in #18 if present)
-- [ ] Document ship loop: `main` → `release` → Pages
-- [ ] Announce v1 freeze policy in README
+- [ ] Confirm `v1.0.0` tag on current `release` HEAD (#18)
+- [ ] After Phase 1 lands on `main`: create and push **`maint/v1`**, **`maint/v2`**
+- [ ] Document ship loop: `maint/*` → `main` → `release` → Pages
 
-### Phase 1 — Directory move (single PR on `main`, then ship via `release`)
+### Phase 1 — Directory move (PR `maint/v2` or `main` → then sync `maint/*`)
 
 - [ ] Create `src/app/`, `src/v1/`, `src/shared/`
 - [ ] `git mv` current pages/components/hooks/data/lib → `src/v1/`
@@ -361,13 +400,13 @@ Initially, run **full suite** on every PR; split when v2 tests multiply.
 - [ ] Move e2e specs → `e2e/v1/`, fix paths
 - [ ] All CI green on `main`; merge `main` → `release` and verify Pages + `/v1` paths
 
-### Phase 2 — v2 scaffold
+### Phase 2 — v2 scaffold (on `maint/v2` → PR → `main`)
 
 - [ ] Add `src/v2/` with minimal Gallery + Reader (can re-export v1 Reader initially behind `/v2` flag)
 - [ ] VersionHub at `/`
 - [ ] `e2e/v2/smoke.spec.ts`
 
-### Phase 3 — v2 feature development
+### Phase 3 — v2 feature development (ongoing on `maint/v2`)
 
 - [ ] Implement v2 milestones (see §8)
 - [ ] Gradually replace v2 Reader stub with new engine
@@ -395,24 +434,26 @@ Open questions carried from plan-1 §6 plus:
 
 All rules in plan-1 §4 (file naming, variable naming, clsx 60-char limit, agent workflow) apply to **both** `v1/` and `v2/` unless this document explicitly overrides them.
 
-Commit scope examples after migration:
+Commit scope examples after migration (branch off the matching `maint/*`):
 
 ```
-feat(v2-reader): add WebGL page mesh prototype
-fix(v1): correct cover-alone keyboard snap on last spread
-refactor(app): add VersionHub and /v1 route prefix
+feat(v2-reader): add WebGL page mesh prototype     # branch off maint/v2
+fix(v1): correct cover-alone keyboard snap         # branch off maint/v1
+refactor(app): add VersionHub and /v1 route prefix # branch off maint/v2
 ```
+
+PR targets: **`main`**. Production: merge **`main` → `release`**.
 
 ---
 
 ## 10. Definition of Done — v1 freeze + v2 branch ready
 
 - [ ] Git tag `v1.0.0` exists on a `release` deploy commit.
+- [ ] Branches **`maint/v1`** and **`maint/v2`** exist; both merge to **`main`** only.
 - [ ] `docs/plan-2.md` approved and linked from README.
-- [ ] Phase 1 migration PR merged to `main`; shipped to Pages via `main` → `release` merge.
+- [ ] Phase 1 on `main`; shipped via **`main` → `release`**.
 - [ ] Playwright smoke passes for `e2e/v1/` and VersionHub.
-- [ ] Deploy preview on Pages shows `/`, `/v1`, `/v2` (v2 may be stub).
-- [ ] Agent rules / project-overview reference plan-2 for v2 architectural decisions.
+- [ ] Pages deploy shows `/`, `/v1`, `/v2` (v2 may be stub).
 
 ---
 
