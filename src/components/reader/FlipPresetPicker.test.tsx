@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 
 import FlipPresetPicker from './FlipPresetPicker'
-import { FLIP_PRESET_LIST } from './flipPresets'
+import { FLIP_PRESET_LIST } from './flip-presets'
 
 describe('FlipPresetPicker', () => {
   it('renders one chip per registered preset', () => {

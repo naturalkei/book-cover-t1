@@ -1,7 +1,7 @@
 import { fireEvent, render } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 
-import { useReaderKeyboard } from './useReaderKeyboard'
+import { useReaderKeyboard } from './reader-keyboard'
 
 interface HarnessProps {
   pageIndex: number

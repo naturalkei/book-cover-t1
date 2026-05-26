@@ -41,3 +41,9 @@ const greet = (name: string) => `hi, ${name}`
 ## Verification
 
 Run `pnpm lint` before committing. Use `pnpm lint:fix` to auto-fix style issues.
+
+## File Naming
+
+- React component files (`.tsx`): **PascalCase** — `CoverModeToggle.tsx`, `Reader.tsx`.
+- All other source files and folder names: **kebab-case** — `book-pages.ts`, `flip-presets.ts`.
+- Hook modules under `src/hooks/`: kebab-case **without** the `use` prefix in the filename; exported functions keep `use` — `cover-mode.ts` → `useCoverMode`.

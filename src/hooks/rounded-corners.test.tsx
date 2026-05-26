@@ -1,7 +1,7 @@
 import { act, renderHook } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
-import { ROUNDED_CORNERS_STORAGE_KEY, useRoundedCorners } from './useRoundedCorners'
+import { ROUNDED_CORNERS_STORAGE_KEY, useRoundedCorners } from './rounded-corners'
 
 beforeEach(() => {
   window.localStorage.clear()

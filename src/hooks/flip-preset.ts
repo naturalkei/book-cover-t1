@@ -5,9 +5,9 @@ import {
   isFlipPresetId,
   REDUCED_MOTION_PRESET,
   type FlipPresetId,
-} from '@/components/reader/flipPresets'
+} from '@/components/reader/flip-presets'
 
-import { useReducedMotion } from './useReducedMotion'
+import { useReducedMotion } from './reduced-motion'
 
 export const FLIP_PRESET_STORAGE_KEY = 'book-flip-showcase:flip-preset'
 

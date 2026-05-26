@@ -12,17 +12,17 @@ import RoundedToggle from '@/components/reader/RoundedToggle'
 import ThumbnailScrubber from '@/components/reader/ThumbnailScrubber'
 import ViewModeToggle from '@/components/reader/ViewModeToggle'
 import { getBookById } from '@/data/books'
-import { useCoverMode, type CoverMode } from '@/hooks/useCoverMode'
-import { useFlipPreset } from '@/hooks/useFlipPreset'
-import { useReaderKeyboard } from '@/hooks/useReaderKeyboard'
-import { useRoundedCorners } from '@/hooks/useRoundedCorners'
+import { useCoverMode, type CoverMode } from '@/hooks/cover-mode'
+import { useFlipPreset } from '@/hooks/flip-preset'
+import { useReaderKeyboard } from '@/hooks/reader-keyboard'
+import { useRoundedCorners } from '@/hooks/rounded-corners'
 import {
   effectiveStep,
   isCoverAlone as computeIsCoverAlone,
   snapPage,
   useViewMode,
   type ViewMode,
-} from '@/hooks/useViewMode'
+} from '@/hooks/view-mode'
 
 export default function Reader() {
   const { id } = useParams<{ id: string }>()

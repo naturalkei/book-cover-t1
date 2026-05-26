@@ -1,4 +1,4 @@
-import { createBookPages } from './bookPages'
+import { createBookPages } from './book-pages'
 
 export interface Book {
   id: string

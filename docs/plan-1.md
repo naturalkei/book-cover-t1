@@ -85,6 +85,10 @@ Keyboard map:
 ## 4. Project Conventions
 
 - **Code style**: StandardJS — no semicolons, single quotes, minimal config. Enforced by ESLint.
+- **File naming**:
+  - React component files (`.tsx`): **PascalCase** — e.g. `CoverModeToggle.tsx`, `BookCard.tsx`.
+  - All other source files and folder names: **kebab-case** — e.g. `book-pages.ts`, `flip-presets.ts`, `reader-keyboard.ts`.
+  - Hook modules under `src/hooks/`: kebab-case filenames **without** the `use` prefix; exported hook functions keep the `use` prefix — e.g. `cover-mode.ts` exports `useCoverMode`.
 - **Commit messages**: [Conventional Commits](https://www.conventionalcommits.org/) (`feat:`, `fix:`, `docs:`, `refactor:`, `chore:`, `test:`).
 - **Branching**: One branch per GitHub issue, named `<type>/<issue-id>-<short-slug>` (e.g. `feat/12-thumbnail-scrubber`).
 - **PRs**: Squash-merge by default. PR title mirrors the Conventional Commit summary and links the issue.

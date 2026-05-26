@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 
-import type { CoverMode } from './useCoverMode'
+import type { CoverMode } from './cover-mode'
 
 export type ViewMode = 'single' | 'spread'
 

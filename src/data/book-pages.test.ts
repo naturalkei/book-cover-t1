@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { createBookPages } from './bookPages'
+import { createBookPages } from './book-pages'
 
 const decode = (uri: string): string => {
   const prefix = 'data:image/svg+xml;charset=utf-8,'

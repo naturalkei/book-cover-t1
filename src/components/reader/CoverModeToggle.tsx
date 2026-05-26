@@ -1,4 +1,4 @@
-import type { CoverMode } from '@/hooks/useCoverMode'
+import type { CoverMode } from '@/hooks/cover-mode'
 
 interface CoverModeToggleProps {
   coverMode: CoverMode

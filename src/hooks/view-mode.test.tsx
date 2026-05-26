@@ -10,7 +10,7 @@ import {
   useViewMode,
   VIEW_MODE_BREAKPOINT,
   VIEW_MODE_STORAGE_KEY,
-} from './useViewMode'
+} from './view-mode'
 
 const setMatchMedia = (matches: boolean) => {
   Object.defineProperty(window, 'matchMedia', {
