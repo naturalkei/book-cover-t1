@@ -1,7 +1,7 @@
 import { act, renderHook } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { useTheme } from './useTheme'
+import { useTheme } from './theme'
 
 const STORAGE_KEY = 'book-flip-showcase:theme'
 

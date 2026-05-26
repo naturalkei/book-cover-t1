@@ -1,6 +1,6 @@
 import { BookOpen, FileText } from 'lucide-react'
 
-import type { ViewMode } from '@/hooks/useViewMode'
+import type { ViewMode } from '@/hooks/view-mode'
 
 interface ViewModeToggleProps {
   mode: ViewMode

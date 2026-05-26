@@ -1,7 +1,7 @@
 import { act, renderHook } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
-import { COVER_MODE_STORAGE_KEY, useCoverMode } from './useCoverMode'
+import { COVER_MODE_STORAGE_KEY, useCoverMode } from './cover-mode'
 
 beforeEach(() => {
   window.localStorage.clear()

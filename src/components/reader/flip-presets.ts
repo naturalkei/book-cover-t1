@@ -1,6 +1,6 @@
 import type { CSSProperties } from 'react'
 
-import type { ViewMode } from '@/hooks/useViewMode'
+import type { ViewMode } from '@/hooks/view-mode'
 
 export type FlipDirection = 'forward' | 'backward'
 export type FlipPresetId = 'classic' | 'curl' | 'slide' | 'fade' | 'tilt'

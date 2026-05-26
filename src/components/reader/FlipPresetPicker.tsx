@@ -1,6 +1,6 @@
 import { Sparkles } from 'lucide-react'
 
-import { FLIP_PRESET_LIST, type FlipPresetId } from './flipPresets'
+import { FLIP_PRESET_LIST, type FlipPresetId } from './flip-presets'
 
 interface FlipPresetPickerProps {
   value: FlipPresetId

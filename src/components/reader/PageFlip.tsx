@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 
-import type { CoverMode } from '@/hooks/useCoverMode'
-import { useReducedMotion } from '@/hooks/useReducedMotion'
-import type { ViewMode } from '@/hooks/useViewMode'
+import type { CoverMode } from '@/hooks/cover-mode'
+import { useReducedMotion } from '@/hooks/reduced-motion'
+import type { ViewMode } from '@/hooks/view-mode'
 
 import {
   DEFAULT_FLIP_PRESET,
@@ -10,7 +10,7 @@ import {
   type FlipDirection,
   type FlipFrames,
   type FlipPresetId,
-} from './flipPresets'
+} from './flip-presets'
 
 interface PageFlipProps {
   pages: string[]

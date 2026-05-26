@@ -1,7 +1,7 @@
 import { act, renderHook } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { FLIP_PRESET_STORAGE_KEY, useFlipPreset } from './useFlipPreset'
+import { FLIP_PRESET_STORAGE_KEY, useFlipPreset } from './flip-preset'
 
 const setReducedMotion = (matches: boolean) => {
   Object.defineProperty(window, 'matchMedia', {

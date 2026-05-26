@@ -6,7 +6,7 @@ import {
   getFlipPreset,
   isFlipPresetId,
   REDUCED_MOTION_PRESET,
-} from './flipPresets'
+} from './flip-presets'
 
 describe('flipPresets registry', () => {
   it('exposes exactly five presets', () => {
