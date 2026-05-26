@@ -1,26 +1,28 @@
+import clsx from 'clsx'
 import { useEffect, useRef, useState } from 'react'
 
-import type { CoverMode } from '@/hooks/cover-mode'
+import type { TCoverMode } from '@/hooks/cover-mode'
 import { useReducedMotion } from '@/hooks/reduced-motion'
-import type { ViewMode } from '@/hooks/view-mode'
+import type { TViewMode } from '@/hooks/view-mode'
+import { FocusRingOnSlate50 } from '@/lib/class-names'
 
 import {
   DEFAULT_FLIP_PRESET,
   getFlipPreset,
-  type FlipDirection,
-  type FlipFrames,
-  type FlipPresetId,
+  type TFlipDirection,
+  type IFlipFrames,
+  type TFlipPresetId,
 } from './flip-presets'
 
-interface PageFlipProps {
+interface IPageFlipProps {
   pages: string[]
   pageIndex: number
   onPageChange?: (index: number) => void
   ariaLabel?: string
   flipDurationMs?: number
-  mode?: ViewMode
-  coverMode?: CoverMode
-  presetId?: FlipPresetId
+  mode?: TViewMode
+  coverMode?: TCoverMode
+  presetId?: TFlipPresetId
   step?: 1 | 2
   rounded?: boolean
 }
@@ -36,7 +38,7 @@ export default function PageFlip({
   presetId = DEFAULT_FLIP_PRESET,
   step: stepProp,
   rounded = false,
-}: PageFlipProps) {
+}: IPageFlipProps) {
   const isCoverPage = (index: number): boolean =>
     mode === 'spread' && coverMode === 'single' && index === 0
   const safeIndex = clamp(pageIndex, 0, pages.length - 1)
@@ -45,7 +47,7 @@ export default function PageFlip({
   const coverAlone = isCoverPage(safeIndex)
   const roundClass = rounded ? 'rounded-2xl' : ''
   const innerRoundClass = rounded ? 'rounded-2xl' : ''
-  const [outgoing, setOutgoing] = useState<{ index: number; direction: FlipDirection } | null>(null)
+  const [outgoing, setOutgoing] = useState<{ index: number; direction: TFlipDirection } | null>(null)
   const lastIndexRef = useRef(safeIndex)
   const reducedMotion = useReducedMotion()
   const duration = reducedMotion ? Math.min(220, flipDurationMs) : flipDurationMs
@@ -53,7 +55,7 @@ export default function PageFlip({
   useEffect(() => {
     const prev = lastIndexRef.current
     if (safeIndex === prev) return
-    const direction: FlipDirection = safeIndex > prev ? 'forward' : 'backward'
+    const direction: TFlipDirection = safeIndex > prev ? 'forward' : 'backward'
     setOutgoing({ index: prev, direction })
     lastIndexRef.current = safeIndex
     const t = window.setTimeout(() => setOutgoing(null), duration)
@@ -110,11 +112,14 @@ export default function PageFlip({
       onClick={handleClick}
       onKeyDown={handleKeyDown}
       data-rounded={rounded ? 'true' : 'false'}
-      className={[
-        'relative mx-auto w-full select-none bg-slate-200 shadow-[0_40px_80px_-30px_rgba(0,0,0,0.4)] ring-1 ring-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-50 dark:bg-slate-900 dark:shadow-[0_40px_80px_-30px_rgba(0,0,0,0.6)] dark:ring-white/5 dark:focus-visible:ring-sky-400 dark:focus-visible:ring-offset-slate-950',
+      className={clsx(
+        'relative mx-auto w-full select-none bg-slate-200',
+        'shadow-[0_40px_80px_-30px_rgba(0,0,0,0.4)] ring-1 ring-slate-200',
+        'dark:bg-slate-900 dark:shadow-[0_40px_80px_-30px_rgba(0,0,0,0.6)] dark:ring-white/5',
+        FocusRingOnSlate50,
         roundClass,
         mode === 'spread' ? 'aspect-[3/2] max-w-4xl' : 'aspect-[3/4] max-w-2xl',
-      ].filter(Boolean).join(' ')}
+      )}
       style={{ perspective: '2400px' }}
     >
       <PageSurface
@@ -137,7 +142,7 @@ export default function PageFlip({
               <OutgoingCoverLeaf
                 key={`cover-${outgoing.index}-${safeIndex}-${outgoing.direction}`}
                 pages={pages}
-                direction={outgoing.direction as FlipDirection}
+                direction={outgoing.direction as TFlipDirection}
                 duration={duration}
                 presetId={presetId}
                 roundClass={innerRoundClass}
@@ -150,7 +155,7 @@ export default function PageFlip({
                   pages={pages}
                   fromIndex={outgoing.index}
                   toIndex={safeIndex}
-                  direction={outgoing.direction as FlipDirection}
+                  direction={outgoing.direction as TFlipDirection}
                   duration={duration}
                   presetId={presetId}
                   roundClass={innerRoundClass}
@@ -163,7 +168,7 @@ export default function PageFlip({
                   index={outgoing.index}
                   mode={mode}
                   coverAlone={isCoverPage(outgoing.index)}
-                  direction={outgoing.direction as FlipDirection}
+                  direction={outgoing.direction as TFlipDirection}
                   duration={duration}
                   presetId={presetId}
                   roundClass={innerRoundClass}
@@ -191,10 +196,10 @@ const staticStyle = (
   return { backfaceVisibility: 'hidden' }
 }
 
-interface PageSurfaceProps {
+interface IPageSurfaceProps {
   pages: string[]
   index: number
-  mode: ViewMode
+  mode: TViewMode
   coverAlone: boolean
   outgoingExists: boolean
   staticStyle: React.CSSProperties
@@ -214,7 +219,7 @@ function PageSurface({
   loading = 'lazy',
   fetchPriority,
   roundClass,
-}: PageSurfaceProps) {
+}: IPageSurfaceProps) {
   if (mode === 'single') {
     const src = pages[index]
     return (
@@ -298,14 +303,14 @@ function PageSurface({
   )
 }
 
-interface OutgoingLayerProps {
+interface IOutgoingLayerProps {
   pages: string[]
   index: number
-  mode: ViewMode
+  mode: TViewMode
   coverAlone: boolean
-  direction: FlipDirection
+  direction: TFlipDirection
   duration: number
-  presetId: FlipPresetId
+  presetId: TFlipPresetId
   roundClass: string
 }
 
@@ -318,8 +323,8 @@ function OutgoingLayer({
   duration,
   presetId,
   roundClass,
-}: OutgoingLayerProps) {
-  const frames: FlipFrames = getFlipPreset(presetId).build(direction, duration)
+}: IOutgoingLayerProps) {
+  const frames: IFlipFrames = getFlipPreset(presetId).build(direction, duration)
   const [phase, setPhase] = useState<'initial' | 'final'>('initial')
 
   useEffect(() => {
@@ -422,7 +427,7 @@ function OutgoingLayer({
 }
 
 const shouldUseSpreadLeaf = (
-  mode: ViewMode,
+  mode: TViewMode,
   outgoingIndex: number,
   currentIndex: number,
   isCoverPage: (index: number) => boolean,
@@ -433,13 +438,13 @@ const shouldUseSpreadLeaf = (
   return true
 }
 
-interface OutgoingSpreadLeafProps {
+interface IOutgoingSpreadLeafProps {
   pages: string[]
   fromIndex: number
   toIndex: number
-  direction: FlipDirection
+  direction: TFlipDirection
   duration: number
-  presetId: FlipPresetId
+  presetId: TFlipPresetId
   roundClass: string
 }
 
@@ -451,8 +456,8 @@ function OutgoingSpreadLeaf({
   duration,
   presetId,
   roundClass,
-}: OutgoingSpreadLeafProps) {
-  const frames: FlipFrames = getFlipPreset(presetId).build(direction, duration, 'spread')
+}: IOutgoingSpreadLeafProps) {
+  const frames: IFlipFrames = getFlipPreset(presetId).build(direction, duration, 'spread')
   const [phase, setPhase] = useState<'initial' | 'final'>('initial')
 
   useEffect(() => {
@@ -563,8 +568,8 @@ function OutgoingSpreadLeaf({
  * is handled by the existing leaf paths.
  */
 const shouldUseCoverLeaf = (
-  mode: ViewMode,
-  coverMode: CoverMode,
+  mode: TViewMode,
+  coverMode: TCoverMode,
   outgoingIndex: number,
   currentIndex: number,
 ): boolean => {
@@ -575,11 +580,11 @@ const shouldUseCoverLeaf = (
   return isForward || isBackward
 }
 
-interface OutgoingCoverLeafProps {
+interface IOutgoingCoverLeafProps {
   pages: string[]
-  direction: FlipDirection
+  direction: TFlipDirection
   duration: number
-  presetId: FlipPresetId
+  presetId: TFlipPresetId
   roundClass: string
 }
 
@@ -596,13 +601,13 @@ function OutgoingCoverLeaf({
   duration,
   presetId,
   roundClass,
-}: OutgoingCoverLeafProps) {
+}: IOutgoingCoverLeafProps) {
   // We always build the forward (right-pivot, 0° → -180°) spread frames and
   // swap initial/final for backward, so the leaf's DOM position and pivot stay
   // identical between directions — the cover never DOM-jumps between sides.
-  const baseFrames: FlipFrames = getFlipPreset(presetId)
+  const baseFrames: IFlipFrames = getFlipPreset(presetId)
     .build('forward', duration, 'spread')
-  const frames: FlipFrames = direction === 'forward'
+  const frames: IFlipFrames = direction === 'forward'
     ? baseFrames
     : { initial: baseFrames.final, final: baseFrames.initial }
 

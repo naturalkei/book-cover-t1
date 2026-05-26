@@ -1,6 +1,9 @@
+import clsx from 'clsx'
 import { useState, type ChangeEvent } from 'react'
 
-interface ThumbnailScrubberProps {
+import { RangeInput, ThumbnailButton } from '@/lib/class-names'
+
+interface IThumbnailScrubberProps {
   pages: string[]
   pageIndex: number
   onPageChange: (next: number) => void
@@ -14,7 +17,7 @@ export default function ThumbnailScrubber({
   pageIndex,
   onPageChange,
   thumbnailWindow = 8,
-}: ThumbnailScrubberProps) {
+}: IThumbnailScrubberProps) {
   const [dragging, setDragging] = useState(false)
   const [previewIndex, setPreviewIndex] = useState(pageIndex)
   const [lastPageIndex, setLastPageIndex] = useState(pageIndex)
@@ -91,7 +94,7 @@ export default function ThumbnailScrubber({
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerUp}
         onBlur={handleBlur}
-        className="mt-3 w-full accent-sky-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:accent-sky-400 dark:focus-visible:ring-sky-400 dark:focus-visible:ring-offset-slate-950"
+        className={clsx('mt-3', RangeInput)}
       />
 
       <ul
@@ -106,12 +109,12 @@ export default function ThumbnailScrubber({
               aria-current={index === pageIndex ? 'page' : undefined}
               data-testid={`scrubber-thumb-${index}`}
               onClick={() => onPageChange(index)}
-              className={[
-                'block h-16 w-12 overflow-hidden rounded-md ring-1 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-sky-400 dark:focus-visible:ring-offset-slate-950',
+              className={clsx(
+                ThumbnailButton,
                 index === pageIndex
                   ? 'ring-sky-500 shadow-[0_0_0_2px_rgba(56,189,248,0.4)] dark:ring-sky-400'
                   : 'ring-slate-200 hover:ring-slate-300 dark:ring-white/10 dark:hover:ring-white/30',
-              ].join(' ')}
+              )}
             >
               <img
                 src={pages[index]}
@@ -129,7 +132,7 @@ export default function ThumbnailScrubber({
   )
 }
 
-interface Thumbnail {
+interface IThumbnail {
   index: number
 }
 
@@ -137,8 +140,8 @@ const computeThumbnails = (
   total: number,
   pageIndex: number,
   windowSize: number,
-): Thumbnail[] => {
-  const all: Thumbnail[] = Array.from({ length: total }, (_, index) => ({ index }))
+): IThumbnail[] => {
+  const all: IThumbnail[] = Array.from({ length: total }, (_, index) => ({ index }))
   if (total <= VIRTUALIZE_THRESHOLD) return all
   return all.filter(({ index }) => Math.abs(index - pageIndex) <= windowSize)
 }

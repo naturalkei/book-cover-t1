@@ -1,11 +1,11 @@
 import BookCard from '@/components/gallery/BookCard'
-import { books as defaultBooks, type Book } from '@/data/books'
+import { Books as defaultBooks, type IBook } from '@/data/books'
 
-interface GalleryProps {
-  books?: Book[]
+interface IGalleryProps {
+  books?: IBook[]
 }
 
-export default function Gallery({ books = defaultBooks }: GalleryProps) {
+export default function Gallery({ books = defaultBooks }: IGalleryProps) {
   return (
     <section className="mx-auto w-full max-w-6xl px-6 py-16 sm:py-24">
       <header className="mb-12 max-w-3xl">

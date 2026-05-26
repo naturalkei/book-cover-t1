@@ -1,16 +1,16 @@
 import { useCallback, useEffect, useState } from 'react'
 
-import type { CoverMode } from './cover-mode'
+import type { TCoverMode } from './cover-mode'
 
-export type ViewMode = 'single' | 'spread'
+export type TViewMode = 'single' | 'spread'
 
 export const VIEW_MODE_STORAGE_KEY = 'book-flip-showcase:view-mode'
 export const VIEW_MODE_BREAKPOINT = '(min-width: 1024px)'
 
-const isViewMode = (value: unknown): value is ViewMode =>
+const isViewMode = (value: unknown): value is TViewMode =>
   value === 'single' || value === 'spread'
 
-const detectInitialViewMode = (): ViewMode => {
+const detectInitialViewMode = (): TViewMode => {
   if (typeof window === 'undefined') return 'single'
   try {
     const stored = window.localStorage.getItem(VIEW_MODE_STORAGE_KEY)
@@ -24,7 +24,7 @@ const detectInitialViewMode = (): ViewMode => {
 }
 
 export function useViewMode() {
-  const [viewMode, setViewModeState] = useState<ViewMode>(() => detectInitialViewMode())
+  const [viewMode, setViewModeState] = useState<TViewMode>(() => detectInitialViewMode())
 
   useEffect(() => {
     try {
@@ -35,7 +35,7 @@ export function useViewMode() {
     }
   }, [viewMode])
 
-  const setViewMode = useCallback((next: ViewMode) => setViewModeState(next), [])
+  const setViewMode = useCallback((next: TViewMode) => setViewModeState(next), [])
   const toggleViewMode = useCallback(() => {
     setViewModeState((prev) => (prev === 'single' ? 'spread' : 'single'))
   }, [])
@@ -43,7 +43,7 @@ export function useViewMode() {
   return { viewMode, setViewMode, toggleViewMode }
 }
 
-export const stepForMode = (mode: ViewMode): 1 | 2 => (mode === 'spread' ? 2 : 1)
+export const getStepForMode = (mode: TViewMode): 1 | 2 => (mode === 'spread' ? 2 : 1)
 
 export const snapToStep = (pageIndex: number, step: number): number => {
   if (step <= 1) return Math.max(0, pageIndex)
@@ -59,8 +59,8 @@ export const snapToStep = (pageIndex: number, step: number): number => {
  */
 export const snapPage = (
   pageIndex: number,
-  mode: ViewMode,
-  coverMode: CoverMode = 'spread',
+  mode: TViewMode,
+  coverMode: TCoverMode = 'spread',
 ): number => {
   if (pageIndex <= 0) return 0
   if (mode === 'single') return pageIndex
@@ -73,10 +73,10 @@ export const snapPage = (
  * Effective step from a given page index. The cover is a one-page step;
  * everything else follows the view mode.
  */
-export const effectiveStep = (
+export const getEffectiveStep = (
   pageIndex: number,
-  mode: ViewMode,
-  coverMode: CoverMode = 'spread',
+  mode: TViewMode,
+  coverMode: TCoverMode = 'spread',
 ): 1 | 2 => {
   if (mode === 'single') return 1
   if (coverMode === 'spread') return 2
@@ -85,6 +85,6 @@ export const effectiveStep = (
 
 export const isCoverAlone = (
   pageIndex: number,
-  mode: ViewMode,
-  coverMode: CoverMode = 'spread',
+  mode: TViewMode,
+  coverMode: TCoverMode = 'spread',
 ): boolean => mode === 'spread' && coverMode === 'single' && pageIndex === 0

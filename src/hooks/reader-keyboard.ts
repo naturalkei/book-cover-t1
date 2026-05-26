@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 
-interface UseReaderKeyboardOptions {
+interface IUseReaderKeyboardOptions {
   pageIndex: number
   totalPages: number
   onPageChange: (next: number) => void
@@ -32,7 +32,7 @@ export function useReaderKeyboard({
   onExit,
   step = 1,
   snap,
-}: UseReaderKeyboardOptions): void {
+}: IUseReaderKeyboardOptions): void {
   useEffect(() => {
     const safeStep = Math.max(1, Math.floor(step))
     const lastIndex = Math.max(0, totalPages - 1)

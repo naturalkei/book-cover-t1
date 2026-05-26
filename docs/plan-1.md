@@ -89,6 +89,13 @@ Keyboard map:
   - React component files (`.tsx`): **PascalCase** — e.g. `CoverModeToggle.tsx`, `BookCard.tsx`.
   - All other source files and folder names: **kebab-case** — e.g. `book-pages.ts`, `flip-presets.ts`, `reader-keyboard.ts`.
   - Hook modules under `src/hooks/`: kebab-case filenames **without** the `use` prefix; exported hook functions keep the `use` prefix — e.g. `cover-mode.ts` exports `useCoverMode`.
+- **Variable naming**:
+  - `interface` → `IPascalCase` (e.g. `IBook`, `IPageFlipProps`)
+  - `type` → `TPascalCase` (e.g. `TViewMode`, `TFlipPresetId`)
+  - Literal constants → `UPPER_SNAKE_CASE` (e.g. `DEFAULT_FLIP_PRESET`)
+  - Constant objects/arrays → `PascalCase` (e.g. `Books`, `FlipPresetList`)
+  - Functions → camelCase with a verb prefix (e.g. `getBookById`, `snapPage`)
+- **Tailwind classes**: when a `className` string exceeds 80 characters, group with `clsx` across multiple lines (shared bundles live in `src/lib/class-names.ts`).
 - **Commit messages**: [Conventional Commits](https://www.conventionalcommits.org/) (`feat:`, `fix:`, `docs:`, `refactor:`, `chore:`, `test:`).
 - **Branching**: One branch per GitHub issue, named `<type>/<issue-id>-<short-slug>` (e.g. `feat/12-thumbnail-scrubber`).
 - **PRs**: Squash-merge by default. PR title mirrors the Conventional Commit summary and links the issue.

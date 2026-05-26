@@ -1,40 +1,40 @@
 import type { CSSProperties } from 'react'
 
-import type { ViewMode } from '@/hooks/view-mode'
+import type { TViewMode } from '@/hooks/view-mode'
 
-export type FlipDirection = 'forward' | 'backward'
-export type FlipPresetId = 'classic' | 'curl' | 'slide' | 'fade' | 'tilt'
+export type TFlipDirection = 'forward' | 'backward'
+export type TFlipPresetId = 'classic' | 'curl' | 'slide' | 'fade' | 'tilt'
 
-export interface FlipFrames {
+export interface IFlipFrames {
   initial: CSSProperties
   final: CSSProperties
 }
 
-export interface FlipPreset {
-  id: FlipPresetId
+export interface IFlipPreset {
+  id: TFlipPresetId
   label: string
   description: string
-  build: (direction: FlipDirection, durationMs: number, mode?: ViewMode) => FlipFrames
+  build: (direction: TFlipDirection, durationMs: number, mode?: TViewMode) => IFlipFrames
 }
 
-const easeFlip = 'cubic-bezier(0.2, 0.7, 0.2, 1)'
-const easeCurl = 'cubic-bezier(0.32, 0, 0.32, 1)'
-const easeSlide = 'cubic-bezier(0.3, 0, 0.2, 1)'
-const easeTilt = 'cubic-bezier(0.4, 0.05, 0.2, 1)'
+const EASE_FLIP = 'cubic-bezier(0.2, 0.7, 0.2, 1)'
+const EASE_CURL = 'cubic-bezier(0.32, 0, 0.32, 1)'
+const EASE_SLIDE = 'cubic-bezier(0.3, 0, 0.2, 1)'
+const EASE_TILT = 'cubic-bezier(0.4, 0.05, 0.2, 1)'
 
-const restingTransform = 'none'
+const RESTING_TRANSFORM = 'none'
 
-const spineOrigin = (direction: FlipDirection): 'left center' | 'right center' =>
+const resolveSpineOrigin = (direction: TFlipDirection): 'left center' | 'right center' =>
   direction === 'forward' ? 'left center' : 'right center'
 
-const FLIP_PRESETS: FlipPreset[] = [
+const FlipPresets: IFlipPreset[] = [
   {
     id: 'classic',
     label: 'Classic',
     description: 'Pure 3D rotateY page turn.',
     build: (direction, duration, mode = 'single') => {
-      const transformOrigin = spineOrigin(direction)
-      const transition = `transform ${duration}ms ${easeFlip}, opacity ${duration}ms ease-in-out`
+      const transformOrigin = resolveSpineOrigin(direction)
+      const transition = `transform ${duration}ms ${EASE_FLIP}, opacity ${duration}ms ease-in-out`
       const finalRotation = direction === 'forward' ? 'rotateY(-180deg)' : 'rotateY(180deg)'
       const shadow = mode === 'spread'
         ? '0 18px 40px -16px rgba(0, 0, 0, 0.5)'
@@ -44,7 +44,7 @@ const FLIP_PRESETS: FlipPreset[] = [
         initial: {
           transformOrigin,
           transition,
-          transform: restingTransform,
+          transform: RESTING_TRANSFORM,
           opacity: 1,
           boxShadow: shadow,
           ...singleFace,
@@ -65,8 +65,8 @@ const FLIP_PRESETS: FlipPreset[] = [
     label: 'Curl',
     description: 'Soft paper curl with a lifted corner.',
     build: (direction, duration, mode = 'single') => {
-      const transformOrigin = spineOrigin(direction)
-      const transition = `transform ${duration}ms ${easeCurl}, opacity ${duration}ms ease-in-out, filter ${duration}ms ease-in-out`
+      const transformOrigin = resolveSpineOrigin(direction)
+      const transition = `transform ${duration}ms ${EASE_CURL}, opacity ${duration}ms ease-in-out, filter ${duration}ms ease-in-out`
       const finalTransform = mode === 'spread'
         ? (direction === 'forward'
           ? 'perspective(1600px) rotateY(-178deg)'
@@ -79,7 +79,7 @@ const FLIP_PRESETS: FlipPreset[] = [
         initial: {
           transformOrigin,
           transition,
-          transform: restingTransform,
+          transform: RESTING_TRANSFORM,
           opacity: 1,
           filter: 'drop-shadow(0 4px 6px rgba(0, 0, 0, 0.15))',
           ...singleFace,
@@ -100,7 +100,7 @@ const FLIP_PRESETS: FlipPreset[] = [
     label: 'Slide',
     description: 'Flat horizontal slide, newspaper feel.',
     build: (direction, duration, mode = 'single') => {
-      const transition = `transform ${duration}ms ${easeSlide}, opacity ${duration}ms ease-in-out`
+      const transition = `transform ${duration}ms ${EASE_SLIDE}, opacity ${duration}ms ease-in-out`
       const finalTransform = mode === 'spread'
         ? (direction === 'forward' ? 'translateX(110%)' : 'translateX(-110%)')
         : (direction === 'forward' ? 'translateX(-100%)' : 'translateX(100%)')
@@ -132,13 +132,13 @@ const FLIP_PRESETS: FlipPreset[] = [
         initial: {
           transformOrigin: 'center center',
           transition,
-          transform: restingTransform,
+          transform: RESTING_TRANSFORM,
           opacity: 1,
         },
         final: {
           transformOrigin: 'center center',
           transition,
-          transform: restingTransform,
+          transform: RESTING_TRANSFORM,
           opacity: 0,
         },
       }
@@ -149,8 +149,8 @@ const FLIP_PRESETS: FlipPreset[] = [
     label: 'Book Tilt',
     description: 'Pages lift and tilt off the table.',
     build: (direction, duration, mode = 'single') => {
-      const transformOrigin = spineOrigin(direction)
-      const transition = `transform ${duration}ms ${easeTilt}, opacity ${duration}ms ease-in-out`
+      const transformOrigin = resolveSpineOrigin(direction)
+      const transition = `transform ${duration}ms ${EASE_TILT}, opacity ${duration}ms ease-in-out`
       // Spread-mode tilt deliberately omits scale: the leaf does not fade out
       // (opacity stays at 1 so the back face can paint), so any scale change
       // would read as a shrink-then-grow glitch when the static layer takes
@@ -167,7 +167,7 @@ const FLIP_PRESETS: FlipPreset[] = [
         initial: {
           transformOrigin,
           transition,
-          transform: restingTransform,
+          transform: RESTING_TRANSFORM,
           opacity: 1,
           boxShadow: '0 30px 50px -20px rgba(0, 0, 0, 0.35)',
           ...singleFace,
@@ -185,17 +185,17 @@ const FLIP_PRESETS: FlipPreset[] = [
   },
 ]
 
-export const FLIP_PRESET_LIST: ReadonlyArray<FlipPreset> = FLIP_PRESETS
-export const DEFAULT_FLIP_PRESET: FlipPresetId = 'classic'
-export const REDUCED_MOTION_PRESET: FlipPresetId = 'fade'
+export const FlipPresetList: ReadonlyArray<IFlipPreset> = FlipPresets
+export const DEFAULT_FLIP_PRESET: TFlipPresetId = 'classic'
+export const REDUCED_MOTION_PRESET: TFlipPresetId = 'fade'
 
-const PRESET_MAP: Record<FlipPresetId, FlipPreset> = FLIP_PRESETS.reduce(
+const PresetMap: Record<TFlipPresetId, IFlipPreset> = FlipPresets.reduce(
   (acc, preset) => ({ ...acc, [preset.id]: preset }),
-  {} as Record<FlipPresetId, FlipPreset>,
+  {} as Record<TFlipPresetId, IFlipPreset>,
 )
 
-export const getFlipPreset = (id: FlipPresetId): FlipPreset =>
-  PRESET_MAP[id] ?? PRESET_MAP[DEFAULT_FLIP_PRESET]
+export const getFlipPreset = (id: TFlipPresetId): IFlipPreset =>
+  PresetMap[id] ?? PresetMap[DEFAULT_FLIP_PRESET]
 
-export const isFlipPresetId = (value: unknown): value is FlipPresetId =>
-  typeof value === 'string' && value in PRESET_MAP
+export const isFlipPresetId = (value: unknown): value is TFlipPresetId =>
+  typeof value === 'string' && value in PresetMap

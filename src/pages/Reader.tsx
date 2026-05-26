@@ -11,17 +11,18 @@ import ReaderControls from '@/components/reader/ReaderControls'
 import RoundedToggle from '@/components/reader/RoundedToggle'
 import ThumbnailScrubber from '@/components/reader/ThumbnailScrubber'
 import ViewModeToggle from '@/components/reader/ViewModeToggle'
+import { TextLink } from '@/lib/class-names'
 import { getBookById } from '@/data/books'
-import { useCoverMode, type CoverMode } from '@/hooks/cover-mode'
+import { useCoverMode, type TCoverMode } from '@/hooks/cover-mode'
 import { useFlipPreset } from '@/hooks/flip-preset'
 import { useReaderKeyboard } from '@/hooks/reader-keyboard'
 import { useRoundedCorners } from '@/hooks/rounded-corners'
 import {
-  effectiveStep,
+  getEffectiveStep,
   isCoverAlone as computeIsCoverAlone,
   snapPage,
   useViewMode,
-  type ViewMode,
+  type TViewMode,
 } from '@/hooks/view-mode'
 
 export default function Reader() {
@@ -48,7 +49,7 @@ export default function Reader() {
   }
 
   const isCoverAlone = computeIsCoverAlone(pageIndex, viewMode, coverMode)
-  const step = effectiveStep(pageIndex, viewMode, coverMode)
+  const step = getEffectiveStep(pageIndex, viewMode, coverMode)
 
   const commitPage = useCallback(
     (next: number) => {
@@ -60,11 +61,11 @@ export default function Reader() {
     [book?.pages.length, snap],
   )
 
-  const handleViewModeChange = useCallback((next: ViewMode) => {
+  const handleViewModeChange = useCallback((next: TViewMode) => {
     setViewMode(next)
   }, [setViewMode])
 
-  const handleCoverModeChange = useCallback((next: CoverMode) => {
+  const handleCoverModeChange = useCallback((next: TCoverMode) => {
     setCoverMode(next)
   }, [setCoverMode])
 
@@ -96,10 +97,7 @@ export default function Reader() {
       className="mx-auto flex w-full max-w-5xl flex-col px-6 py-12"
     >
       <header className="mb-10 flex flex-wrap items-center justify-between gap-4">
-        <Link
-          to="/"
-          className="inline-flex items-center gap-2 text-sm font-medium text-slate-600 transition hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:text-slate-300 dark:hover:text-white dark:focus-visible:ring-sky-400 dark:focus-visible:ring-offset-slate-950"
-        >
+        <Link to="/" className={TextLink}>
           <ArrowLeft className="h-4 w-4" aria-hidden="true" />
           Back to gallery
         </Link>

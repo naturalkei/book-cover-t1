@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom'
 
-interface NotFoundProps {
+import { GalleryBackLink } from '@/lib/class-names'
+
+interface INotFoundProps {
   title?: string
   message?: string
 }
@@ -8,7 +10,7 @@ interface NotFoundProps {
 export default function NotFound({
   title = 'Page not found',
   message = 'The page you are looking for does not exist.',
-}: NotFoundProps) {
+}: INotFoundProps) {
   return (
     <section
       role="alert"
@@ -17,10 +19,7 @@ export default function NotFound({
       <p className="text-sm font-medium uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400">404</p>
       <h1 className="mt-3 text-3xl font-bold text-slate-900 dark:text-white">{title}</h1>
       <p className="mt-3 text-slate-600 dark:text-slate-400">{message}</p>
-      <Link
-        to="/"
-        className="mt-8 inline-flex items-center gap-2 rounded-full bg-slate-200 px-5 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:bg-white/5 dark:text-slate-200 dark:hover:bg-white/10 dark:focus-visible:ring-sky-400 dark:focus-visible:ring-offset-slate-950"
-      >
+      <Link to="/" className={GalleryBackLink}>
         Back to gallery
       </Link>
     </section>

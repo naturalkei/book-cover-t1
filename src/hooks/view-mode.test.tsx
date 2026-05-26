@@ -2,11 +2,11 @@ import { act, renderHook } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import {
-  effectiveStep,
+  getEffectiveStep,
   isCoverAlone,
   snapPage,
   snapToStep,
-  stepForMode,
+  getStepForMode,
   useViewMode,
   VIEW_MODE_BREAKPOINT,
   VIEW_MODE_STORAGE_KEY,
@@ -79,12 +79,12 @@ describe('useViewMode', () => {
   })
 })
 
-describe('stepForMode', () => {
+describe('getStepForMode', () => {
   it('returns 1 for single', () => {
-    expect(stepForMode('single')).toBe(1)
+    expect(getStepForMode('single')).toBe(1)
   })
   it('returns 2 for spread', () => {
-    expect(stepForMode('spread')).toBe(2)
+    expect(getStepForMode('spread')).toBe(2)
   })
 })
 
@@ -133,21 +133,21 @@ describe('snapPage (cover-aware)', () => {
   })
 })
 
-describe('effectiveStep (cover-aware)', () => {
+describe('getEffectiveStep (cover-aware)', () => {
   it('is 1 for single mode regardless of index', () => {
-    expect(effectiveStep(0, 'single')).toBe(1)
-    expect(effectiveStep(5, 'single', 'single')).toBe(1)
+    expect(getEffectiveStep(0, 'single')).toBe(1)
+    expect(getEffectiveStep(5, 'single', 'single')).toBe(1)
   })
 
   it('is 2 across the whole spread in coverMode=spread', () => {
-    expect(effectiveStep(0, 'spread', 'spread')).toBe(2)
-    expect(effectiveStep(4, 'spread', 'spread')).toBe(2)
+    expect(getEffectiveStep(0, 'spread', 'spread')).toBe(2)
+    expect(getEffectiveStep(4, 'spread', 'spread')).toBe(2)
   })
 
   it('is 1 only at the cover (index 0) and 2 elsewhere in coverMode=single', () => {
-    expect(effectiveStep(0, 'spread', 'single')).toBe(1)
-    expect(effectiveStep(1, 'spread', 'single')).toBe(2)
-    expect(effectiveStep(3, 'spread', 'single')).toBe(2)
+    expect(getEffectiveStep(0, 'spread', 'single')).toBe(1)
+    expect(getEffectiveStep(1, 'spread', 'single')).toBe(2)
+    expect(getEffectiveStep(3, 'spread', 'single')).toBe(2)
   })
 })
 
