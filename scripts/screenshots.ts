@@ -30,7 +30,7 @@ const seedPrefs = async (
 }
 
 const openReaderSpread = async (page: Page) => {
-  await page.goto(BASE_URL + '/')
+  await page.goto(BASE_URL + '/v1')
   await page.locator('[aria-label="Book gallery"] a').first().click()
   await page.waitForSelector('[data-testid="page-flip"]')
   // Cover-alone → first interior spread (pages 2–3)
@@ -45,7 +45,7 @@ const shots: Shot[] = [
     name: 'hero.png',
     theme: 'dark',
     setup: async (page) => {
-      await page.goto(BASE_URL + '/')
+      await page.goto(BASE_URL + '/v1')
       await page.waitForSelector('[aria-label="Book gallery"]')
     },
   },
@@ -53,7 +53,7 @@ const shots: Shot[] = [
     name: 'gallery-light.png',
     theme: 'light',
     setup: async (page) => {
-      await page.goto(BASE_URL + '/')
+      await page.goto(BASE_URL + '/v1')
       await page.waitForSelector('[aria-label="Book gallery"]')
     },
   },
