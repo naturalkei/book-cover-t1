@@ -12,7 +12,8 @@ test.describe('v2 smoke', () => {
 
     await expect(page).toHaveTitle(/.+/)
     await expect(page.getByRole('heading', { level: 1, name: /next-generation reading room/i })).toBeVisible()
-    await expect(page.getByRole('link', { name: /browse the stable v1 demo/i })).toHaveAttribute('href', '/v1')
+    await expect(page.getByRole('list', { name: /book gallery/i })).toBeVisible()
+    await expect(page.getByRole('link', { name: /stable v1 demo/i })).toHaveAttribute('href', '/v1')
 
     expect(errors).toEqual([])
   })

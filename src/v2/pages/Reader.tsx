@@ -1,37 +1,173 @@
 import clsx from 'clsx'
 import { ArrowLeft } from 'lucide-react'
-import { Link, useParams } from 'react-router-dom'
+import { useCallback, useState } from 'react'
+import { Link, useNavigate, useParams } from 'react-router-dom'
+
+import CoverModeToggle from '@v2/components/reader/CoverModeToggle'
+import FlipPresetPicker from '@v2/components/reader/FlipPresetPicker'
+import NotFound from '@v2/components/NotFound'
+import PageFlip from '@v2/components/reader/PageFlip'
+import PageJumpInput from '@v2/components/reader/PageJumpInput'
+import ReaderControls from '@v2/components/reader/ReaderControls'
+import RoundedToggle from '@v2/components/reader/RoundedToggle'
+import ThumbnailScrubber from '@v2/components/reader/ThumbnailScrubber'
+import ViewModeToggle from '@v2/components/reader/ViewModeToggle'
+import { TextLink } from '@v2/lib/class-names'
+import { getBookById } from '@v2/data/books'
+import { useCoverMode, type TCoverMode } from '@v2/hooks/cover-mode'
+import { useFlipPreset } from '@v2/hooks/flip-preset'
+import { useReaderKeyboard } from '@v2/hooks/reader-keyboard'
+import { useRoundedCorners } from '@v2/hooks/rounded-corners'
+import {
+  getEffectiveStep,
+  isCoverAlone as computeIsCoverAlone,
+  snapPage,
+  useViewMode,
+  type TViewMode,
+} from '@v2/hooks/view-mode'
 
 export default function Reader() {
   const { id } = useParams<{ id: string }>()
+  const navigate = useNavigate()
+  const book = id ? getBookById(id) : undefined
+
+  const { viewMode, setViewMode } = useViewMode()
+  const { coverMode, setCoverMode } = useCoverMode()
+  const { rounded, setRounded } = useRoundedCorners()
+  const { preset, effectivePreset, setPreset, reducedMotionOverride } = useFlipPreset()
+
+  const snap = useCallback(
+    (index: number) => snapPage(index, viewMode, coverMode),
+    [viewMode, coverMode],
+  )
+
+  const [pageIndex, setPageIndex] = useState(0)
+  const [lastSnapKey, setLastSnapKey] = useState(`${viewMode}:${coverMode}`)
+  const currentSnapKey = `${viewMode}:${coverMode}`
+  if (lastSnapKey !== currentSnapKey) {
+    setLastSnapKey(currentSnapKey)
+    setPageIndex((current) => snap(current))
+  }
+
+  const isCoverAlone = computeIsCoverAlone(pageIndex, viewMode, coverMode)
+  const step = getEffectiveStep(pageIndex, viewMode, coverMode)
+
+  const commitPage = useCallback(
+    (next: number) => {
+      const total = book?.pages.length ?? 0
+      if (total === 0) return
+      const clamped = Math.min(Math.max(0, next), total - 1)
+      setPageIndex(snap(clamped))
+    },
+    [book?.pages.length, snap],
+  )
+
+  const handleViewModeChange = useCallback((next: TViewMode) => {
+    setViewMode(next)
+  }, [setViewMode])
+
+  const handleCoverModeChange = useCallback((next: TCoverMode) => {
+    setCoverMode(next)
+  }, [setCoverMode])
+
+  const exitToGallery = useCallback(() => navigate('/v2'), [navigate])
+
+  useReaderKeyboard({
+    pageIndex,
+    totalPages: book?.pages.length ?? 0,
+    onPageChange: commitPage,
+    onExit: exitToGallery,
+    step,
+    snap,
+  })
+
+  if (!book) {
+    return (
+      <NotFound
+        title="Book not found"
+        message="We couldn’t find a book with that id. It may have been removed or never existed."
+      />
+    )
+  }
+
+  const totalPages = book.pages.length
 
   return (
-    <section className="mx-auto max-w-3xl px-6 py-16 sm:py-24">
-      <Link
-        to="/v2"
-        className={clsx(
-          'inline-flex items-center gap-2 text-sm font-medium',
-          'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white',
-        )}
-      >
-        <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-        Back to v2 preview
-      </Link>
+    <section
+      aria-label={`Reader for ${book.title}`}
+      className="mx-auto flex w-full max-w-5xl flex-col px-6 py-12"
+    >
+      <header className="mb-10 flex flex-wrap items-center justify-between gap-4">
+        <Link to="/v2" className={TextLink}>
+          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+          Back to gallery
+        </Link>
 
-      <div
-        role="status"
-        className={clsx(
-          'mt-12 rounded-2xl border border-dashed border-slate-300',
-          'bg-white p-10 dark:border-slate-700 dark:bg-slate-900',
-        )}
-      >
-        <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">
-          v2 reader stub
-        </h1>
-        <p className="mt-3 text-slate-600 dark:text-slate-400">
-          Book <code className="font-mono text-sm">{id}</code> will open here once the v2 reader engine ships.
-        </p>
+        <div className="flex flex-wrap items-center gap-4">
+          <ViewModeToggle mode={viewMode} onChange={handleViewModeChange} />
+          <CoverModeToggle
+            coverMode={coverMode}
+            onChange={handleCoverModeChange}
+            disabled={viewMode !== 'spread'}
+          />
+          <RoundedToggle rounded={rounded} onChange={setRounded} />
+          <div className="text-right">
+            <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">{book.title}</h1>
+            <p className="text-sm text-slate-600 dark:text-slate-300">by {book.author}</p>
+          </div>
+        </div>
+      </header>
+
+      <PageFlip
+        pages={book.pages}
+        pageIndex={pageIndex}
+        onPageChange={commitPage}
+        ariaLabel={`${book.title} spread`}
+        mode={viewMode}
+        coverMode={coverMode}
+        presetId={effectivePreset}
+        step={step}
+        rounded={rounded}
+      />
+
+      <ReaderControls
+        pageIndex={pageIndex}
+        totalPages={totalPages}
+        onPageChange={commitPage}
+        step={step}
+        isCoverAlone={isCoverAlone}
+      />
+
+      <div className="mt-4 flex justify-center">
+        <PageJumpInput
+          pageIndex={pageIndex}
+          totalPages={totalPages}
+          onPageChange={commitPage}
+          step={step}
+          snap={snap}
+        />
       </div>
+
+      <ThumbnailScrubber
+        pages={book.pages}
+        pageIndex={pageIndex}
+        onPageChange={commitPage}
+      />
+
+      <FlipPresetPicker
+        value={preset}
+        effectiveValue={effectivePreset}
+        onChange={setPreset}
+        locked={reducedMotionOverride}
+      />
+
+      <footer className={clsx(
+        'mt-6 text-center text-xs uppercase tracking-[0.2em]',
+        'text-slate-600 dark:text-slate-400',
+      )}
+      >
+        tap a page side, use the controls, scrub, or jump to any page
+      </footer>
     </section>
   )
 }
