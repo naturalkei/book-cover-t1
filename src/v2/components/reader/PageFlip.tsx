@@ -768,15 +768,17 @@ const FLIP_CLEANUP_GRACE_MS = 80
 function useFlipTransitionEnd(
   duration: number,
   onComplete: () => void,
-): React.RefObject<HTMLElement | null> {
-  const ref = useRef<HTMLElement | null>(null)
+): (node: HTMLElement | null) => void {
   const onCompleteRef = useRef(onComplete)
+  const [node, setNode] = useState<HTMLElement | null>(null)
 
   useEffect(() => {
     onCompleteRef.current = onComplete
   }, [onComplete])
 
   useEffect(() => {
+    if (!node) return
+
     let done = false
     const finish = () => {
       if (done) return
@@ -784,22 +786,23 @@ function useFlipTransitionEnd(
       onCompleteRef.current()
     }
 
-    const el = ref.current
     const onEnd = (event: TransitionEvent) => {
-      if (event.target !== el) return
+      if (event.target !== node) return
       finish()
     }
 
-    el?.addEventListener('transitionend', onEnd)
+    node.addEventListener('transitionend', onEnd)
     const fallback = window.setTimeout(finish, duration + FLIP_CLEANUP_GRACE_MS)
 
     return () => {
-      el?.removeEventListener('transitionend', onEnd)
+      node.removeEventListener('transitionend', onEnd)
       window.clearTimeout(fallback)
     }
-  }, [duration])
+  }, [duration, node])
 
-  return ref
+  return useCallback((next: HTMLElement | null) => {
+    setNode(next)
+  }, [])
 }
 
 const clamp = (value: number, min: number, max: number): number => {
