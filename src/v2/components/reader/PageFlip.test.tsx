@@ -39,7 +39,22 @@ describe('PageFlip', () => {
   it('updates the displayed page when pageIndex changes', () => {
     const { rerender } = render(<PageFlip pages={PAGES} pageIndex={0} />)
     rerender(<PageFlip pages={PAGES} pageIndex={2} />)
+    expect(screen.getByAltText(/page 1/i)).toHaveAttribute('src', '/p/a.svg')
+    act(() => {
+      vi.runAllTimers()
+    })
     expect(screen.getByAltText(/page 3/i)).toHaveAttribute('src', '/p/c.svg')
+  })
+
+  it('keeps the static page on the outgoing index until the flip completes', () => {
+    const { rerender } = render(<PageFlip pages={PAGES} pageIndex={0} presetId="classic" />)
+    rerender(<PageFlip pages={PAGES} pageIndex={1} presetId="classic" />)
+    expect(screen.getByTestId('page-flip-current')).toHaveAttribute('src', '/p/a.svg')
+    act(() => {
+      vi.runAllTimers()
+    })
+    expect(screen.getByTestId('page-flip-current')).toHaveAttribute('src', '/p/b.svg')
+    expect(screen.queryByTestId('page-flip-outgoing')).not.toBeInTheDocument()
   })
 
   it('exposes flip direction via data-flip-state during the animation', () => {
@@ -277,6 +292,9 @@ describe('PageFlip', () => {
       expect(screen.getByTestId('page-flip')).toHaveAttribute('data-cover-alone', 'true')
       rerender(<PageFlip pages={PAGES} pageIndex={1} mode="spread" coverMode="single" />)
       expect(screen.getByTestId('page-flip')).toHaveAttribute('data-cover-alone', 'false')
+      act(() => {
+        vi.runAllTimers()
+      })
       expect(screen.getByTestId('page-flip-current-right')).toHaveAttribute('src', '/p/c.svg')
     })
 

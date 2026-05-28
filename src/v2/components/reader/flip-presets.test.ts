@@ -46,10 +46,18 @@ describe('flipPresets registry', () => {
     }
   })
 
-  it('every preset.initial has opacity 1 and final has opacity 0 (so a real from-to transition exists)', () => {
-    for (const preset of FlipPresetList) {
-      const { initial, final } = preset.build('forward', 700)
-      expect(initial.opacity).toBe(1)
+  it('single-mode classic and curl stay opaque at final (backface culling hides the turned leaf)', () => {
+    for (const id of ['classic', 'curl'] as const) {
+      const preset = FlipPresetList.find(p => p.id === id)!
+      const { final } = preset.build('forward', 700, 'single')
+      expect(final.opacity).toBe(1)
+    }
+  })
+
+  it('opacity-based presets still fade to 0 in single mode', () => {
+    for (const id of ['slide', 'fade', 'tilt'] as const) {
+      const preset = FlipPresetList.find(p => p.id === id)!
+      const { final } = preset.build('forward', 700, 'single')
       expect(final.opacity).toBe(0)
     }
   })
