@@ -78,7 +78,9 @@ const FlipPresets: IFlipPreset[] = [
           transformOrigin,
           transition,
           transform: buildPaperClassicTransform(direction, 'turned'),
-          opacity: mode === 'spread' ? 1 : 0,
+          // Single mode: keep opacity 1 — backfaceVisibility hides the leaf at ±180°
+          // so the static layer beneath is revealed without an opacity crossfade flash.
+          opacity: 1,
           boxShadow: classicShadow(mode, 'lifted'),
           ...singleFace,
         },
@@ -113,7 +115,7 @@ const FlipPresets: IFlipPreset[] = [
           transformOrigin,
           transition,
           transform: finalTransform,
-          opacity: mode === 'spread' ? 1 : 0,
+          opacity: 1,
           filter: 'drop-shadow(0 24px 24px rgba(0, 0, 0, 0.35))',
           ...singleFace,
         },

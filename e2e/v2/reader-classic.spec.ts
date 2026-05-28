@@ -17,4 +17,23 @@ test.describe('v2 reader classic flip', () => {
     expect(style).toMatch(/rotateY\(-180deg\)/)
     expect(style).toMatch(/perspective\(2200px\)/)
   })
+
+  test('flips forward three times without swapping the current image mid-animation', async ({ page }) => {
+    await page.goto('/v2/book/atlas-of-cities')
+    await expect(page.getByTestId('page-flip')).toBeVisible()
+
+    const current = page.getByTestId('page-flip-current')
+    const initialSrc = await current.getAttribute('src')
+
+    for (let i = 0; i < 3; i += 1) {
+      const srcBefore = await current.getAttribute('src')
+      await page.getByRole('button', { name: /next page/i }).click()
+      await expect(page.getByTestId('page-flip-outgoing')).toBeVisible({ timeout: 300 })
+      await expect(current).toHaveAttribute('src', srcBefore)
+      await expect(page.getByTestId('page-flip-outgoing')).toHaveCount(0, { timeout: 2000 })
+    }
+
+    const finalSrc = await current.getAttribute('src')
+    expect(finalSrc).not.toBe(initialSrc)
+  })
 })
