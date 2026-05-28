@@ -416,12 +416,28 @@ Initially, run **full suite** on every PR; split when v2 tests multiply.
 
 ## 8. v2 Product Milestones (tentative)
 
-1. **M2.1 — Shell** — VersionHub, `/v2` routes, namespaced storage, CI split prep.
-2. **M2.2 — Reader engine** — WebGL or canvas flip prototype; feature flag inside v2 only.
+1. **M2.1 — Shell** — VersionHub, `/v2` routes, namespaced storage, CI split prep. *(shell landed in Phase 1 — #67; storage namespacing still open.)*
+2. **M2.2 — Reader engine (CSS flip polish, sequential)** — fork v1 flip stack into `src/v2/components/reader/`, then improve motion quality **before** any WebGL/canvas prototype:
+   - **M2.2a — Classic realism** ([#71](https://github.com/naturalkei/book-cover-t1/issues/71)) — paper-like page turn starting from the Classic preset; improved easing, perspective, subtle curl arc (CSS-first).
+   - **M2.2b — Flicker fix** ([#72](https://github.com/naturalkei/book-cover-t1/issues/72)) — analyze/fix image flash during outgoing ↔ static handoff (unmount timing, opacity, phantom layers, decode overlap).
+   - **M2.2c — Spine shadow polish** ([#73](https://github.com/naturalkei/book-cover-t1/issues/73)) — center gutter shadow that pops at `data-flip-phase="final"`; smooth shadow/gutter easing with leaf progress.
+   - **M2.2d — Engine prototype (later)** — WebGL or canvas flip only if CSS path hits a quality/perf ceiling.
 3. **M2.3 — Gallery++** — filters, search, series grouping, richer metadata.
 4. **M2.4 — Content** — optional EPUB ingest (client-side), still no DRM.
 5. **M2.5 — Polish** — perf budget, a11y audit, i18n if needed.
 6. **M2.6 — Release** — `v2.0.0` tag via release-please on `release`; v1 code frozen under `src/v1/`.
+
+### 8.1 Reader flip quality backlog (M2.2 detail)
+
+Work **only** under `src/v2/**` on branch `maint/v2`. Do not import `@v1/` — fork the v1 reader flip baseline once, then iterate.
+
+| Order | Issue | Problem | Key code (v1 baseline to fork) |
+| --- | --- | --- | --- |
+| 1 | [#71](https://github.com/naturalkei/book-cover-t1/issues/71) | Classic flip feels flat, not like turning paper | `flip-presets.ts` classic frames; `OutgoingLayer` double-RAF phase (#39) |
+| 2 | [#72](https://github.com/naturalkei/book-cover-t1/issues/72) | Page image flickers mid-flip | `PageFlip` outgoing timeout + `PageSurface` key remount; classic `opacity: 0` at `final` |
+| 3 | [#73](https://github.com/naturalkei/book-cover-t1/issues/73) | Center spine shadow pops at `final` phase | Container spine gradient (`PageFlip` L177–184) + preset `boxShadow`/`drop-shadow` at phase swap |
+
+**Definition of done (M2.2a–c):** `/v2/book/:id` renders the improved reader; v1 untouched; Vitest + Playwright v2 reader specs green; manual side-by-side with `/v1` documents the delta.
 
 Open questions carried from plan-1 §6 plus:
 
@@ -481,4 +497,4 @@ The hub is intentionally tiny — no feature creep:
 
 ---
 
-*Document version: 2026-05-26 · Status: proposed · Author: agent workflow*
+*Document version: 2026-05-27 · Status: proposed · Author: agent workflow*
