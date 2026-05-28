@@ -8,7 +8,7 @@ import { PageFlipSurface } from '@v2/lib/class-names'
 
 import {
   DEFAULT_FLIP_PRESET,
-  FLIP_EASE_PAPER,
+  FLIP_PERSPECTIVE,
   getFlipPreset,
   type TFlipDirection,
   type IFlipFrames,
@@ -45,10 +45,10 @@ export default function PageFlip({
   const safeIndex = clamp(pageIndex, 0, pages.length - 1)
   const defaultStep: 1 | 2 = mode === 'spread' ? (isCoverPage(safeIndex) ? 1 : 2) : 1
   const step: 1 | 2 = stepProp ?? defaultStep
-  const coverAlone = isCoverPage(safeIndex)
   const roundClass = rounded ? 'rounded-2xl' : ''
   const innerRoundClass = rounded ? 'rounded-2xl' : ''
   const [displayIndex, setDisplayIndex] = useState(safeIndex)
+  const displayCoverAlone = isCoverPage(displayIndex)
   const displayIndexRef = useRef(safeIndex)
   const [outgoing, setOutgoing] = useState<{
     index: number
@@ -57,34 +57,45 @@ export default function PageFlip({
   } | null>(null)
   const lastIndexRef = useRef(safeIndex)
   const flipIdRef = useRef(0)
-  const [outgoingPhase, setOutgoingPhase] = useState<'initial' | 'final'>('initial')
   const reducedMotion = useReducedMotion()
   const duration = reducedMotion ? Math.min(220, flipDurationMs) : flipDurationMs
 
   const completeFlip = useCallback((flipId: number) => {
     setOutgoing((current) => {
       if (!current || current.flipId !== flipId) return current
-      displayIndexRef.current = lastIndexRef.current
-      setDisplayIndex(lastIndexRef.current)
       return null
     })
-  }, [])
+    if (displayIndexRef.current !== safeIndex) {
+      displayIndexRef.current = safeIndex
+      setDisplayIndex(safeIndex)
+    }
+  }, [safeIndex])
 
   useEffect(() => {
     if (safeIndex === lastIndexRef.current) return
     const prevTarget = lastIndexRef.current
     const direction: TFlipDirection = safeIndex > prevTarget ? 'forward' : 'backward'
     const flipId = ++flipIdRef.current
+    const deferLastReveal =
+      mode === 'single'
+      && direction === 'forward'
+      && safeIndex === pages.length - 1
 
-    setOutgoing((current) => {
-      if (current) {
-        displayIndexRef.current = prevTarget
-        setDisplayIndex(prevTarget)
-      }
-      return { index: current ? displayIndexRef.current : prevTarget, direction, flipId }
-    })
+    if (!deferLastReveal) {
+      displayIndexRef.current = safeIndex
+      setDisplayIndex(safeIndex)
+    }
+    setOutgoing({ index: prevTarget, direction, flipId })
     lastIndexRef.current = safeIndex
-  }, [safeIndex])
+  }, [safeIndex, mode, pages.length])
+
+  const staticSpreadMask = resolveStaticSpreadMask(
+    outgoing,
+    displayIndex,
+    pages,
+    mode,
+    coverMode,
+  )
 
   useEffect(() => {
     const offsets = mode === 'spread' ? [-4, -3, -2, -1, 2, 3, 4, 5] : [-2, -1, 1, 2]
@@ -130,7 +141,7 @@ export default function PageFlip({
       data-testid="page-flip"
       data-flip-state={outgoing?.direction ?? 'idle'}
       data-view-mode={mode}
-      data-cover-alone={coverAlone ? 'true' : 'false'}
+      data-cover-alone={displayCoverAlone ? 'true' : 'false'}
       data-flip-preset={presetId}
       tabIndex={0}
       onClick={handleClick}
@@ -141,13 +152,14 @@ export default function PageFlip({
         roundClass,
         mode === 'spread' ? 'aspect-[3/2] max-w-4xl' : 'aspect-[3/4] max-w-2xl',
       )}
-      style={{ perspective: '2400px' }}
+      style={{ perspective: FLIP_PERSPECTIVE, transformStyle: 'preserve-3d' }}
     >
       <PageSurface
         pages={pages}
         index={displayIndex}
         mode={mode}
-        coverAlone={coverAlone}
+        coverAlone={displayCoverAlone}
+        spreadMask={staticSpreadMask}
         outgoingExists={!!outgoing}
         staticStyle={staticStyle(reducedMotion, !!outgoing, duration)}
         testIdPrefix="page-flip-current"
@@ -168,7 +180,6 @@ export default function PageFlip({
                 presetId={presetId}
                 roundClass={innerRoundClass}
                 onFlipComplete={() => completeFlip(outgoing.flipId)}
-                onPhaseChange={setOutgoingPhase}
               />
             )
             : shouldUseSpreadLeaf(mode, outgoing.index, safeIndex, isCoverPage)
@@ -183,7 +194,6 @@ export default function PageFlip({
                   presetId={presetId}
                   roundClass={innerRoundClass}
                   onFlipComplete={() => completeFlip(outgoing.flipId)}
-                  onPhaseChange={setOutgoingPhase}
                 />
               )
               : (
@@ -198,7 +208,6 @@ export default function PageFlip({
                   presetId={presetId}
                   roundClass={innerRoundClass}
                   onFlipComplete={() => completeFlip(outgoing.flipId)}
-                  onPhaseChange={setOutgoingPhase}
                 />
               )
         )
@@ -209,15 +218,11 @@ export default function PageFlip({
           <span
             aria-hidden="true"
             data-testid="page-flip-spine"
-            data-flip-phase={outgoing ? outgoingPhase : 'idle'}
+            data-flip-phase={outgoing ? 'active' : 'idle'}
             className={clsx(
               'pointer-events-none absolute inset-y-0 left-1/2 z-[15] w-px -translate-x-1/2',
-              'bg-linear-to-b from-black/0 via-black/35 to-black/0',
+              'bg-linear-to-b from-black/0 via-black/30 to-black/0 opacity-80',
             )}
-            style={{
-              opacity: outgoing && outgoingPhase === 'final' ? 1 : 0.8,
-              transition: `opacity ${duration}ms ${FLIP_EASE_PAPER}`,
-            }}
           />
         )
         : null}
@@ -236,11 +241,19 @@ const staticStyle = (
   return { backfaceVisibility: 'hidden' }
 }
 
+interface IStaticSpreadMask {
+  holdLeft: boolean
+  holdLeftBlank: boolean
+  holdRight: boolean
+  outgoingIndex: number
+}
+
 interface IPageSurfaceProps {
   pages: string[]
   index: number
   mode: TViewMode
   coverAlone: boolean
+  spreadMask: IStaticSpreadMask | null
   outgoingExists: boolean
   staticStyle: React.CSSProperties
   testIdPrefix: string
@@ -254,6 +267,7 @@ function PageSurface({
   index,
   mode,
   coverAlone,
+  spreadMask,
   staticStyle,
   testIdPrefix,
   loading = 'lazy',
@@ -302,8 +316,12 @@ function PageSurface({
     )
   }
 
-  const leftSrc = pages[index]
-  const rightSrc = pages[index + 1]
+  const leftSrc = spreadMask?.holdLeft
+    ? (spreadMask.holdLeftBlank ? undefined : pages[spreadMask.outgoingIndex])
+    : pages[index]
+  const rightSrc = spreadMask?.holdRight
+    ? pages[spreadMask.outgoingIndex + 1]
+    : pages[index + 1]
 
   return (
     <div
@@ -311,15 +329,25 @@ function PageSurface({
       className={clsx('absolute inset-0 z-0 flex overflow-hidden', roundClass)}
       style={staticStyle}
     >
-      <img
-        src={leftSrc}
-        alt={`Page ${index + 1}`}
-        loading={loading}
-        decoding="async"
-        fetchPriority={fetchPriority}
-        data-testid={testIdPrefix}
-        className="h-full w-1/2 object-cover"
-      />
+      {leftSrc
+        ? (
+          <img
+            src={leftSrc}
+            alt={`Page ${index + 1}`}
+            loading={loading}
+            decoding="async"
+            fetchPriority={fetchPriority}
+            data-testid={testIdPrefix}
+            className="h-full w-1/2 object-cover"
+          />
+        )
+        : (
+          <div
+            aria-hidden="true"
+            data-testid={`${testIdPrefix}-left-blank`}
+            className="h-full w-1/2 bg-slate-100 dark:bg-slate-950/40"
+          />
+        )}
       {rightSrc
         ? (
           <img
@@ -352,7 +380,6 @@ interface IOutgoingLayerProps {
   presetId: TFlipPresetId
   roundClass: string
   onFlipComplete: () => void
-  onPhaseChange?: (phase: 'initial' | 'final') => void
 }
 
 function OutgoingLayer({
@@ -365,15 +392,10 @@ function OutgoingLayer({
   presetId,
   roundClass,
   onFlipComplete,
-  onPhaseChange,
 }: IOutgoingLayerProps) {
   const frames: IFlipFrames = getFlipPreset(presetId).build(direction, duration)
   const [phase, setPhase] = useState<'initial' | 'final'>('initial')
   const transitionRef = useFlipTransitionEnd(duration, onFlipComplete)
-
-  useEffect(() => {
-    onPhaseChange?.(phase)
-  }, [phase, onPhaseChange])
 
   useEffect(() => {
     let cancelled = false
@@ -499,7 +521,6 @@ interface IOutgoingSpreadLeafProps {
   presetId: TFlipPresetId
   roundClass: string
   onFlipComplete: () => void
-  onPhaseChange?: (phase: 'initial' | 'final') => void
 }
 
 function OutgoingSpreadLeaf({
@@ -511,15 +532,10 @@ function OutgoingSpreadLeaf({
   presetId,
   roundClass,
   onFlipComplete,
-  onPhaseChange,
 }: IOutgoingSpreadLeafProps) {
   const frames: IFlipFrames = getFlipPreset(presetId).build(direction, duration, 'spread')
   const [phase, setPhase] = useState<'initial' | 'final'>('initial')
   const transitionRef = useFlipTransitionEnd(duration, onFlipComplete)
-
-  useEffect(() => {
-    onPhaseChange?.(phase)
-  }, [phase, onPhaseChange])
 
   useEffect(() => {
     let cancelled = false
@@ -649,7 +665,6 @@ interface IOutgoingCoverLeafProps {
   presetId: TFlipPresetId
   roundClass: string
   onFlipComplete: () => void
-  onPhaseChange?: (phase: 'initial' | 'final') => void
 }
 
 /**
@@ -666,7 +681,6 @@ function OutgoingCoverLeaf({
   presetId,
   roundClass,
   onFlipComplete,
-  onPhaseChange,
 }: IOutgoingCoverLeafProps) {
   // We always build the forward (right-pivot, 0° → -180°) spread frames and
   // swap initial/final for backward, so the leaf's DOM position and pivot stay
@@ -679,10 +693,6 @@ function OutgoingCoverLeaf({
 
   const [phase, setPhase] = useState<'initial' | 'final'>('initial')
   const transitionRef = useFlipTransitionEnd(duration, onFlipComplete)
-
-  useEffect(() => {
-    onPhaseChange?.(phase)
-  }, [phase, onPhaseChange])
 
   useEffect(() => {
     let cancelled = false
@@ -789,6 +799,28 @@ function OutgoingCoverLeaf({
 }
 
 const FLIP_CLEANUP_GRACE_MS = 80
+
+const resolveStaticSpreadMask = (
+  outgoing: { index: number } | null,
+  targetIndex: number,
+  pages: string[],
+  mode: TViewMode,
+  coverMode: TCoverMode,
+): IStaticSpreadMask | null => {
+  if (!outgoing || mode !== 'spread') return null
+  const isCoverAlonePage = (index: number): boolean =>
+    coverMode === 'single' && index === 0
+
+  const fromCover = isCoverAlonePage(outgoing.index)
+  const targetMissingTrailing = pages[targetIndex + 1] == null
+
+  return {
+    holdLeft: fromCover || targetMissingTrailing,
+    holdLeftBlank: fromCover,
+    holdRight: targetMissingTrailing,
+    outgoingIndex: outgoing.index,
+  }
+}
 
 function useFlipTransitionEnd(
   duration: number,

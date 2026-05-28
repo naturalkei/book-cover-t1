@@ -75,14 +75,14 @@ describe('flipPresets registry', () => {
     const classic = FlipPresetList.find(p => p.id === 'classic')!
     const forward = classic.build('forward', 700)
     const backward = classic.build('backward', 700)
-    expect(String(forward.initial.transform)).toContain('rotateY(0deg)')
-    expect(String(forward.initial.transform)).toContain('perspective(2200px)')
-    expect(String(forward.final.transform)).toContain('rotateY(-180deg)')
-    expect(String(forward.final.transform)).toContain('rotateX(-2.5deg)')
-    expect(String(backward.final.transform)).toContain('rotateY(180deg)')
+    expect(String(forward.initial.transform)).toBe('rotateY(0deg)')
+    expect(String(forward.final.transform)).toBe('rotateY(-180deg)')
+    expect(String(forward.final.transform)).not.toMatch(/rotateX/)
+    expect(String(backward.final.transform)).toBe('rotateY(180deg)')
     expect(forward.final.transformOrigin).toBe('left center')
     expect(backward.final.transformOrigin).toBe('right center')
-    expect(forward.initial.boxShadow).not.toEqual(forward.final.boxShadow)
+    expect(forward.initial.boxShadow).toEqual(forward.final.boxShadow)
+    expect(String(forward.initial.transform)).not.toEqual(String(forward.final.transform))
   })
 
   it('slide preset rests at translateX 0 and slides off-screen in the final frame', () => {
@@ -100,6 +100,13 @@ describe('flipPresets registry', () => {
     const curl = FlipPresetList.find(p => p.id === 'curl')!
     const curlSpread = curl.build('forward', 700, 'spread')
     expect(curlSpread.initial.filter).toEqual(curlSpread.final.filter)
+  })
+
+  it('classic preset keeps boxShadow constant in single mode (transform-only motion)', () => {
+    const classic = FlipPresetList.find(p => p.id === 'classic')!
+    const single = classic.build('forward', 700, 'single')
+    expect(single.initial.boxShadow).toEqual(single.final.boxShadow)
+    expect(single.initial.transition).not.toContain('box-shadow')
   })
 
   it('spread-mode rotational presets pivot at the spine and keep the leaf opaque (so the back face shows)', () => {
