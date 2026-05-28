@@ -18,6 +18,7 @@ export interface IFlipPreset {
 }
 
 const EASE_PAPER = 'cubic-bezier(0.42, 0.05, 0.25, 1)'
+export const FLIP_EASE_PAPER = EASE_PAPER
 const EASE_CURL = 'cubic-bezier(0.32, 0, 0.32, 1)'
 const EASE_SLIDE = 'cubic-bezier(0.3, 0, 0.2, 1)'
 const EASE_TILT = 'cubic-bezier(0.4, 0.05, 0.2, 1)'
@@ -65,13 +66,16 @@ const FlipPresets: IFlipPreset[] = [
         `box-shadow ${duration}ms ${EASE_PAPER}`,
       ].join(', ')
       const singleFace = mode === 'single' ? { backfaceVisibility: 'hidden' as const } : {}
+      const spreadLeafShadow = classicShadow('spread', 'rest')
+      const initialShadow = mode === 'spread' ? spreadLeafShadow : classicShadow(mode, 'rest')
+      const finalShadow = mode === 'spread' ? spreadLeafShadow : classicShadow(mode, 'lifted')
       return {
         initial: {
           transformOrigin,
           transition,
           transform: buildPaperClassicTransform(direction, 'rest'),
           opacity: 1,
-          boxShadow: classicShadow(mode, 'rest'),
+          boxShadow: initialShadow,
           ...singleFace,
         },
         final: {
@@ -81,7 +85,7 @@ const FlipPresets: IFlipPreset[] = [
           // Single mode: keep opacity 1 — backfaceVisibility hides the leaf at ±180°
           // so the static layer beneath is revealed without an opacity crossfade flash.
           opacity: 1,
-          boxShadow: classicShadow(mode, 'lifted'),
+          boxShadow: finalShadow,
           ...singleFace,
         },
       }
@@ -102,13 +106,18 @@ const FlipPresets: IFlipPreset[] = [
           ? 'perspective(1600px) rotateY(-160deg) translateX(-6%) skewY(-1deg)'
           : 'perspective(1600px) rotateY(160deg) translateX(6%) skewY(1deg)')
       const singleFace = mode === 'single' ? { backfaceVisibility: 'hidden' as const } : {}
+      const restFilter = 'drop-shadow(0 4px 6px rgba(0, 0, 0, 0.15))'
+      const liftedFilter = 'drop-shadow(0 24px 24px rgba(0, 0, 0, 0.35))'
+      const spreadFilter = 'drop-shadow(0 8px 16px rgba(0, 0, 0, 0.22))'
+      const initialFilter = mode === 'spread' ? spreadFilter : restFilter
+      const finalFilter = mode === 'spread' ? spreadFilter : liftedFilter
       return {
         initial: {
           transformOrigin,
           transition,
           transform: RESTING_TRANSFORM,
           opacity: 1,
-          filter: 'drop-shadow(0 4px 6px rgba(0, 0, 0, 0.15))',
+          filter: initialFilter,
           ...singleFace,
         },
         final: {
@@ -116,7 +125,7 @@ const FlipPresets: IFlipPreset[] = [
           transition,
           transform: finalTransform,
           opacity: 1,
-          filter: 'drop-shadow(0 24px 24px rgba(0, 0, 0, 0.35))',
+          filter: finalFilter,
           ...singleFace,
         },
       }

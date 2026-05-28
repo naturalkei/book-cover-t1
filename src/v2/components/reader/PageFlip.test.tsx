@@ -202,6 +202,29 @@ describe('PageFlip', () => {
       expect(phantom.querySelector('img')).toHaveAttribute('src', '/p/a.svg')
     })
 
+    it('renders a resting spine overlay in spread mode', () => {
+      render(<PageFlip pages={PAGES} pageIndex={0} mode="spread" />)
+      const spine = screen.getByTestId('page-flip-spine')
+      expect(spine).toHaveAttribute('data-flip-phase', 'idle')
+      expect(spine).toHaveStyle({ opacity: '0.8' })
+    })
+
+    it('ramps spine overlay in sync with outgoing phase instead of on outgoing mount', async () => {
+      vi.useRealTimers()
+      const { rerender } = render(<PageFlip pages={PAGES} pageIndex={0} mode="spread" presetId="classic" />)
+      rerender(<PageFlip pages={PAGES} pageIndex={2} mode="spread" presetId="classic" />)
+      const spine = screen.getByTestId('page-flip-spine')
+      expect(spine).toHaveAttribute('data-flip-phase', 'initial')
+      expect(spine).toHaveStyle({ opacity: '0.8' })
+      await waitFor(() => {
+        expect(screen.getByTestId('page-flip-outgoing')).toHaveAttribute('data-flip-phase', 'final')
+      })
+      expect(spine).toHaveAttribute('data-flip-phase', 'final')
+      const style = spine.getAttribute('style') ?? ''
+      expect(style).toContain(`opacity ${700}ms`)
+      expect(style).toContain('cubic-bezier(0.42, 0.05, 0.25, 1)')
+    })
+
     it('spread-mode forward leaf sits on the right half and pivots at the left (spine)', () => {
       const { rerender } = render(<PageFlip pages={PAGES} pageIndex={0} mode="spread" />)
       rerender(<PageFlip pages={PAGES} pageIndex={2} mode="spread" />)
