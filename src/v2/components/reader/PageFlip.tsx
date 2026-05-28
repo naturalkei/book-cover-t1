@@ -8,6 +8,7 @@ import { PageFlipSurface } from '@v2/lib/class-names'
 
 import {
   DEFAULT_FLIP_PRESET,
+  FLIP_EASE_PAPER,
   getFlipPreset,
   type TFlipDirection,
   type IFlipFrames,
@@ -56,6 +57,7 @@ export default function PageFlip({
   } | null>(null)
   const lastIndexRef = useRef(safeIndex)
   const flipIdRef = useRef(0)
+  const [outgoingPhase, setOutgoingPhase] = useState<'initial' | 'final'>('initial')
   const reducedMotion = useReducedMotion()
   const duration = reducedMotion ? Math.min(220, flipDurationMs) : flipDurationMs
 
@@ -166,6 +168,7 @@ export default function PageFlip({
                 presetId={presetId}
                 roundClass={innerRoundClass}
                 onFlipComplete={() => completeFlip(outgoing.flipId)}
+                onPhaseChange={setOutgoingPhase}
               />
             )
             : shouldUseSpreadLeaf(mode, outgoing.index, safeIndex, isCoverPage)
@@ -180,6 +183,7 @@ export default function PageFlip({
                   presetId={presetId}
                   roundClass={innerRoundClass}
                   onFlipComplete={() => completeFlip(outgoing.flipId)}
+                  onPhaseChange={setOutgoingPhase}
                 />
               )
               : (
@@ -194,6 +198,7 @@ export default function PageFlip({
                   presetId={presetId}
                   roundClass={innerRoundClass}
                   onFlipComplete={() => completeFlip(outgoing.flipId)}
+                  onPhaseChange={setOutgoingPhase}
                 />
               )
         )
@@ -204,13 +209,15 @@ export default function PageFlip({
           <span
             aria-hidden="true"
             data-testid="page-flip-spine"
+            data-flip-phase={outgoing ? outgoingPhase : 'idle'}
             className={clsx(
-              'pointer-events-none absolute inset-y-0 left-1/2 w-px',
-              '-translate-x-1/2 transition-opacity duration-300',
-              outgoing
-                ? 'bg-linear-to-b from-black/0 via-black/45 to-black/0 opacity-100'
-                : 'bg-linear-to-b from-black/0 via-black/25 to-black/0 opacity-80',
+              'pointer-events-none absolute inset-y-0 left-1/2 z-[15] w-px -translate-x-1/2',
+              'bg-linear-to-b from-black/0 via-black/35 to-black/0',
             )}
+            style={{
+              opacity: outgoing && outgoingPhase === 'final' ? 1 : 0.8,
+              transition: `opacity ${duration}ms ${FLIP_EASE_PAPER}`,
+            }}
           />
         )
         : null}
@@ -345,6 +352,7 @@ interface IOutgoingLayerProps {
   presetId: TFlipPresetId
   roundClass: string
   onFlipComplete: () => void
+  onPhaseChange?: (phase: 'initial' | 'final') => void
 }
 
 function OutgoingLayer({
@@ -357,10 +365,15 @@ function OutgoingLayer({
   presetId,
   roundClass,
   onFlipComplete,
+  onPhaseChange,
 }: IOutgoingLayerProps) {
   const frames: IFlipFrames = getFlipPreset(presetId).build(direction, duration)
   const [phase, setPhase] = useState<'initial' | 'final'>('initial')
   const transitionRef = useFlipTransitionEnd(duration, onFlipComplete)
+
+  useEffect(() => {
+    onPhaseChange?.(phase)
+  }, [phase, onPhaseChange])
 
   useEffect(() => {
     let cancelled = false
@@ -486,6 +499,7 @@ interface IOutgoingSpreadLeafProps {
   presetId: TFlipPresetId
   roundClass: string
   onFlipComplete: () => void
+  onPhaseChange?: (phase: 'initial' | 'final') => void
 }
 
 function OutgoingSpreadLeaf({
@@ -497,10 +511,15 @@ function OutgoingSpreadLeaf({
   presetId,
   roundClass,
   onFlipComplete,
+  onPhaseChange,
 }: IOutgoingSpreadLeafProps) {
   const frames: IFlipFrames = getFlipPreset(presetId).build(direction, duration, 'spread')
   const [phase, setPhase] = useState<'initial' | 'final'>('initial')
   const transitionRef = useFlipTransitionEnd(duration, onFlipComplete)
+
+  useEffect(() => {
+    onPhaseChange?.(phase)
+  }, [phase, onPhaseChange])
 
   useEffect(() => {
     let cancelled = false
@@ -630,6 +649,7 @@ interface IOutgoingCoverLeafProps {
   presetId: TFlipPresetId
   roundClass: string
   onFlipComplete: () => void
+  onPhaseChange?: (phase: 'initial' | 'final') => void
 }
 
 /**
@@ -646,6 +666,7 @@ function OutgoingCoverLeaf({
   presetId,
   roundClass,
   onFlipComplete,
+  onPhaseChange,
 }: IOutgoingCoverLeafProps) {
   // We always build the forward (right-pivot, 0° → -180°) spread frames and
   // swap initial/final for backward, so the leaf's DOM position and pivot stay
@@ -658,6 +679,10 @@ function OutgoingCoverLeaf({
 
   const [phase, setPhase] = useState<'initial' | 'final'>('initial')
   const transitionRef = useFlipTransitionEnd(duration, onFlipComplete)
+
+  useEffect(() => {
+    onPhaseChange?.(phase)
+  }, [phase, onPhaseChange])
 
   useEffect(() => {
     let cancelled = false

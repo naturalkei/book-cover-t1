@@ -92,6 +92,16 @@ describe('flipPresets registry', () => {
     expect(final.transform).toBe('translateX(-100%)')
   })
 
+  it('spread-mode classic and curl keep leaf shadow/filter constant across phases', () => {
+    const classic = FlipPresetList.find(p => p.id === 'classic')!
+    const classicSpread = classic.build('forward', 700, 'spread')
+    expect(classicSpread.initial.boxShadow).toEqual(classicSpread.final.boxShadow)
+
+    const curl = FlipPresetList.find(p => p.id === 'curl')!
+    const curlSpread = curl.build('forward', 700, 'spread')
+    expect(curlSpread.initial.filter).toEqual(curlSpread.final.filter)
+  })
+
   it('spread-mode rotational presets pivot at the spine and keep the leaf opaque (so the back face shows)', () => {
     const classic = FlipPresetList.find(p => p.id === 'classic')!
     const forward = classic.build('forward', 700, 'spread')

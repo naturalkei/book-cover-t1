@@ -36,4 +36,17 @@ test.describe('v2 reader classic flip', () => {
     const finalSrc = await current.getAttribute('src')
     expect(finalSrc).not.toBe(initialSrc)
   })
+
+  test('ramps spine overlay with leaf phase in spread mode', async ({ page }) => {
+    await page.goto('/v2/book/atlas-of-cities')
+    await page.getByTestId('view-mode-spread').click()
+    await expect(page.getByTestId('page-flip')).toHaveAttribute('data-view-mode', 'spread')
+
+    await page.getByRole('button', { name: /next page/i }).click()
+
+    const spine = page.getByTestId('page-flip-spine')
+    await expect(spine).toHaveAttribute('data-flip-phase', 'initial')
+    await expect(page.getByTestId('page-flip-outgoing')).toHaveAttribute('data-flip-phase', 'final', { timeout: 500 })
+    await expect(spine).toHaveAttribute('data-flip-phase', 'final')
+  })
 })
