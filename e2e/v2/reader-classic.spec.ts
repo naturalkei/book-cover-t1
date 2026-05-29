@@ -15,29 +15,30 @@ test.describe('v2 reader classic flip', () => {
 
     const style = await outgoing.evaluate((node) => node.getAttribute('style') ?? '')
     expect(style).toMatch(/rotateY\(-180deg\)/)
-    expect(style).toMatch(/perspective\(2200px\)/)
+    expect(style).not.toMatch(/rotateX/)
   })
 
-  test('flips forward three times without swapping the current image mid-animation', async ({ page }) => {
+  test('reveals the target page under the outgoing leaf during forward flips', async ({ page }) => {
     await page.goto('/v2/book/atlas-of-cities')
-    await expect(page.getByTestId('page-flip')).toBeVisible()
+    await page.getByTestId('view-mode-single').click()
+    await expect(page.getByTestId('page-flip')).toHaveAttribute('data-view-mode', 'single')
 
     const current = page.getByTestId('page-flip-current')
-    const initialSrc = await current.getAttribute('src')
 
     for (let i = 0; i < 3; i += 1) {
-      const srcBefore = await current.getAttribute('src')
       await page.getByRole('button', { name: /next page/i }).click()
-      await expect(page.getByTestId('page-flip-outgoing')).toBeVisible({ timeout: 300 })
-      await expect(current).toHaveAttribute('src', srcBefore)
-      await expect(page.getByTestId('page-flip-outgoing')).toHaveCount(0, { timeout: 2000 })
+      const outgoing = page.getByTestId('page-flip-outgoing')
+      await expect(outgoing).toBeVisible({ timeout: 300 })
+      const outgoingSrc = await outgoing.getAttribute('src')
+      const currentSrc = await current.getAttribute('src')
+      expect(outgoingSrc).not.toBeNull()
+      expect(currentSrc).not.toBeNull()
+      expect(outgoingSrc).not.toEqual(currentSrc)
+      await expect(outgoing).toHaveCount(0, { timeout: 2000 })
     }
-
-    const finalSrc = await current.getAttribute('src')
-    expect(finalSrc).not.toBe(initialSrc)
   })
 
-  test('ramps spine overlay with leaf phase in spread mode', async ({ page }) => {
+  test('keeps spine overlay at constant opacity during spread flips', async ({ page }) => {
     await page.goto('/v2/book/atlas-of-cities')
     await page.getByTestId('view-mode-spread').click()
     await expect(page.getByTestId('page-flip')).toHaveAttribute('data-view-mode', 'spread')
@@ -45,8 +46,8 @@ test.describe('v2 reader classic flip', () => {
     await page.getByRole('button', { name: /next page/i }).click()
 
     const spine = page.getByTestId('page-flip-spine')
-    await expect(spine).toHaveAttribute('data-flip-phase', 'initial')
+    await expect(spine).toHaveAttribute('data-flip-phase', 'active')
     await expect(page.getByTestId('page-flip-outgoing')).toHaveAttribute('data-flip-phase', 'final', { timeout: 500 })
-    await expect(spine).toHaveAttribute('data-flip-phase', 'final')
+    await expect(spine).toHaveClass(/opacity-80/)
   })
 })

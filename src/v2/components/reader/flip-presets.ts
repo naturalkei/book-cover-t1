@@ -24,6 +24,7 @@ const EASE_SLIDE = 'cubic-bezier(0.3, 0, 0.2, 1)'
 const EASE_TILT = 'cubic-bezier(0.4, 0.05, 0.2, 1)'
 
 const PAPER_PERSPECTIVE = '2200px'
+export const FLIP_PERSPECTIVE = PAPER_PERSPECTIVE
 
 const RESTING_TRANSFORM = 'none'
 
@@ -31,12 +32,8 @@ const buildPaperClassicTransform = (
   direction: TFlipDirection,
   phase: 'rest' | 'turned',
 ): string => {
-  const rotateY = phase === 'rest'
-    ? '0deg'
-    : (direction === 'forward' ? '-180deg' : '180deg')
-  const rotateX = phase === 'rest' ? '0deg' : '-2.5deg'
-  const translateZ = phase === 'rest' ? '1px' : '-8px'
-  return `perspective(${PAPER_PERSPECTIVE}) rotateX(${rotateX}) rotateY(${rotateY}) translateZ(${translateZ})`
+  if (phase === 'rest') return 'rotateY(0deg)'
+  return direction === 'forward' ? 'rotateY(-180deg)' : 'rotateY(180deg)'
 }
 
 const classicShadow = (mode: TViewMode, phase: 'rest' | 'lifted') => {
@@ -63,19 +60,16 @@ const FlipPresets: IFlipPreset[] = [
       const transition = [
         `transform ${duration}ms ${EASE_PAPER}`,
         `opacity ${duration}ms ease-in-out`,
-        `box-shadow ${duration}ms ${EASE_PAPER}`,
       ].join(', ')
       const singleFace = mode === 'single' ? { backfaceVisibility: 'hidden' as const } : {}
-      const spreadLeafShadow = classicShadow('spread', 'rest')
-      const initialShadow = mode === 'spread' ? spreadLeafShadow : classicShadow(mode, 'rest')
-      const finalShadow = mode === 'spread' ? spreadLeafShadow : classicShadow(mode, 'lifted')
+      const leafShadow = classicShadow(mode, 'rest')
       return {
         initial: {
           transformOrigin,
           transition,
           transform: buildPaperClassicTransform(direction, 'rest'),
           opacity: 1,
-          boxShadow: initialShadow,
+          boxShadow: leafShadow,
           ...singleFace,
         },
         final: {
@@ -85,7 +79,7 @@ const FlipPresets: IFlipPreset[] = [
           // Single mode: keep opacity 1 — backfaceVisibility hides the leaf at ±180°
           // so the static layer beneath is revealed without an opacity crossfade flash.
           opacity: 1,
-          boxShadow: finalShadow,
+          boxShadow: leafShadow,
           ...singleFace,
         },
       }

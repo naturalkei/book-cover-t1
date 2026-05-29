@@ -37,24 +37,50 @@ describe('PageFlip', () => {
   })
 
   it('updates the displayed page when pageIndex changes', () => {
-    const { rerender } = render(<PageFlip pages={PAGES} pageIndex={0} />)
-    rerender(<PageFlip pages={PAGES} pageIndex={2} />)
-    expect(screen.getByAltText(/page 1/i)).toHaveAttribute('src', '/p/a.svg')
+    const { rerender } = render(<PageFlip pages={PAGES} pageIndex={1} />)
+    rerender(<PageFlip pages={PAGES} pageIndex={3} />)
+    expect(screen.getByAltText(/page 4/i)).toHaveAttribute('src', '/p/d.svg')
     act(() => {
       vi.runAllTimers()
     })
-    expect(screen.getByAltText(/page 3/i)).toHaveAttribute('src', '/p/c.svg')
+    expect(screen.getByAltText(/page 4/i)).toHaveAttribute('src', '/p/d.svg')
   })
 
-  it('keeps the static page on the outgoing index until the flip completes', () => {
+  it('reveals the target page under the outgoing leaf while the flip runs', () => {
+    const { rerender } = render(<PageFlip pages={PAGES} pageIndex={1} presetId="classic" />)
+    rerender(<PageFlip pages={PAGES} pageIndex={2} presetId="classic" />)
+    expect(screen.getByTestId('page-flip-current')).toHaveAttribute('src', '/p/c.svg')
+    expect(screen.getByTestId('page-flip-outgoing')).toHaveAttribute('src', '/p/b.svg')
+    act(() => {
+      vi.runAllTimers()
+    })
+    expect(screen.getByTestId('page-flip-current')).toHaveAttribute('src', '/p/c.svg')
+    expect(screen.queryByTestId('page-flip-outgoing')).not.toBeInTheDocument()
+  })
+
+  it('reveals the first single page under the outgoing leaf while the flip runs', () => {
     const { rerender } = render(<PageFlip pages={PAGES} pageIndex={0} presetId="classic" />)
     rerender(<PageFlip pages={PAGES} pageIndex={1} presetId="classic" />)
-    expect(screen.getByTestId('page-flip-current')).toHaveAttribute('src', '/p/a.svg')
+    expect(screen.getByTestId('page-flip-current')).toHaveAttribute('src', '/p/b.svg')
+    expect(screen.getByTestId('page-flip-outgoing')).toHaveAttribute('src', '/p/a.svg')
     act(() => {
       vi.runAllTimers()
     })
     expect(screen.getByTestId('page-flip-current')).toHaveAttribute('src', '/p/b.svg')
-    expect(screen.queryByTestId('page-flip-outgoing')).not.toBeInTheDocument()
+  })
+
+  it('holds the last single page until the flip completes', () => {
+    const lastIndex = PAGES.length - 1
+    const { rerender } = render(
+      <PageFlip pages={PAGES} pageIndex={lastIndex - 1} presetId="classic" />,
+    )
+    rerender(<PageFlip pages={PAGES} pageIndex={lastIndex} presetId="classic" />)
+    expect(screen.getByTestId('page-flip-current')).toHaveAttribute('src', '/p/d.svg')
+    expect(screen.getByTestId('page-flip-outgoing')).toHaveAttribute('src', '/p/d.svg')
+    act(() => {
+      vi.runAllTimers()
+    })
+    expect(screen.getByTestId('page-flip-current')).toHaveAttribute('src', '/p/e.svg')
   })
 
   it('exposes flip direction via data-flip-state during the animation', () => {
@@ -206,23 +232,61 @@ describe('PageFlip', () => {
       render(<PageFlip pages={PAGES} pageIndex={0} mode="spread" />)
       const spine = screen.getByTestId('page-flip-spine')
       expect(spine).toHaveAttribute('data-flip-phase', 'idle')
-      expect(spine).toHaveStyle({ opacity: '0.8' })
+      expect(spine.className).toMatch(/opacity-80/)
+      expect(spine.className).toMatch(/\bw-px\b/)
     })
 
-    it('ramps spine overlay in sync with outgoing phase instead of on outgoing mount', async () => {
+    it('reveals the target spread under the outgoing leaf while the flip runs', () => {
+      const { rerender } = render(<PageFlip pages={PAGES} pageIndex={1} mode="spread" presetId="classic" />)
+      rerender(<PageFlip pages={PAGES} pageIndex={3} mode="spread" presetId="classic" />)
+      expect(screen.getByTestId('page-flip-current')).toHaveAttribute('src', '/p/d.svg')
+      expect(screen.getByTestId('page-flip-outgoing-front')).toHaveAttribute('src', '/p/c.svg')
+      act(() => {
+        vi.runAllTimers()
+      })
+      expect(screen.queryByTestId('page-flip-outgoing')).not.toBeInTheDocument()
+    })
+
+    it('holds only the left static half when leaving the cover during a flip', () => {
+      const { rerender } = render(
+        <PageFlip pages={PAGES} pageIndex={0} mode="spread" coverMode="single" presetId="classic" />,
+      )
+      rerender(<PageFlip pages={PAGES} pageIndex={1} mode="spread" coverMode="single" presetId="classic" />)
+      expect(screen.getByTestId('page-flip-current-left-blank')).toBeInTheDocument()
+      expect(screen.getByTestId('page-flip-current-right')).toHaveAttribute('src', '/p/c.svg')
+      expect(screen.queryByTestId('page-flip-current')).toBeNull()
+      act(() => {
+        vi.runAllTimers()
+      })
+      expect(screen.getByTestId('page-flip-current')).toHaveAttribute('src', '/p/b.svg')
+      expect(screen.getByTestId('page-flip-current-right')).toHaveAttribute('src', '/p/c.svg')
+    })
+
+    it('holds the last spread static halves until the flip completes', () => {
+      const { rerender } = render(<PageFlip pages={PAGES} pageIndex={2} mode="spread" presetId="classic" />)
+      rerender(<PageFlip pages={PAGES} pageIndex={4} mode="spread" presetId="classic" />)
+      expect(screen.getByTestId('page-flip-current')).toHaveAttribute('src', '/p/c.svg')
+      expect(screen.getByTestId('page-flip-current-right')).toHaveAttribute('src', '/p/d.svg')
+      expect(screen.queryByTestId('page-flip-current-right-empty')).toBeNull()
+      act(() => {
+        vi.runAllTimers()
+      })
+      expect(screen.getByTestId('page-flip-current')).toHaveAttribute('src', '/p/e.svg')
+      expect(screen.getByTestId('page-flip-current-right-empty')).toBeInTheDocument()
+    })
+
+    it('keeps spine overlay at constant opacity during spread flips', async () => {
       vi.useRealTimers()
       const { rerender } = render(<PageFlip pages={PAGES} pageIndex={0} mode="spread" presetId="classic" />)
       rerender(<PageFlip pages={PAGES} pageIndex={2} mode="spread" presetId="classic" />)
       const spine = screen.getByTestId('page-flip-spine')
-      expect(spine).toHaveAttribute('data-flip-phase', 'initial')
-      expect(spine).toHaveStyle({ opacity: '0.8' })
+      expect(spine).toHaveAttribute('data-flip-phase', 'active')
+      expect(spine.className).toMatch(/opacity-80/)
       await waitFor(() => {
         expect(screen.getByTestId('page-flip-outgoing')).toHaveAttribute('data-flip-phase', 'final')
       })
-      expect(spine).toHaveAttribute('data-flip-phase', 'final')
-      const style = spine.getAttribute('style') ?? ''
-      expect(style).toContain(`opacity ${700}ms`)
-      expect(style).toContain('cubic-bezier(0.42, 0.05, 0.25, 1)')
+      expect(spine.className).toMatch(/opacity-80/)
+      expect(spine.getAttribute('style')).toBeNull()
     })
 
     it('spread-mode forward leaf sits on the right half and pivots at the left (spine)', () => {
@@ -315,10 +379,26 @@ describe('PageFlip', () => {
       expect(screen.getByTestId('page-flip')).toHaveAttribute('data-cover-alone', 'true')
       rerender(<PageFlip pages={PAGES} pageIndex={1} mode="spread" coverMode="single" />)
       expect(screen.getByTestId('page-flip')).toHaveAttribute('data-cover-alone', 'false')
+      expect(screen.getByTestId('page-flip-current-left-blank')).toBeInTheDocument()
+      expect(screen.getByTestId('page-flip-current-right')).toHaveAttribute('src', '/p/c.svg')
       act(() => {
         vi.runAllTimers()
       })
+      expect(screen.getByTestId('page-flip-current')).toHaveAttribute('src', '/p/b.svg')
       expect(screen.getByTestId('page-flip-current-right')).toHaveAttribute('src', '/p/c.svg')
+    })
+
+    it('pre-renders the right spread half when leaving the cover', () => {
+      const { rerender } = render(
+        <PageFlip pages={PAGES} pageIndex={0} mode="spread" coverMode="single" presetId="classic" />,
+      )
+      rerender(<PageFlip pages={PAGES} pageIndex={1} mode="spread" coverMode="single" presetId="classic" />)
+      expect(screen.getByTestId('page-flip-current-right')).toHaveAttribute('src', '/p/c.svg')
+      expect(screen.getByTestId('page-flip-outgoing-front')).toHaveAttribute('src', '/p/a.svg')
+      act(() => {
+        vi.runAllTimers()
+      })
+      expect(screen.getByTestId('page-flip-current')).toHaveAttribute('src', '/p/b.svg')
     })
 
     it('clicking the left half of the first spread snaps back to the cover (#53)', () => {
