@@ -385,26 +385,36 @@ Initially, run **full suite** on every PR; split when v2 tests multiply.
 
 ## 7. Migration Plan (phased)
 
+### 7.0 Progress snapshot (2026-05-29)
+
+| Phase | Status | Notes |
+| --- | --- | --- |
+| Phase 0 — Tag & bootstrap branches | Done | `v1.0.0`, `maint/v1`, and `maint/v2` exist. |
+| Phase 1 — Directory move | Done | `src/app`, `src/v1`, versioned routes, and legacy redirects are on `main`. |
+| Phase 2 — v2 scaffold | Done | VersionHub and `/v2` gallery/reader routes are on `main`. |
+| Phase 3 — v2 reader quality | In progress | Classic realism, flicker handoff, spine shadow, and edge reveal fixes are merged to `main`. |
+| Release to Pages | Pending this ship loop | `main` must be merged to `release` so GitHub Pages deploys the current v2 work. |
+
 ### Phase 0 — Tag & bootstrap branches
 
-- [ ] Confirm `v1.0.0` tag on current `release` HEAD (#18)
-- [ ] After Phase 1 lands on `main`: create and push **`maint/v1`**, **`maint/v2`**
-- [ ] Document ship loop: `maint/*` → `main` → `release` → Pages
+- [x] Confirm `v1.0.0` tag on a release-quality deploy commit (#18)
+- [x] After Phase 1 lands on `main`: create and push **`maint/v1`**, **`maint/v2`**
+- [x] Document ship loop: `maint/*` → `main` → `release` → Pages
 
 ### Phase 1 — Directory move (PR `maint/v2` or `main` → then sync `maint/*`)
 
-- [ ] Create `src/app/`, `src/v1/`, `src/shared/`
-- [ ] `git mv` current pages/components/hooks/data/lib → `src/v1/`
-- [ ] Update imports to `@v1/*`
-- [ ] Add route prefix `/v1` + legacy redirects from `/book/:id`
-- [ ] Move e2e specs → `e2e/v1/`, fix paths
-- [ ] All CI green on `main`; merge `main` → `release` and verify Pages + `/v1` paths
+- [x] Create `src/app/`, `src/v1/`, and versioned app shell
+- [x] `git mv` current pages/components/hooks/data/lib → `src/v1/`
+- [x] Update imports to `@v1/*`
+- [x] Add route prefix `/v1` + legacy redirects from `/book/:id`
+- [x] Move e2e specs → `e2e/v1/`, fix paths
+- [x] All CI green on `main`; merge `main` → `release` and verify Pages + `/v1` paths
 
 ### Phase 2 — v2 scaffold (on `maint/v2` → PR → `main`)
 
-- [ ] Add `src/v2/` with minimal Gallery + Reader (can re-export v1 Reader initially behind `/v2` flag)
-- [ ] VersionHub at `/`
-- [ ] `e2e/v2/smoke.spec.ts`
+- [x] Add `src/v2/` with Gallery + Reader fork
+- [x] VersionHub at `/`
+- [x] `e2e/v2/smoke.spec.ts`
 
 ### Phase 3 — v2 feature development (ongoing on `maint/v2`)
 
@@ -418,9 +428,10 @@ Initially, run **full suite** on every PR; split when v2 tests multiply.
 
 1. **M2.1 — Shell** — VersionHub, `/v2` routes, namespaced storage, CI split prep. *(shell landed in Phase 1 — #67; storage namespacing still open.)*
 2. **M2.2 — Reader engine (CSS flip polish, sequential)** — fork v1 flip stack into `src/v2/components/reader/`, then improve motion quality **before** any WebGL/canvas prototype:
-   - **M2.2a — Classic realism** ([#71](https://github.com/naturalkei/book-cover-t1/issues/71)) — paper-like page turn starting from the Classic preset; improved easing, perspective, subtle curl arc (CSS-first).
-   - **M2.2b — Flicker fix** ([#72](https://github.com/naturalkei/book-cover-t1/issues/72)) — analyze/fix image flash during outgoing ↔ static handoff (unmount timing, opacity, phantom layers, decode overlap).
-   - **M2.2c — Spine shadow polish** ([#73](https://github.com/naturalkei/book-cover-t1/issues/73)) — center gutter shadow that pops at `data-flip-phase="final"`; smooth shadow/gutter easing with leaf progress.
+   - **M2.2a — Classic realism** ([#71](https://github.com/naturalkei/book-cover-t1/issues/71)) — shipped to `main`; paper-like page turn starting from the Classic preset with improved easing, perspective, and spine pivot.
+   - **M2.2b — Flicker fix** ([#72](https://github.com/naturalkei/book-cover-t1/issues/72)) — shipped to `main`; outgoing ↔ static handoff now uses stable static layers, transition-end cleanup, and mask-aware spreads.
+   - **M2.2c — Spine shadow polish** ([#73](https://github.com/naturalkei/book-cover-t1/issues/73)) — shipped to `main`; center gutter shadow now has active/idle phase state and no final-phase pop.
+   - **M2.2 edge reveal** ([#78](https://github.com/naturalkei/book-cover-t1/issues/78)) — shipped to `main`; static reveal is deferred at cover and final-spread boundaries to prevent flash-through.
    - **M2.2d — Engine prototype (later)** — WebGL or canvas flip only if CSS path hits a quality/perf ceiling.
 3. **M2.3 — Gallery++** — filters, search, series grouping, richer metadata.
 4. **M2.4 — Content** — optional EPUB ingest (client-side), still no DRM.
@@ -464,12 +475,13 @@ PR targets: **`main`**. Production: merge **`main` → `release`**.
 
 ## 10. Definition of Done — v1 freeze + v2 branch ready
 
-- [ ] Git tag `v1.0.0` exists on a `release` deploy commit.
-- [ ] Branches **`maint/v1`** and **`maint/v2`** exist; both merge to **`main`** only.
-- [ ] `docs/plan-2.md` approved and linked from README.
-- [ ] Phase 1 on `main`; shipped via **`main` → `release`**.
-- [ ] Playwright smoke passes for `e2e/v1/` and VersionHub.
-- [ ] Pages deploy shows `/`, `/v1`, `/v2` (v2 may be stub).
+- [x] Git tag `v1.0.0` exists on a release-quality deploy commit.
+- [x] Branches **`maint/v1`** and **`maint/v2`** exist; both merge to **`main`** only.
+- [x] `docs/plan-2.md` approved and linked from README.
+- [x] Phase 1 on `main`; shipped via **`main` → `release`**.
+- [x] Playwright smoke passes for `e2e/v1/` and VersionHub.
+- [x] Pages deploy shows `/`, `/v1`, `/v2`.
+- [ ] Current v2 reader improvements from `main` are shipped via **`main` → `release`**.
 
 ---
 
@@ -497,4 +509,4 @@ The hub is intentionally tiny — no feature creep:
 
 ---
 
-*Document version: 2026-05-27 · Status: proposed · Author: agent workflow*
+*Document version: 2026-05-29 · Status: active / partially shipped · Author: agent workflow*
