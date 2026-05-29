@@ -20,7 +20,8 @@ test.describe('v2 reader classic flip', () => {
 
   test('reveals the target page under the outgoing leaf during forward flips', async ({ page }) => {
     await page.goto('/v2/book/atlas-of-cities')
-    await expect(page.getByTestId('page-flip')).toBeVisible()
+    await page.getByTestId('view-mode-single').click()
+    await expect(page.getByTestId('page-flip')).toHaveAttribute('data-view-mode', 'single')
 
     const current = page.getByTestId('page-flip-current')
 
