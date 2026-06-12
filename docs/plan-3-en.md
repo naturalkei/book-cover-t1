@@ -6,7 +6,13 @@ This document builds on the v2 CSS flip engine to deliver a more natural **paper
 - Preceding documents: [`plan-1.md`](./plan-1.md) (v1 product scope), [`plan-2.md`](./plan-2.md) (v1 freeze and v2 coexistence architecture)
 - v2 status summary: [`v2-improvements-over-v1.md`](./v2-improvements-over-v1.md)
 - Author: **Cursor Agent**
-- Status: **Revised draft** — technical validation before v3 scaffolding
+- Status: **Paused work in progress** — the current prototype does not meet the v2 quality baseline
+
+> **Pause decision — June 12, 2026:** The current v3 prototype does not meet
+> the v2 baseline for visual continuity and overall finish. Further feature
+> work and the v3 release are paused. `/v3` remains available only as a
+> work-in-progress comparison and research surface. Resuming requires a
+> quality review against v2 and a renewed renderer decision.
 
 ---
 
@@ -526,4 +532,4 @@ interface IFlipDebugSnapshot {
 
 ---
 
-*Document version: 2026-06-12 · Author: Cursor Agent · Status: revised draft · Next step: run M3.0 CSS/Canvas/WebGL quality and performance spike before M3.1 scaffolding*
+*Document version: 2026-06-12 · Author: Cursor Agent · Status: paused work in progress · Next step: reassess the v2 quality gate and renderer direction before resuming*

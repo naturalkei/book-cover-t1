@@ -11,11 +11,16 @@ test.describe('v3 smoke', () => {
     await page.goto('/v3')
 
     await expect(page).toHaveTitle(/.+/)
+    const status = page.getByRole('status', {
+      name: /v3 status: work in progress, development paused/i,
+    })
+    await expect(status).toBeVisible()
     await expect(page.getByRole('heading', { level: 1, name: /paper curl reading room/i })).toBeVisible()
     await expect(page.getByRole('list', { name: /book gallery/i })).toBeVisible()
     await expect(page.getByRole('link', { name: /v2 css reader/i })).toHaveAttribute('href', '/v2')
 
     await page.getByRole('link', { name: /open atlas of cities/i }).click()
+    await expect(status).toBeVisible()
     await expect(page.getByTestId('page-flip')).toBeVisible()
     await expect(page.getByTestId('page-flip')).toHaveAttribute('data-flip-renderer', 'css')
     await expect(page.getByRole('heading', { level: 1, name: /atlas of cities/i })).toBeVisible()
