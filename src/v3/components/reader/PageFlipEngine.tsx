@@ -49,10 +49,12 @@ export default function PageFlipEngine({
   const duration = reducedMotion ? 0 : FLIP_DURATION_MS
 
   const [progress, setProgress] = useState(0)
+  const [displayIndex, setDisplayIndex] = useState(safeIndex)
   const [outgoing, setOutgoing] = useState<{
     index: number
     direction: TFlipDirection
   } | null>(null)
+  const displayIndexRef = useRef(safeIndex)
   const lastIndexRef = useRef(safeIndex)
   const controllerRef = useRef(createFlipProgressController({ durationMs: duration }))
 
@@ -64,7 +66,8 @@ export default function PageFlipEngine({
   useEffect(() => {
     if (safeIndex === lastIndexRef.current) return
 
-    const prevIndex = lastIndexRef.current
+    const prevIndex = displayIndexRef.current
+    const targetIndex = safeIndex
     const direction: TFlipDirection = safeIndex > prevIndex ? 'forward' : 'backward'
     lastIndexRef.current = safeIndex
 
@@ -75,6 +78,10 @@ export default function PageFlipEngine({
     controllerRef.current.start({
       onProgress: setProgress,
       onCommit: () => {
+        if (lastIndexRef.current === targetIndex) {
+          displayIndexRef.current = targetIndex
+          setDisplayIndex(targetIndex)
+        }
         setOutgoing(null)
         setProgress(0)
       },
@@ -151,7 +158,7 @@ export default function PageFlipEngine({
   return (
     <div
       role="group"
-      aria-label={`${ariaLabel}, page ${safeIndex + 1} of ${pages.length}`}
+      aria-label={`${ariaLabel}, page ${displayIndex + 1} of ${pages.length}`}
       data-testid="page-flip"
       data-flip-state={outgoing?.direction ?? 'idle'}
       data-flip-progress={formatFlipProgress(progress)}
@@ -169,7 +176,7 @@ export default function PageFlipEngine({
     >
       <StaticPageLayer
         pages={pages}
-        index={safeIndex}
+        index={displayIndex}
         mode={mode}
         coverMode={coverMode}
         roundClass={roundClass}

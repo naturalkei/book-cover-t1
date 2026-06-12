@@ -6,11 +6,15 @@ test.describe('v3 reader css curl flip', () => {
     await page.getByTestId('view-mode-single').click()
 
     const board = page.getByTestId('page-flip')
+    const current = page.getByTestId('page-flip-current')
+    const initialSrc = await current.getAttribute('src')
+    expect(initialSrc).not.toBeNull()
     await expect(board).toHaveAttribute('data-flip-progress', '0.000')
 
     await page.getByRole('button', { name: /next page/i }).click()
     const outgoing = page.getByTestId('page-flip-outgoing')
     await expect(outgoing).toBeVisible({ timeout: 300 })
+    await expect(current).toHaveAttribute('src', initialSrc!)
     await expect(outgoing).toHaveJSProperty('tagName', 'IMG')
     await expect(outgoing.locator(':scope > *')).toHaveCount(0)
     await expect(board).toHaveAttribute('data-flip-state', 'forward')
@@ -21,6 +25,7 @@ test.describe('v3 reader css curl flip', () => {
 
     await expect(outgoing).toHaveCount(0, { timeout: 2500 })
     await expect(board).toHaveAttribute('data-flip-progress', '0.000')
+    await expect(current).not.toHaveAttribute('src', initialSrc!)
   })
 
   test('keeps the cover to one page and animates the spread gutter', async ({ page }) => {
