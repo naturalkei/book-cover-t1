@@ -1,5 +1,5 @@
 import clsx from 'clsx'
-import { BookOpen, FlaskConical, Github } from 'lucide-react'
+import { BookOpen, FlaskConical, Github, Layers } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 const cardClass = clsx(
@@ -45,11 +45,11 @@ export default function VersionHub() {
             Choose a version
           </h1>
           <p className="mt-4 text-lg text-slate-600 dark:text-slate-400">
-            Compare the stable v1 demo with the v2 preview under active development.
+            Compare the stable v1 demo with the v2 CSS reader and the v3 paper-curl preview.
           </p>
         </header>
 
-        <div className="grid gap-6 sm:grid-cols-2">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           <Link to="/v1" className={cardClass}>
             <span className={clsx(
               'mb-4 flex h-10 w-10 items-center justify-center rounded-lg',
@@ -81,6 +81,23 @@ export default function VersionHub() {
             </p>
             <span className="mt-6 text-sm font-medium text-slate-900 dark:text-white">
               Open v2 preview →
+            </span>
+          </Link>
+
+          <Link to="/v3" className={cardClass}>
+            <span className={clsx(
+              'mb-4 flex h-10 w-10 items-center justify-center rounded-lg',
+              'bg-emerald-600 text-white',
+            )}
+            >
+              <Layers className="h-5 w-5" aria-hidden="true" />
+            </span>
+            <h2 className="text-xl font-semibold text-slate-900 dark:text-white">v3</h2>
+            <p className="mt-2 flex-1 text-sm text-slate-600 dark:text-slate-400">
+              Paper curl preview — progress-driven flip engine and gutter lighting.
+            </p>
+            <span className="mt-6 text-sm font-medium text-slate-900 dark:text-white">
+              Open v3 preview →
             </span>
           </Link>
         </div>
