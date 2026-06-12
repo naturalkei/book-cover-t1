@@ -112,6 +112,14 @@ Use measurable prototypes before committing to one renderer.
 
 **Recommended path:** validate interaction quickly with T1, then promote T3 to the default `classic+` / `curl` renderer while retaining T1 as fallback.
 
+**Initial M3.0 decision (#81):**
+
+- Adopt T3 WebGL/Three.js as the default quality path.
+- Retain the T1 CSS segmented renderer as the reduced-capability fallback.
+- Defer T2 Canvas 2D CPU mesh because it adds more complexity than the DOM/CSS fallback without providing T3's normal-based lighting and GPU deformation benefits.
+- Require every renderer to share the endpoint, lead, directional-symmetry, and gutter-lighting invariants in `src/v3/lib/curl-model.ts`.
+- Revalidate the final adoption gate with real browser frame-time and visual-quality measurements in M3.2c.
+
 ### 3.2 Curl Design Principles
 
 1. **Fixed spine** — deformation stays anchored to the gutter.
