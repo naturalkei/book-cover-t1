@@ -20,8 +20,8 @@ export default function StaticPageLayer({
 }: IStaticPageLayerProps) {
   const coverAlone = mode === 'spread' && coverMode === 'single' && index === 0
 
-  if (mode === 'single' || coverAlone) {
-    const src = coverAlone ? pages[0] : pages[index]
+  if (mode === 'single') {
+    const src = pages[index]
     return (
       <div className={clsx('absolute inset-0 z-0 overflow-hidden', roundClass)}>
         {src
@@ -35,6 +35,28 @@ export default function StaticPageLayer({
             />
           )
           : null}
+      </div>
+    )
+  }
+
+  if (coverAlone) {
+    return (
+      <div
+        data-testid="page-flip-current-spread"
+        className={clsx('absolute inset-0 z-0 flex overflow-hidden', roundClass)}
+      >
+        <div
+          aria-hidden="true"
+          data-testid="page-flip-current-cover-blank"
+          className="h-full w-1/2 bg-slate-100 dark:bg-slate-950/40"
+        />
+        <img
+          src={pages[0]}
+          alt="Page 1"
+          decoding="async"
+          data-testid="page-flip-current"
+          className="h-full w-1/2 object-cover"
+        />
       </div>
     )
   }

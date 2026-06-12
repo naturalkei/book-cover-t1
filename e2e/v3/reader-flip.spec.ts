@@ -22,4 +22,30 @@ test.describe('v3 reader css curl flip', () => {
     await expect(outgoing).toHaveCount(0, { timeout: 2500 })
     await expect(board).toHaveAttribute('data-flip-progress', '0.000')
   })
+
+  test('keeps the cover to one page and animates the spread gutter', async ({ page }) => {
+    await page.goto('/v3/book/atlas-of-cities')
+
+    const current = page.getByTestId('page-flip-current')
+    const blank = page.getByTestId('page-flip-current-cover-blank')
+    await expect(current).toBeVisible()
+    await expect(blank).toBeVisible()
+
+    const boardWidth = await page.getByTestId('page-flip').evaluate(element =>
+      element.getBoundingClientRect().width,
+    )
+    const coverWidth = await current.evaluate(element => element.getBoundingClientRect().width)
+    expect(coverWidth).toBeCloseTo(boardWidth / 2, 0)
+
+    await page.getByRole('button', { name: /next page/i }).click()
+    const outgoing = page.getByTestId('page-flip-outgoing')
+    await expect(outgoing).toBeVisible({ timeout: 300 })
+    const outgoingWidth = await outgoing.evaluate(element => element.getBoundingClientRect().width)
+    expect(outgoingWidth).toBeCloseTo(boardWidth / 2, 0)
+
+    const gutter = page.getByTestId('page-flip-gutter')
+    await expect(gutter).toHaveAttribute('data-flip-phase', 'active')
+    await expect(page.getByTestId('page-flip-gutter-cast')).not.toHaveCSS('opacity', '0')
+    await expect(gutter).toHaveAttribute('data-flip-phase', 'idle', { timeout: 2500 })
+  })
 })
