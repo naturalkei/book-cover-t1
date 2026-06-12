@@ -113,6 +113,14 @@ v2 spine (`PageFlip.tsx` L216–227):
 
 참고 OSS: [TurnGL](https://github.com/oguzhanT/turngl) (`segments`, `LEAD` factor), [mantine-book `rounded`](https://github.com/gfazioli/mantine-book) (WebGL + flat fallback).
 
+**M3.0 1차 결정 (#81):**
+
+- T3 WebGL/Three.js를 기본 품질 경로로 채택한다.
+- T1 CSS segmented renderer를 reduced-capability fallback으로 유지한다.
+- T2 Canvas 2D CPU mesh는 DOM/CSS fallback보다 복잡하면서 T3의 법선 기반 조명·GPU 변형 이점을 제공하지 못하므로 보류한다.
+- 모든 renderer는 `src/v3/lib/curl-model.ts`의 endpoint, lead, 방향 대칭, gutter-lighting 불변 조건을 공유한다.
+- 실제 브라우저 frame-time과 시각 품질 비교는 M3.2c에서 최종 채택 게이트로 다시 검증한다.
+
 ### 3.2 커브 모션 설계 원칙
 
 1. **Spine 고정** — 변형 pivot은 항상 gutter(spine) 쪽; spread forward는 `transform-origin: left center`.
