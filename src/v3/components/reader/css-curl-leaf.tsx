@@ -3,7 +3,8 @@ import clsx from 'clsx'
 import { sampleCurl, type TFlipDirection } from '@v3/lib/curl-model'
 
 interface ICssCurlLeafProps {
-  src: string
+  frontSrc: string
+  backSrc: string
   progress: number
   direction: TFlipDirection
   pivot: 'left' | 'right'
@@ -12,7 +13,8 @@ interface ICssCurlLeafProps {
 }
 
 export default function CssCurlLeaf({
-  src,
+  frontSrc,
+  backSrc,
   progress,
   direction,
   pivot,
@@ -27,22 +29,38 @@ export default function CssCurlLeaf({
   const shadowOpacity = Math.min(0.45, sample.lift * 2.2)
 
   return (
-    <img
-      src={src}
-      alt=""
+    <div
       data-testid={testId}
       aria-hidden="true"
-      decoding="async"
       className={clsx(
-        'absolute inset-0 h-full w-full object-cover will-change-transform',
-        roundClass,
+        'absolute inset-0 h-full w-full will-change-transform',
       )}
       style={{
         transformOrigin: pivot === 'left' ? 'left center' : 'right center',
         transform: `translateX(${translateX}%) translateZ(${translateZ}px) rotateY(${rotateY}deg)`,
-        backfaceVisibility: 'hidden',
+        transformStyle: 'preserve-3d',
         boxShadow: `${directionSign * 20}px 12px 36px rgba(0, 0, 0, ${shadowOpacity})`,
       }}
-    />
+    >
+      <img
+        src={frontSrc}
+        alt=""
+        data-testid={`${testId}-front`}
+        decoding="async"
+        className={clsx('absolute inset-0 h-full w-full object-cover', roundClass)}
+        style={{ backfaceVisibility: 'hidden' }}
+      />
+      <img
+        src={backSrc}
+        alt=""
+        data-testid={`${testId}-back`}
+        decoding="async"
+        className={clsx('absolute inset-0 h-full w-full object-cover', roundClass)}
+        style={{
+          backfaceVisibility: 'hidden',
+          transform: 'rotateY(180deg)',
+        }}
+      />
+    </div>
   )
 }

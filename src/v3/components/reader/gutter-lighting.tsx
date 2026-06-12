@@ -13,7 +13,7 @@ export default function GutterLighting({
 }: IGutterLightingProps) {
   const sample = sampleGutterLighting(active ? progress : 0)
   const castWidth = 8 + sample.castWidth * 56
-  const castToRight = direction === 'forward'
+  const castToRight = direction === 'backward'
 
   return (
     <div
