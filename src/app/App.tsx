@@ -12,9 +12,13 @@ import V1Gallery from '@v1/pages/Gallery'
 import V2NotFound from '@v2/components/NotFound'
 import V2Layout from '@v2/layouts/V2Layout'
 import V2Gallery from '@v2/pages/Gallery'
+import V3NotFound from '@v3/components/NotFound'
+import V3Layout from '@v3/layouts/V3Layout'
+import V3Gallery from '@v3/pages/Gallery'
 
 const V1Reader = lazy(() => import('@v1/pages/Reader'))
 const V2Reader = lazy(() => import('@v2/pages/Reader'))
+const V3Reader = lazy(() => import('@v3/pages/Reader'))
 
 export default function App() {
   return (
@@ -47,6 +51,19 @@ export default function App() {
             )}
           />
           <Route path="*" element={<V2NotFound />} />
+        </Route>
+
+        <Route path="v3" element={<V3Layout />}>
+          <Route index element={<V3Gallery />} />
+          <Route
+            path="book/:id"
+            element={(
+              <Suspense fallback={<RouteLoadingFallback />}>
+                <V3Reader />
+              </Suspense>
+            )}
+          />
+          <Route path="*" element={<V3NotFound />} />
         </Route>
 
         <Route path="*" element={<RootNotFound />} />

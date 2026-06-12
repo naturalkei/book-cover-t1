@@ -49,6 +49,16 @@ export default function RootNotFound() {
         >
           v2 preview
         </Link>
+        <Link
+          to="/v3"
+          className={clsx(
+            'rounded-full border border-slate-300 px-5 py-2 text-sm',
+            'font-medium text-slate-900 hover:bg-slate-100',
+            'dark:border-slate-700 dark:text-white dark:hover:bg-slate-900',
+          )}
+        >
+          v3 preview
+        </Link>
       </div>
     </section>
   )
