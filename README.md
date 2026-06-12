@@ -185,7 +185,8 @@ See [`.cursor/rules/code-style.mdc`](./.cursor/rules/code-style.mdc) for the ful
 - **Branches** are named `<type>/<issue-id>-<short-slug>` (or `<type>/<short-slug>` when no issue exists).
 - **PRs** are squash-merged by default and must close their linked issue.
 
-Detailed conventions live in [`.cursor/rules/`](./.cursor/rules/):
+Detailed conventions live in [`.cursor/rules/`](./.cursor/rules/) for Cursor
+and [`AGENTS.md`](./AGENTS.md) for Codex:
 
 | Rule | Scope |
 | --- | --- |
@@ -194,6 +195,7 @@ Detailed conventions live in [`.cursor/rules/`](./.cursor/rules/):
 | `commit-convention.mdc` | Conventional Commits and branch naming. |
 | `agent-workflow.mdc` | Mandatory loop for every requirement. |
 | `testing.mdc` | Vitest and Playwright conventions. |
+| `AGENTS.md` | Repository-wide Codex agent instructions derived from the Cursor rules. |
 
 ## Changelog
 
