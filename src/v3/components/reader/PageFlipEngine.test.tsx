@@ -40,4 +40,50 @@ describe('PageFlipEngine', () => {
     expect(screen.getByTestId('page-flip-outgoing').children).toHaveLength(0)
     expect(screen.getByTestId('page-flip-current')).toHaveAttribute('src', '/p/c.svg')
   })
+
+  test('keeps a single cover in the right page slot in spread mode', () => {
+    vi.stubGlobal('requestAnimationFrame', () => 1)
+
+    render(
+      <PageFlipEngine
+        pages={PAGES}
+        pageIndex={0}
+        mode="spread"
+        coverMode="single"
+      />,
+    )
+
+    expect(screen.getByTestId('page-flip-current-cover-blank').className).toMatch(/\bw-1\/2\b/)
+    expect(screen.getByTestId('page-flip-current').className).toMatch(/\bw-1\/2\b/)
+    expect(screen.getByTestId('page-flip-current')).toHaveAttribute('src', '/p/a.svg')
+  })
+
+  test('uses a half-width leaf and progress-driven gutter lighting for cover turns', () => {
+    vi.stubGlobal('requestAnimationFrame', () => 1)
+
+    const { rerender } = render(
+      <PageFlipEngine
+        pages={PAGES}
+        pageIndex={0}
+        mode="spread"
+        coverMode="single"
+      />,
+    )
+
+    act(() => {
+      rerender(
+        <PageFlipEngine
+          pages={PAGES}
+          pageIndex={1}
+          mode="spread"
+          coverMode="single"
+        />,
+      )
+    })
+
+    expect(screen.getByTestId('page-flip-outgoing').parentElement?.className).toMatch(/\bw-1\/2\b/)
+    expect(screen.getByTestId('page-flip-outgoing')).toHaveAttribute('src', '/p/a.svg')
+    expect(screen.getByTestId('page-flip-gutter')).toHaveAttribute('data-flip-phase', 'active')
+    expect(screen.getByTestId('page-flip-gutter-cast')).toHaveStyle({ opacity: '0' })
+  })
 })

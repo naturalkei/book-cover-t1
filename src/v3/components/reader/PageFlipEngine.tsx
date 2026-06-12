@@ -13,6 +13,7 @@ import {
 } from '@v3/lib/flip-progress'
 
 import CssCurlLeaf from './css-curl-leaf'
+import GutterLighting from './gutter-lighting'
 import StaticPageLayer from './static-page-layer'
 
 const FLIP_PERSPECTIVE = '2200px'
@@ -106,11 +107,9 @@ export default function PageFlipEngine({
     const { index, direction } = outgoing
     const isForward = direction === 'forward'
     const spreadLeaf = mode === 'spread'
-      && !isCoverPage(index)
-      && !isCoverPage(safeIndex)
 
     if (spreadLeaf) {
-      const frontSrc = isForward ? pages[index + 1] : pages[index]
+      const frontSrc = isForward && !isCoverPage(index) ? pages[index + 1] : pages[index]
       if (!frontSrc) return null
       return (
         <div
@@ -176,6 +175,15 @@ export default function PageFlipEngine({
         roundClass={roundClass}
       />
       {resolveOutgoingLeaf()}
+      {mode === 'spread'
+        ? (
+          <GutterLighting
+            progress={progress}
+            direction={outgoing?.direction ?? 'forward'}
+            active={busy}
+          />
+        )
+        : null}
     </div>
   )
 }

@@ -85,4 +85,16 @@ describe('v3 gutter lighting model', () => {
     expect(start.castWidth).toBeCloseTo(end.castWidth)
     expect(start.ridgeLight).toBeCloseTo(end.ridgeLight)
   })
+
+  test('changes continuously across animation frames', () => {
+    const samples = Array.from({ length: 61 }, (_, index) =>
+      sampleGutterLighting(index / 60))
+
+    for (let index = 1; index < samples.length; index += 1) {
+      expect(Math.abs(samples[index].creaseAo - samples[index - 1].creaseAo)).toBeLessThan(0.02)
+      expect(Math.abs(samples[index].castOpacity - samples[index - 1].castOpacity)).toBeLessThan(0.08)
+      expect(Math.abs(samples[index].castWidth - samples[index - 1].castWidth)).toBeLessThan(0.2)
+      expect(Math.abs(samples[index].ridgeLight - samples[index - 1].ridgeLight)).toBeLessThan(0.02)
+    }
+  })
 })
