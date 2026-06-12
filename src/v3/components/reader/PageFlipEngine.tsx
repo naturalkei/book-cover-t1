@@ -56,10 +56,15 @@ export default function PageFlipEngine({
   } | null>(null)
   const displayIndexRef = useRef(safeIndex)
   const lastIndexRef = useRef(safeIndex)
+  const handoffFrameRef = useRef<number | null>(null)
   const controllerRef = useRef(createFlipProgressController({ durationMs: duration }))
 
   useEffect(() => {
     controllerRef.current.cancel()
+    if (handoffFrameRef.current !== null) {
+      cancelAnimationFrame(handoffFrameRef.current)
+      handoffFrameRef.current = null
+    }
     controllerRef.current = createFlipProgressController({ durationMs: duration })
   }, [duration])
 
@@ -72,6 +77,10 @@ export default function PageFlipEngine({
     lastIndexRef.current = safeIndex
 
     controllerRef.current.cancel()
+    if (handoffFrameRef.current !== null) {
+      cancelAnimationFrame(handoffFrameRef.current)
+      handoffFrameRef.current = null
+    }
     setOutgoing({ index: prevIndex, direction })
     setProgress(0)
 
@@ -82,14 +91,28 @@ export default function PageFlipEngine({
           displayIndexRef.current = targetIndex
           setDisplayIndex(targetIndex)
         }
-        setOutgoing(null)
-        setProgress(0)
+        setProgress(1)
+
+        if (reducedMotion) {
+          setOutgoing(null)
+          setProgress(0)
+          return
+        }
+
+        handoffFrameRef.current = requestAnimationFrame(() => {
+          handoffFrameRef.current = null
+          setOutgoing(null)
+          setProgress(0)
+        })
       },
     }, reducedMotion)
   }, [safeIndex, reducedMotion])
 
   useEffect(() => () => {
     controllerRef.current.cancel()
+    if (handoffFrameRef.current !== null) {
+      cancelAnimationFrame(handoffFrameRef.current)
+    }
   }, [])
 
   const busy = outgoing !== null
@@ -167,6 +190,7 @@ export default function PageFlipEngine({
       aria-label={`${ariaLabel}, page ${displayIndex + 1} of ${pages.length}`}
       data-testid="page-flip"
       data-flip-state={outgoing?.direction ?? 'idle'}
+      data-flip-phase={outgoing ? (progress === 1 ? 'handoff' : 'settling') : 'idle'}
       data-flip-progress={formatFlipProgress(progress)}
       data-flip-renderer="css"
       data-view-mode={mode}
