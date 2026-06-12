@@ -6,7 +6,12 @@
 - 영문 버전: [`plan-3-en.md`](./plan-3-en.md)
 - v2 현황 요약: [`v2-improvements-over-v1.md`](./v2-improvements-over-v1.md)
 - 작성: **Cursor Agent**
-- 상태: **보완 초안 (revised draft)** — v3 스캐폴딩 전 기술 검증 단계
+- 상태: **개발 보류 (paused work in progress)** — 현재 프로토타입은 v2 품질 기준 미달
+
+> **2026-06-12 보류 결정:** 현재 v3 프로토타입은 페이지 전환의 시각적
+> 연속성과 완성도가 v2 기준에 미치지 못한다. 추가 기능 개발과 v3 릴리즈를
+> 보류하며, `/v3`는 비교·연구용 작업 중 화면으로만 유지한다. 재개 전에는
+> v2 대비 품질 검토와 renderer 방향 재결정이 선행되어야 한다.
 
 ---
 
@@ -537,4 +542,4 @@ interface IFlipDebugSnapshot {
 
 ---
 
-*문서 버전: 2026-06-12 · 작성: Cursor Agent · Status: revised draft · 다음 단계: M3.0 기술 스파이크로 CSS/Canvas/WebGL curl 품질·성능 비교 후 M3.1 scaffold 착수*
+*문서 버전: 2026-06-12 · 작성: Cursor Agent · Status: paused work in progress · 다음 단계: 보류 해제 결정 전 v2 대비 품질 게이트 및 renderer 방향 재검토*
