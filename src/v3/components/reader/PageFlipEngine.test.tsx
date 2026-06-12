@@ -44,10 +44,10 @@ describe('PageFlipEngine', () => {
   })
 
   test('commits the target page only after the flip animation completes', () => {
-    let frameCallback: FrameRequestCallback | undefined
+    const frameCallbacks: FrameRequestCallback[] = []
     vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) => {
-      frameCallback = callback
-      return 1
+      frameCallbacks.push(callback)
+      return frameCallbacks.length
     })
 
     const { rerender } = render(<PageFlipEngine pages={PAGES} pageIndex={1} />)
@@ -59,13 +59,22 @@ describe('PageFlipEngine', () => {
     expect(screen.getByTestId('page-flip-current')).toHaveAttribute('src', '/p/b.svg')
 
     act(() => {
-      frameCallback?.(0)
-      frameCallback?.(700)
+      frameCallbacks.shift()?.(0)
+      frameCallbacks.shift()?.(700)
+    })
+
+    expect(screen.getByTestId('page-flip')).toHaveAttribute('data-flip-phase', 'handoff')
+    expect(screen.getByTestId('page-flip-outgoing')).toBeInTheDocument()
+    expect(screen.getByTestId('page-flip-outgoing-back')).toHaveAttribute('src', '/p/c.svg')
+    expect(screen.getByTestId('page-flip-current')).toHaveAttribute('src', '/p/c.svg')
+    expect(screen.getByTestId('page-flip')).toHaveAccessibleName(/page 3 of 5/i)
+
+    act(() => {
+      frameCallbacks.shift()?.(716)
     })
 
     expect(screen.queryByTestId('page-flip-outgoing')).not.toBeInTheDocument()
-    expect(screen.getByTestId('page-flip-current')).toHaveAttribute('src', '/p/c.svg')
-    expect(screen.getByTestId('page-flip')).toHaveAccessibleName(/page 3 of 5/i)
+    expect(screen.getByTestId('page-flip')).toHaveAttribute('data-flip-phase', 'idle')
   })
 
   test('keeps a single cover in the right page slot in spread mode', () => {

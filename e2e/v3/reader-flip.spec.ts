@@ -10,6 +10,15 @@ test.describe('v3 reader css curl flip', () => {
     const initialSrc = await current.getAttribute('src')
     expect(initialSrc).not.toBeNull()
     await expect(board).toHaveAttribute('data-flip-progress', '0.000')
+    await page.evaluate(() => {
+      const phases: string[] = []
+      const board = document.querySelector('[data-testid="page-flip"]')
+      if (!board) return
+      new MutationObserver(() => {
+        phases.push(board.getAttribute('data-flip-phase') ?? '')
+      }).observe(board, { attributes: true, attributeFilter: ['data-flip-phase'] })
+      ;(window as Window & { __flipPhases?: string[] }).__flipPhases = phases
+    })
 
     await page.getByRole('button', { name: /next page/i }).click()
     const outgoing = page.getByTestId('page-flip-outgoing')
@@ -20,14 +29,19 @@ test.describe('v3 reader css curl flip', () => {
     await expect(page.getByTestId('page-flip-outgoing-front')).toHaveAttribute('src', initialSrc!)
     await expect(page.getByTestId('page-flip-outgoing-back')).not.toHaveAttribute('src', initialSrc!)
     await expect(board).toHaveAttribute('data-flip-state', 'forward')
+    await expect(board).toHaveAttribute('data-flip-phase', 'settling')
 
     const progress = await board.getAttribute('data-flip-progress')
     expect(progress).not.toBeNull()
     expect(Number(progress)).toBeGreaterThanOrEqual(0)
 
     await expect(outgoing).toHaveCount(0, { timeout: 2500 })
+    await expect(board).toHaveAttribute('data-flip-phase', 'idle')
     await expect(board).toHaveAttribute('data-flip-progress', '0.000')
     await expect(current).not.toHaveAttribute('src', initialSrc!)
+    const phases = await page.evaluate(() =>
+      (window as Window & { __flipPhases?: string[] }).__flipPhases ?? [])
+    expect(phases).toContain('handoff')
   })
 
   test('keeps the cover to one page and animates the spread gutter', async ({ page }) => {
