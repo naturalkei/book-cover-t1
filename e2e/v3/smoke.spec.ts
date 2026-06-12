@@ -16,7 +16,8 @@ test.describe('v3 smoke', () => {
     await expect(page.getByRole('link', { name: /v2 css reader/i })).toHaveAttribute('href', '/v2')
 
     await page.getByRole('link', { name: /open atlas of cities/i }).click()
-    await expect(page.getByTestId('v3-reader-stub')).toBeVisible()
+    await expect(page.getByTestId('page-flip')).toBeVisible()
+    await expect(page.getByTestId('page-flip')).toHaveAttribute('data-flip-renderer', 'css')
     await expect(page.getByRole('heading', { level: 1, name: /atlas of cities/i })).toBeVisible()
 
     expect(errors).toEqual([])

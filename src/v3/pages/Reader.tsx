@@ -1,55 +1,129 @@
 import clsx from 'clsx'
 import { ArrowLeft } from 'lucide-react'
-import { Link, useParams } from 'react-router-dom'
+import { useCallback, useState } from 'react'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 
+import CoverModeToggle from '@v3/components/reader/CoverModeToggle'
+import PageFlipEngine from '@v3/components/reader/PageFlipEngine'
+import ReaderControls from '@v3/components/reader/ReaderControls'
+import ViewModeToggle from '@v3/components/reader/ViewModeToggle'
 import NotFound from '@v3/components/NotFound'
 import { getBookById } from '@v3/data/books'
+import { useCoverMode, type TCoverMode } from '@v3/hooks/cover-mode'
+import { useReaderKeyboard } from '@v3/hooks/reader-keyboard'
+import {
+  getEffectiveStep,
+  isCoverAlone as computeIsCoverAlone,
+  snapPage,
+  useViewMode,
+  type TViewMode,
+} from '@v3/hooks/view-mode'
 import { TextLink } from '@v3/lib/class-names'
 
 export default function Reader() {
   const { id } = useParams<{ id: string }>()
+  const navigate = useNavigate()
   const book = id ? getBookById(id) : undefined
 
+  const { viewMode, setViewMode } = useViewMode()
+  const { coverMode, setCoverMode } = useCoverMode()
+
+  const snap = useCallback(
+    (index: number) => snapPage(index, viewMode, coverMode),
+    [viewMode, coverMode],
+  )
+
+  const [pageIndex, setPageIndex] = useState(0)
+  const [lastSnapKey, setLastSnapKey] = useState(`${viewMode}:${coverMode}`)
+  const currentSnapKey = `${viewMode}:${coverMode}`
+  if (lastSnapKey !== currentSnapKey) {
+    setLastSnapKey(currentSnapKey)
+    setPageIndex((current) => snap(current))
+  }
+
+  const isCoverAlone = computeIsCoverAlone(pageIndex, viewMode, coverMode)
+  const step = getEffectiveStep(pageIndex, viewMode, coverMode)
+
+  const commitPage = useCallback(
+    (next: number) => {
+      const total = book?.pages.length ?? 0
+      if (total === 0) return
+      const clamped = Math.min(Math.max(0, next), total - 1)
+      setPageIndex(snap(clamped))
+    },
+    [book?.pages.length, snap],
+  )
+
+  const exitToGallery = useCallback(() => navigate('/v3'), [navigate])
+
+  useReaderKeyboard({
+    pageIndex,
+    totalPages: book?.pages.length ?? 0,
+    onPageChange: commitPage,
+    onExit: exitToGallery,
+    step,
+    snap,
+  })
+
   if (!book) {
-    return <NotFound title="Book not found" message="No v3 book matches this id." />
+    return (
+      <NotFound
+        title="Book not found"
+        message="We couldn't find a book with that id."
+      />
+    )
   }
 
   return (
     <section
       aria-label={`Reader for ${book.title}`}
-      className="mx-auto w-full max-w-4xl px-6 py-12"
+      className="mx-auto flex w-full max-w-5xl flex-col px-6 py-12"
     >
-      <Link to="/v3" className={TextLink}>
-        <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-        Back to gallery
-      </Link>
+      <header className="mb-10 flex flex-wrap items-center justify-between gap-4">
+        <Link to="/v3" className={TextLink}>
+          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+          Back to gallery
+        </Link>
 
-      <header className="mt-6">
-        <h1 className="text-3xl font-bold text-slate-900 dark:text-white">{book.title}</h1>
-        <p className="mt-2 text-slate-600 dark:text-slate-400">by {book.author}</p>
+        <div className="flex flex-wrap items-center gap-4">
+          <ViewModeToggle mode={viewMode} onChange={(next: TViewMode) => setViewMode(next)} />
+          <CoverModeToggle
+            coverMode={coverMode}
+            onChange={(next: TCoverMode) => setCoverMode(next)}
+            disabled={viewMode !== 'spread'}
+          />
+          <div className="text-right">
+            <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">{book.title}</h1>
+            <p className="text-sm text-slate-600 dark:text-slate-300">by {book.author}</p>
+          </div>
+        </div>
       </header>
 
-      <div
-        data-testid="v3-reader-stub"
-        className={clsx(
-          'mt-10 flex min-h-[420px] items-center justify-center',
-          'rounded-2xl border border-dashed border-emerald-300/60',
-          'bg-emerald-50/40 text-center dark:border-emerald-500/30',
-          'dark:bg-emerald-950/20',
-        )}
+      <PageFlipEngine
+        pages={book.pages}
+        pageIndex={pageIndex}
+        onPageChange={commitPage}
+        ariaLabel={`${book.title} spread`}
+        mode={viewMode}
+        coverMode={coverMode}
+        step={step}
+      />
+
+      <ReaderControls
+        pageIndex={pageIndex}
+        totalPages={book.pages.length}
+        onPageChange={commitPage}
+        step={step}
+        isCoverAlone={isCoverAlone}
+      />
+
+      <footer className={clsx(
+        'mt-6 text-center text-xs uppercase tracking-[0.2em]',
+        'text-slate-600 dark:text-slate-400',
+      )}
       >
-        <div className="max-w-md px-6">
-          <p className="text-sm font-medium uppercase tracking-[0.2em] text-emerald-700 dark:text-emerald-300">
-            v3 flip engine
-          </p>
-          <p className="mt-3 text-slate-700 dark:text-slate-300">
-            Progress-based curl renderer ships in the next milestone (#83).
-          </p>
-          <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-            {book.pages.length} pages loaded · shared curl model ready
-          </p>
-        </div>
-      </div>
+        progress-driven css curl · tap or use controls
+      </footer>
     </section>
   )
 }
