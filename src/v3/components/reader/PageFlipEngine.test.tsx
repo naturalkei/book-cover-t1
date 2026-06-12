@@ -36,8 +36,10 @@ describe('PageFlipEngine', () => {
 
     expect(screen.getByTestId('page-flip')).toHaveAttribute('data-flip-state', 'forward')
     expect(screen.getByTestId('page-flip-outgoing')).toBeInTheDocument()
-    expect(screen.getByTestId('page-flip-outgoing').tagName).toBe('IMG')
-    expect(screen.getByTestId('page-flip-outgoing').children).toHaveLength(0)
+    expect(screen.getByTestId('page-flip-outgoing').tagName).toBe('DIV')
+    expect(screen.getByTestId('page-flip-outgoing').children).toHaveLength(2)
+    expect(screen.getByTestId('page-flip-outgoing-front')).toHaveAttribute('src', '/p/b.svg')
+    expect(screen.getByTestId('page-flip-outgoing-back')).toHaveAttribute('src', '/p/c.svg')
     expect(screen.getByTestId('page-flip-current')).toHaveAttribute('src', '/p/b.svg')
   })
 
@@ -107,7 +109,8 @@ describe('PageFlipEngine', () => {
     })
 
     expect(screen.getByTestId('page-flip-outgoing').parentElement?.className).toMatch(/\bw-1\/2\b/)
-    expect(screen.getByTestId('page-flip-outgoing')).toHaveAttribute('src', '/p/a.svg')
+    expect(screen.getByTestId('page-flip-outgoing-front')).toHaveAttribute('src', '/p/a.svg')
+    expect(screen.getByTestId('page-flip-outgoing-back')).toHaveAttribute('src', '/p/b.svg')
     expect(screen.getByTestId('page-flip-gutter')).toHaveAttribute('data-flip-phase', 'active')
     expect(screen.getByTestId('page-flip-gutter-cast')).toHaveStyle({ opacity: '0' })
   })

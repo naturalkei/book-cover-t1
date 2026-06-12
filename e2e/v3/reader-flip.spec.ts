@@ -15,8 +15,10 @@ test.describe('v3 reader css curl flip', () => {
     const outgoing = page.getByTestId('page-flip-outgoing')
     await expect(outgoing).toBeVisible({ timeout: 300 })
     await expect(current).toHaveAttribute('src', initialSrc!)
-    await expect(outgoing).toHaveJSProperty('tagName', 'IMG')
-    await expect(outgoing.locator(':scope > *')).toHaveCount(0)
+    await expect(outgoing).toHaveJSProperty('tagName', 'DIV')
+    await expect(outgoing.locator(':scope > img')).toHaveCount(2)
+    await expect(page.getByTestId('page-flip-outgoing-front')).toHaveAttribute('src', initialSrc!)
+    await expect(page.getByTestId('page-flip-outgoing-back')).not.toHaveAttribute('src', initialSrc!)
     await expect(board).toHaveAttribute('data-flip-state', 'forward')
 
     const progress = await board.getAttribute('data-flip-progress')
@@ -50,7 +52,9 @@ test.describe('v3 reader css curl flip', () => {
 
     const gutter = page.getByTestId('page-flip-gutter')
     await expect(gutter).toHaveAttribute('data-flip-phase', 'active')
-    await expect(page.getByTestId('page-flip-gutter-cast')).not.toHaveCSS('opacity', '0')
+    const gutterCast = page.getByTestId('page-flip-gutter-cast')
+    await expect(gutterCast).not.toHaveCSS('opacity', '0')
+    await expect(gutterCast).toHaveCSS('right', '0px')
     await expect(gutter).toHaveAttribute('data-flip-phase', 'idle', { timeout: 2500 })
   })
 })

@@ -117,7 +117,10 @@ export default function PageFlipEngine({
 
     if (spreadLeaf) {
       const frontSrc = isForward && !isCoverPage(index) ? pages[index + 1] : pages[index]
-      if (!frontSrc) return null
+      const backSrc = isForward || isCoverPage(safeIndex)
+        ? pages[safeIndex]
+        : pages[safeIndex + 1]
+      if (!frontSrc || !backSrc) return null
       return (
         <div
           className={clsx(
@@ -127,7 +130,8 @@ export default function PageFlipEngine({
           style={{ transformStyle: 'preserve-3d' }}
         >
           <CssCurlLeaf
-            src={frontSrc}
+            frontSrc={frontSrc}
+            backSrc={backSrc}
             progress={progress}
             direction={direction}
             pivot={isForward ? 'left' : 'right'}
@@ -137,15 +141,17 @@ export default function PageFlipEngine({
       )
     }
 
-    const src = pages[index]
-    if (!src) return null
+    const frontSrc = pages[index]
+    const backSrc = pages[safeIndex]
+    if (!frontSrc || !backSrc) return null
     return (
       <div
         className="absolute inset-0 z-10"
         style={{ transformStyle: 'preserve-3d' }}
       >
         <CssCurlLeaf
-          src={src}
+          frontSrc={frontSrc}
+          backSrc={backSrc}
           progress={progress}
           direction={direction}
           pivot={isForward ? 'left' : 'right'}
