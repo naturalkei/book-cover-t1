@@ -36,6 +36,8 @@ describe('PageFlipEngine', () => {
 
     expect(screen.getByTestId('page-flip')).toHaveAttribute('data-flip-state', 'forward')
     expect(screen.getByTestId('page-flip-outgoing')).toBeInTheDocument()
+    expect(screen.getByTestId('page-flip-outgoing').tagName).toBe('IMG')
+    expect(screen.getByTestId('page-flip-outgoing').children).toHaveLength(0)
     expect(screen.getByTestId('page-flip-current')).toHaveAttribute('src', '/p/c.svg')
   })
 })
